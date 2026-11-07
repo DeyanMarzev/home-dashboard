@@ -42,3 +42,14 @@ CMD ["node", "dist/index.js"]
 FROM runtime AS collector
 COPY --from=build --chown=node:node /out/collector ./
 CMD ["node", "dist/index.js"]
+
+# netprobe: network measurements from the host network (docs/01). Runs as root because Wi-Fi
+# scans and ARP need the NET_ADMIN / NET_RAW capabilities docker-compose.yml grants it.
+FROM ${NODE_IMAGE} AS netprobe
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends iw iputils-ping arp-scan iproute2 \
+ && rm -rf /var/lib/apt/lists/*
+ENV NODE_ENV=production TZ=Europe/London
+WORKDIR /app
+COPY --from=build /out/collector ./
+CMD ["node", "dist/netprobe/main.js"]

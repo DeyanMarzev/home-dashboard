@@ -1,0 +1,32 @@
+BSS a4:c3:f0:11:22:33(on wlan0) -- associated
+	last seen: 120 ms ago
+	TSF: 123456789 usec (0d, 00:02:03)
+	freq: 5180.0
+	beacon interval: 100 TUs
+	capability: ESS Privacy SpectrumMgmt ShortSlotTime RadioMeasure (0x1511)
+	signal: -58.00 dBm
+	SSID: HomeMesh
+BSS a4:c3:f0:11:22:34(on wlan0)
+	freq: 2437.0
+	beacon interval: 100 TUs
+	signal: -49.00 dBm
+	SSID: HomeMesh
+	DS Parameter set: channel 6
+BSS 10:20:30:40:50:01(on wlan0)
+	freq: 2437.0
+	signal: -71.00 dBm
+	SSID: BTHub-ABCD
+	DS Parameter set: channel 6
+BSS 10:20:30:40:50:02(on wlan0)
+	freq: 2412.0
+	signal: -80.00 dBm
+	SSID: VM1234567
+	DS Parameter set: channel 1
+BSS 10:20:30:40:50:03(on wlan0)
+	freq: 2412.0
+	signal: -84.00 dBm
+	SSID: SKYABCDE
+BSS 10:20:30:40:50:04(on wlan0)
+	freq: 5500.0
+	signal: -86.00 dBm
+	SSID: BTHub-ABCD

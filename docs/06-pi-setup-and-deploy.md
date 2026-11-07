@@ -189,6 +189,18 @@ cat /sys/bus/w1/devices/28-*/temperature   # millidegrees; warm the flow pipe to
 
 Put the ids in `BOILER_FLOW_W1_ID` / `BOILER_RETURN_W1_ID`, set `boiler_probes: enabled: true`, `docker compose up -d collector`. Until the ids are set, the collector logs the probes it can see and writes nothing.
 
+## 5d. Network measurements (netprobe, M9)
+
+Set `MQTT_NETPROBE_PASSWORD` (and keep `MQTT_NETPROBE_USERNAME=netprobe`) in `.env`. For device counts from the Linksys MX4200, also set `ROUTER_PASSWORD` (the router's admin password, the one for the local web page; `ROUTER_URL` if it isn't the gateway). Without it, devices are counted with an ARP scan.
+
+```bash
+docker compose up -d --build netprobe mosquitto collector
+docker compose logs -f netprobe        # "netprobe started"; problems are logged as "probe problem"
+docker compose exec netprobe iw dev wlan0 link   # the Pi's own Wi-Fi (nothing if it's on Ethernet)
+```
+
+Within 5 minutes the Wi-Fi page shows devices and latency; within 30 the channel scan; the speed test runs daily at 12:00. To confirm the router's device format (docs/08 6b): `docker compose exec netprobe node dist/netprobe/router-capture.js > devices.json` and send the file (names and addresses are redacted).
+
 ## 6. Start
 
 ```bash

@@ -880,6 +880,8 @@ const PI_CHIP = {
 
 function PiPanel({ latest }: { latest: LatestResponse | undefined }) {
   const combine = useCombinedFreshness();
+  const wifi = useLatest({ source: 'wifi' });
+  const piSignal = valueOf(wifi.data, 'wifi_rssi', 'pi');
   const cpu = pick(latest, 'cpu_temperature');
   const mask = valueOf(latest, 'throttle_flags');
   const memTotal = valueOf(latest, 'memory_total');
@@ -945,16 +947,23 @@ function PiPanel({ latest }: { latest: LatestResponse | undefined }) {
               <dt>Load (5 min)</dt>
               <dd>{valueOf(latest, 'load_5m')?.toFixed(2) ?? '—'}</dd>
             </div>
-            <div>
-              <dt>Database</dt>
-              <dd>
-                {dbSize === null
-                  ? '—'
-                  : dbSize >= 1000
-                    ? `${formatNumber(dbSize / 1000, 1)} GB`
-                    : `${formatNumber(dbSize)} MB`}
-              </dd>
-            </div>
+            {piSignal !== null ? (
+              <div>
+                <dt>Wi-Fi</dt>
+                <dd>{formatNumber(piSignal)} dBm</dd>
+              </div>
+            ) : (
+              <div>
+                <dt>Database</dt>
+                <dd>
+                  {dbSize === null
+                    ? '—'
+                    : dbSize >= 1000
+                      ? `${formatNumber(dbSize / 1000, 1)} GB`
+                      : `${formatNumber(dbSize)} MB`}
+                </dd>
+              </div>
+            )}
           </dl>
           {sdPercent !== null && (
             <ProgressBar

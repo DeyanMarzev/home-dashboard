@@ -39,6 +39,23 @@ sources:
     poll: 30m
     expected_delay: 0s
 
+  # Measured by the netprobe container (host network) and pushed over MQTT (docs/01, docs/03).
+  wifi:
+    name: Wi-Fi and network
+    description: Pi's Wi-Fi link, latency, devices, channels
+    kind: local
+    push_interval: 5m
+    expected_delay: 0s
+    mqtt_topic: home/net/wifi
+
+  speed_test:
+    name: Broadband speed test
+    description: Download, upload, latency (daily 12:00)
+    kind: local
+    push_interval: 1d
+    expected_delay: 0s
+    mqtt_topic: home/net/speed_test
+
   # Not built yet: enabled in the milestone that adds the collector (docs/07-build-plan.md).
   # Disabled sources don't show as Late or raise events.
 

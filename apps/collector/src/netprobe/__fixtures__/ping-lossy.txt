@@ -1,0 +1,5 @@
+PING 1.1.1.1 (1.1.1.1) 56(84) bytes of data.
+
+--- 1.1.1.1 ping statistics ---
+10 packets transmitted, 9 received, 10% packet loss, time 1820ms
+rtt min/avg/max/mdev = 12.004/14.218/19.732/2.101 ms

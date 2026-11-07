@@ -97,8 +97,18 @@ const SourceEntrySchema = z
           message: 'push sources (kind: sensor) are not polled',
         });
       }
-    } else if (s.poll === undefined) {
-      ctx.addIssue({ code: 'custom', path: ['poll'], message: `kind: ${s.kind} needs poll` });
+    } else if (s.poll === undefined && s.push_interval === undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['poll'],
+        message: `kind: ${s.kind} needs poll (or push_interval if it pushes)`,
+      });
+    } else if (s.poll !== undefined && s.push_interval !== undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['poll'],
+        message: 'a source is polled or pushes, not both',
+      });
     }
     // A live source's Live window is derived from its cadence; a cron has no fixed cadence.
     if (s.poll?.type === 'cron' && s.expected_delay <= LIVE_THRESHOLD_SECONDS) {

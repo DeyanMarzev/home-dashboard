@@ -48,6 +48,8 @@ services:
       MQTT_PASSWORD: ${MQTT_PASSWORD:?set MQTT_PASSWORD in .env}
       MQTT_SENSOR_USERNAME: ${MQTT_SENSOR_USERNAME:?set MQTT_SENSOR_USERNAME in .env}
       MQTT_SENSOR_PASSWORD: ${MQTT_SENSOR_PASSWORD:?set MQTT_SENSOR_PASSWORD in .env}
+      MQTT_NETPROBE_USERNAME: ${MQTT_NETPROBE_USERNAME:-}
+      MQTT_NETPROBE_PASSWORD: ${MQTT_NETPROBE_PASSWORD:-}
     volumes:
       - ./docker/mosquitto:/mosquitto/config:ro
       - ${DATA_DIR}/mosquitto/data:/mosquitto/data
@@ -155,6 +157,34 @@ services:
         limits:
           memory: 384m
     networks: [home]
+    logging: *logging
+
+  # Network measurements from the host network: the Pi's Wi-Fi, latency, devices, channel
+  # scans, daily speed test. Publishes to MQTT on localhost:1883 (docs/01, docs/03 § wifi).
+  netprobe:
+    build:
+      context: .
+      target: netprobe
+    image: home-dashboard/netprobe
+    restart: unless-stopped
+    network_mode: host
+    cap_add: [NET_ADMIN, NET_RAW]
+    environment:
+      MQTT_URL: mqtt://127.0.0.1:1883
+      MQTT_NETPROBE_USERNAME: ${MQTT_NETPROBE_USERNAME:?set MQTT_NETPROBE_USERNAME in .env}
+      MQTT_NETPROBE_PASSWORD: ${MQTT_NETPROBE_PASSWORD:?set MQTT_NETPROBE_PASSWORD in .env}
+      WIFI_INTERFACE: ${WIFI_INTERFACE:-wlan0}
+      PING_TARGET: ${PING_TARGET:-1.1.1.1}
+      ROUTER_URL: ${ROUTER_URL:-}
+      ROUTER_PASSWORD: ${ROUTER_PASSWORD:-}
+      TZ: Europe/London
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      mosquitto: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 96m
     logging: *logging
 
   # Publishes realistic readings for three rooms, as real sensors would (M3 pipeline test).
