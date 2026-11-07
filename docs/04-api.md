@@ -29,12 +29,13 @@ interface SeriesMeta {
   label?: string;
 }
 
-interface Freshness {         // see docs/03
+interface Freshness {         // see docs/03; type exported by packages/shared
   state: 'live' | 'delayed' | 'late';
-  dataTo: string;
-  lagSeconds: number;
-  daysBehind: number;
+  dataTo: string | null;      // null = never reported
+  lagSeconds: number | null;
+  daysBehind: number | null;
   label: string;
+  compactLabel: string;
 }
 ```
 
@@ -43,7 +44,7 @@ Every response that contains data includes a `freshness` object for each series,
 ## Endpoints
 
 ### `GET /api/health`
-`{ ok: true, db: 'up' | 'down', version: string }`
+`{ ok: true, db: 'up' | 'down', version: string }`. Always 200 once the API is listening (it only starts listening after migrations and the registry sync). `db` is a `select 1` with a 2 s timeout.
 
 ### `GET /api/sources`
 All sources with registry info, freshness of their newest series, and the last collector run.

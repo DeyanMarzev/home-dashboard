@@ -14,6 +14,7 @@ COPY packages/shared/package.json packages/shared/
 COPY apps/api/package.json apps/api/
 COPY apps/collector/package.json apps/collector/
 COPY apps/web/package.json apps/web/
+COPY packages/db/package.json packages/db/
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm -r build
@@ -25,6 +26,10 @@ FROM ${NODE_IMAGE} AS runtime
 ENV NODE_ENV=production TZ=Europe/London
 WORKDIR /app
 USER node
+# Both services migrate the database and sync the source registry at startup.
+# config/ is also bind-mounted by docker-compose.yml, so registry edits need only a restart.
+COPY --chown=node:node db/migrations ./db/migrations
+COPY --chown=node:node config ./config
 
 FROM runtime AS api
 COPY --from=build --chown=node:node /out/api ./

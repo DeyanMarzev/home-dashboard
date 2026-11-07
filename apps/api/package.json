@@ -7,7 +7,7 @@
     "dist"
   ],
   "scripts": {
-    "dev": "NODE_ENV=development AUTH_DISABLED=true tsx watch --env-file-if-exists=../../.env --conditions=development src/index.ts",
+    "dev": "NODE_ENV=development AUTH_DISABLED=true MIGRATIONS_DIR=../../db/migrations SOURCES_FILE=../../config/sources.yaml tsx watch --env-file-if-exists=../../.env --conditions=development src/index.ts",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@fastify/static": "^10.1.10",
+    "@home/db": "workspace:*",
     "@home/shared": "workspace:*",
     "fastify": "^5.12.8",
     "jose": "^6.2.15",

@@ -18,6 +18,8 @@ PostgreSQL 17 + TimescaleDB. One generic readings table for every source, so add
 
 ## Schema (migration `001_init.sql`)
 
+The migration files in `db/migrations/` are the source of truth; this block mirrors `001_init.sql`.
+
 ```sql
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
@@ -25,7 +27,7 @@ CREATE TABLE sources (
   id               text PRIMARY KEY,                -- 'smart_meters'
   name             text NOT NULL,                   -- 'Smart meters'
   kind             text NOT NULL CHECK (kind IN ('sensor','api','scrape','local','derived')),
-  poll_interval    interval,                        -- NULL for push sources
+  poll_interval    interval,                        -- NULL for push and cron-scheduled sources
   expected_delay   interval NOT NULL DEFAULT '0',   -- how far behind data normally is
   grace            interval,                        -- override; NULL = default rule
   enabled          boolean NOT NULL DEFAULT true,
@@ -42,7 +44,8 @@ CREATE TABLE series (
   interval    interval,                             -- required for interval_total
   label       text,                                 -- optional display name
   created_at  timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (source_id, metric, entity)
+  UNIQUE (source_id, metric, entity),
+  CHECK ((value_type = 'interval_total') = (interval IS NOT NULL))
 );
 
 CREATE TABLE readings (
@@ -52,13 +55,15 @@ CREATE TABLE readings (
   received_at  timestamptz NOT NULL DEFAULT now(),  -- when we stored it
   PRIMARY KEY (series_id, ts)
 );
-SELECT create_hypertable('readings', by_range('ts', INTERVAL '7 days'));
+-- No default ts index: every query filters by series_id, so the primary key covers them.
+SELECT create_hypertable('readings', by_range('ts', INTERVAL '7 days'), create_default_indexes => false);
 
 -- Upsert pattern used by every collector:
 -- INSERT INTO readings (series_id, ts, value) VALUES ...
 -- ON CONFLICT (series_id, ts) DO UPDATE SET value = EXCLUDED.value, received_at = now();
 
-CREATE INDEX ON readings (series_id, ts DESC);
+-- No separate (series_id, ts DESC) index: the primary key serves "latest per series" with a
+-- backward scan, and every extra index costs writes on the Pi.
 
 CREATE TABLE collector_runs (
   id           bigserial PRIMARY KEY,
@@ -82,6 +87,8 @@ CREATE TABLE events (
   resolved_at timestamptz
 );
 CREATE INDEX ON events (ts DESC);
+-- At most one open event of a kind per source (e.g. one open 'source_late').
+CREATE UNIQUE INDEX events_one_open_per_source_kind ON events (source_id, kind) WHERE resolved_at IS NULL;
 
 CREATE TABLE tariffs (
   id               serial PRIMARY KEY,
@@ -93,13 +100,30 @@ CREATE TABLE tariffs (
 );
 ```
 
+## Migrations
+
+- Plain numbered SQL files in `db/migrations/` (`001_init.sql`, `002_...`), applied in order at startup by **both** `api` and `collector` (`packages/db/src/migrate.ts`), recorded in `schema_migrations` (version, name, sha256 checksum).
+- Each file runs in **one transaction** holding a transaction-level advisory lock, so two processes starting at once can't both apply it. Anything that can't run in a transaction is not allowed in a migration (e.g. a continuous aggregate `WITH DATA`).
+- **Never edit an applied migration.** The runner compares checksums and refuses to start if one changed. Add a new file instead.
+- Tests run the migrations on PGlite (real Postgres in WebAssembly) with TimescaleDB's two functions in `001` stubbed and `002` skipped, and on real TimescaleDB when `TEST_DATABASE_URL` is set (see `packages/db/src/test/database.ts`).
+
+## Writing readings
+
+`createReadingWriter(sql).write(sourceId, readings)` in `packages/db/src/readings.ts` is the only way collectors write data:
+
+- Validates every reading (`ReadingInputSchema` in `packages/shared`): snake_case keys, finite values, timestamps with a zone, `interval` exactly when `interval_total`. One bad reading rejects the whole batch.
+- Creates missing series; rejects a reading whose unit, value type or interval differs from its existing series.
+- Upserts on `(series_id, ts)` in chunks of 5,000 rows; repeated timestamps within a batch keep the last value.
+- `NOTIFY readings` with `{"seriesId", "ts", "value"}` for the newest point of each series in the batch, in the same transaction (delivered on commit).
+- All of it in one transaction: a failed batch writes nothing.
+
 ## Freshness view
 
 The API computes freshness in TypeScript (shared logic), but needs the latest timestamp per series cheaply:
 
 ```sql
 CREATE VIEW series_latest AS
-SELECT s.id AS series_id, s.source_id, l.ts AS data_to, l.value, l.received_at
+SELECT s.id AS series_id, s.source_id, l.ts AS latest_ts, l.value, l.received_at
 FROM series s
 LEFT JOIN LATERAL (
   SELECT ts, value, received_at FROM readings r
@@ -107,7 +131,7 @@ LEFT JOIN LATERAL (
 ) l ON true;
 ```
 
-For `interval_total` series, `data_to` used for freshness is `ts + interval` (the end of the last complete interval). The shared logic handles that from the series' `interval`.
+For `interval_total` series, the `dataTo` used for freshness is `latest_ts + interval` (the end of the last complete interval). The shared logic handles that from the series' `interval`.
 
 ## Aggregates, compression, retention (migration `002_timescale_policies.sql`)
 
@@ -119,15 +143,17 @@ SELECT series_id,
        avg(value) AS avg, min(value) AS min, max(value) AS max,
        sum(value) AS sum, count(*) AS n
 FROM readings
-GROUP BY series_id, bucket;
+GROUP BY series_id, bucket
+WITH NO DATA;   -- WITH DATA can't run inside the migration's transaction; the policy fills it
 
 SELECT add_continuous_aggregate_policy('readings_hourly',
   start_offset => INTERVAL '10 days',      -- covers late-arriving data (Thames is 3+ days late)
   end_offset   => INTERVAL '1 hour',
   schedule_interval => INTERVAL '30 minutes');
 
-ALTER TABLE readings SET (timescaledb.compress, timescaledb.compress_segmentby = 'series_id');
-SELECT add_compression_policy('readings', INTERVAL '14 days');   -- after late data has landed
+-- TimescaleDB ≥ 2.18 names ("columnstore" = compression); checked against 2.31.
+ALTER TABLE readings SET (timescaledb.enable_columnstore = true, timescaledb.segmentby = 'series_id');
+CALL add_columnstore_policy('readings', after => INTERVAL '14 days');   -- after late data has landed
 SELECT add_retention_policy('readings', INTERVAL '90 days');      -- raw kept 90 days
 -- readings_hourly is kept forever.
 ```

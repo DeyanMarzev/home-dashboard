@@ -158,7 +158,9 @@ docker compose ps
 docker compose logs -f api collector
 ```
 
-Migrations run automatically when `api` starts (single runner, advisory lock so only one instance migrates).
+Migrations run automatically when `api` and `collector` start (advisory lock, so only one applies each migration), and both sync `config/sources.yaml` into the `sources` table. Look for `database ready` in the logs.
+
+To change the source registry: edit `config/sources.yaml` (it is bind-mounted into both containers), then `docker compose restart api collector`. An invalid file stops both with a message listing every problem; fix it and restart.
 
 Check: `https://home.deyan.uk` asks for login, then shows the dashboard.
 
