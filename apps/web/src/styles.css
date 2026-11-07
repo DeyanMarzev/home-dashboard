@@ -743,3 +743,84 @@ table.data tr:last-child td {
   font-size: 13px;
   color: var(--text-secondary);
 }
+
+/* ---- Heating: today's target temperature bar ---------------------------------------- */
+
+.schedule {
+  position: relative;
+  padding-top: 18px;
+}
+
+.schedule-bar {
+  display: flex;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.schedule-bar > div {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.schedule-cool {
+  background: #dce6fb;
+  color: #1e3a8a;
+}
+
+.schedule-warm {
+  background: var(--heat-band);
+  color: var(--delayed-text);
+}
+
+.schedule-unknown {
+  background: repeating-linear-gradient(135deg, var(--surface-muted) 0 6px, var(--grid) 6px 12px);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.schedule-now {
+  position: absolute;
+  top: 16px; /* below the label, which sits in the padding above the bar */
+  bottom: 0;
+  width: 2px;
+  background: var(--text);
+}
+
+.schedule-now span {
+  position: absolute;
+  top: -17px;
+  left: 1px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  transform: translateX(-50%);
+}
+
+.schedule-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.tips {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tips p:first-child {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tips p:last-child {
+  font-size: 14px;
+  color: var(--text-secondary);
+}

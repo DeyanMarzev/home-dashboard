@@ -190,6 +190,7 @@ interface CollectorContext {
 
 - Two DS18B20 on 1-Wire: `/sys/bus/w1/devices/28-*/temperature` (millidegrees). Map sensor IDs to `boiler_flow` / `boiler_return` via env (`BOILER_FLOW_W1_ID`, `BOILER_RETURN_W1_ID`).
 - Hardware not installed yet: the collector must handle "no devices" quietly (log once, no crash).
+- Implemented (`apps/collector/src/sources/boiler_probes/`): reads `temperature` (or `w1_slave` on older kernels, CRC checked) under `/host/sys/bus/w1/devices`. Rejects the 85 °C power-on value and −127 °C (disconnected). A configured probe that's missing fails the run (the other probe's reading is still stored). Series: `temperature` on entities `boiler_flow` and `boiler_return`.
 
 ### nest (Google Smart Device Management API): live
 
@@ -203,6 +204,8 @@ interface CollectorContext {
   - `sdm.devices.traits.ThermostatMode.mode`, `ThermostatEco.mode` → states
 - Poll every 2 min; on HTTP 429 back off. Refresh access token before expiry; log refresh failures as events.
 - Boiler running time, cycles and "warm-up rate" are derived from `hvac_heating` + temperatures at query time.
+- Implemented (`apps/collector/src/sources/nest/`): token from `https://oauth2.googleapis.com/token`, cached until 2 min before expiry; a refused refresh token opens one `nest_auth` alert event (resolved on the next success). An offline thermostat fails the run instead of storing stale values as current. SDM has no timestamps: readings are stamped with the poll time. Entity = the room's display name in snake_case (override with `options.entity`). Extra states: `thermostat_mode` (0 off, 1 heat, 2 cool, 3 heat-cool), `eco_mode` (0 off, 1 manual eco). No `target_temperature` while eco is on or the mode is off.
+- SDM doesn't expose the schedule, so the Heating page shows the target temperatures observed so far today, not the plan.
 
 ### open_meteo: live
 

@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router';
 import { Layout } from './components/Layout.js';
+import { HeatingPage } from './pages/Heating.js';
 import { NotYetPage } from './pages/NotYet.js';
 import { OverviewPage } from './pages/Overview.js';
 import { RoomsPage } from './pages/Rooms.js';
@@ -15,12 +16,7 @@ export const router = createBrowserRouter([
         path: '/energy',
         element: <NotYetPage title="Energy" sourceIds={['smart_meters']} milestone="M7" />,
       },
-      {
-        path: '/heating',
-        element: (
-          <NotYetPage title="Heating" sourceIds={['nest', 'boiler_probes']} milestone="M6" />
-        ),
-      },
+      { path: '/heating', element: <HeatingPage /> },
       {
         path: '/water',
         element: <NotYetPage title="Water" sourceIds={['thames_water']} milestone="M8" />,

@@ -26,6 +26,16 @@ const EnvSchema = z.object({
       .optional(),
   ),
 
+  // Nest (Google Smart Device Management API). Secrets: never logged.
+  NEST_PROJECT_ID: optionalString,
+  NEST_CLIENT_ID: optionalString,
+  NEST_CLIENT_SECRET: optionalString,
+  NEST_REFRESH_TOKEN: optionalString,
+
+  // DS18B20 boiler pipe probes (1-Wire ids like 28-0123456789ab). Unset until fitted.
+  BOILER_FLOW_W1_ID: optionalString,
+  BOILER_RETURN_W1_ID: optionalString,
+
   // Host paths, mounted read-only into the container (docker-compose.yml).
   HOST_SYS: z.preprocess(blankToUndefined, z.string().default('/sys')),
   HOST_PROC: z.preprocess(blankToUndefined, z.string().default('/proc')),

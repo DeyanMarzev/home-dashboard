@@ -1,0 +1,31 @@
+{
+  "devices": [
+    {
+      "name": "enterprises/REDACTED-PROJECT/devices/REDACTED-DEVICE",
+      "type": "sdm.devices.types.THERMOSTAT",
+      "assignee": "enterprises/REDACTED-PROJECT/structures/REDACTED-STRUCTURE/rooms/REDACTED-ROOM",
+      "traits": {
+        "sdm.devices.traits.Info": { "customName": "" },
+        "sdm.devices.traits.Humidity": { "ambientHumidityPercent": 61 },
+        "sdm.devices.traits.Connectivity": { "status": "ONLINE" },
+        "sdm.devices.traits.ThermostatMode": { "mode": "HEAT", "availableModes": ["HEAT", "OFF"] },
+        "sdm.devices.traits.ThermostatEco": {
+          "availableModes": ["OFF", "MANUAL_ECO"],
+          "mode": "MANUAL_ECO",
+          "heatCelsius": 12.5,
+          "coolCelsius": 24.4
+        },
+        "sdm.devices.traits.ThermostatHvac": { "status": "OFF" },
+        "sdm.devices.traits.Settings": { "temperatureScale": "CELSIUS" },
+        "sdm.devices.traits.ThermostatTemperatureSetpoint": {},
+        "sdm.devices.traits.Temperature": { "ambientTemperatureCelsius": 17.81 }
+      },
+      "parentRelations": [
+        {
+          "parent": "enterprises/REDACTED-PROJECT/structures/REDACTED-STRUCTURE/rooms/REDACTED-ROOM",
+          "displayName": "Hallway"
+        }
+      ]
+    }
+  ]
+}

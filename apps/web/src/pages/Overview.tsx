@@ -1,5 +1,8 @@
 import {
   averageByWindow,
+  CONDENSING_LIMIT_C,
+  formatMinutes,
+  stateRuns,
   averageSeries,
   co2Level,
   CO2_LABELS,
@@ -23,7 +26,7 @@ import {
   type LatestResponse,
   type SourceInfo,
 } from '@home/shared';
-import { useEvents, useLatest, useReadings, useSources } from '../api/hooks.js';
+import { useEvents, useHeatingSummary, useLatest, useReadings, useSources } from '../api/hooks.js';
 import { useLive } from '../api/live-context.js';
 import { AlertStrip } from '../components/AlertStrip.js';
 import { Panel, ProgressBar, Skeleton, StatTile } from '../components/Cards.js';
@@ -41,6 +44,8 @@ import { buildRooms, valuesOf, type Room } from '../model/rooms.js';
 import { COLLECTOR_STATUS_TEXT, collectorStatus, describePoll } from '../model/sources.js';
 
 const MOULD_TONE = { low: 'good', watch: 'warn', high: 'bad' } as const;
+/** How long one point of the heating state holds, by the bucket the API used. */
+const BUCKET_HOLD_SECONDS = { raw: 360, '5m': 300, '15m': 900, '1h': 3600, '1d': 86400 } as const;
 const CO2_TONE = { good: 'good', fair: 'good', high: 'warn', very_high: 'bad' } as const;
 
 export function OverviewPage() {
@@ -73,9 +78,15 @@ export function OverviewPage() {
       />
       <FreshnessKey />
       <AlertStrip events={openAlerts} />
-      <Tiles rooms={rooms} weather={weather.data} source={source} loading={sensors.isPending} />
+      <Tiles
+        rooms={rooms}
+        weather={weather.data}
+        nest={nest.data}
+        source={source}
+        loading={sensors.isPending}
+      />
       <div className="row">
-        <TemperaturePanel rooms={rooms} weather={weather.data} range={range} />
+        <TemperaturePanel rooms={rooms} weather={weather.data} nest={nest.data} range={range} />
         <HeatingPanel source={source('nest')} />
       </div>
       <RoomsSection rooms={rooms} loading={sensors.isPending} />
@@ -119,11 +130,13 @@ export function OverviewPage() {
 function Tiles({
   rooms,
   weather,
+  nest,
   source,
   loading,
 }: {
   rooms: Room[];
   weather: LatestResponse | undefined;
+  nest: LatestResponse | undefined;
   source: (id: string) => SourceInfo | undefined;
   loading: boolean;
 }) {
@@ -157,6 +170,7 @@ function Tiles({
   const nestTemp = thermostat?.metrics.temperature;
   const indoor = nestTemp?.value ?? avg(temps);
   const target = thermostat?.metrics.target_temperature?.value;
+  const heating = valueOf(nest, 'hvac_heating', 'boiler');
   const avgTemp = avg(temps);
   const avgHumidity = avg(humidities);
   const coldest = temps.length ? Math.min(...temps.map((t) => t.value)) : null;
@@ -199,7 +213,7 @@ function Tiles({
         unit={indoor === null ? undefined : '°C'}
         context={
           target != null
-            ? `Target ${formatNumber(target, 1)} °C`
+            ? `Target ${formatNumber(target, 1)} °C${heating === null ? '' : ` · heating ${heating === 1 ? 'on' : 'idle'}`}`
             : temps.length
               ? `Average of ${temps.length} rooms`
               : 'No room sensors yet'
@@ -271,10 +285,12 @@ function Tiles({
 function TemperaturePanel({
   rooms,
   weather,
+  nest,
   range,
 }: {
   rooms: Room[];
   weather: LatestResponse | undefined;
+  nest: LatestResponse | undefined;
   range: Range;
 }) {
   const combine = useCombinedFreshness();
@@ -285,6 +301,16 @@ function TemperaturePanel({
   const targetId = rooms.find((r) => r.kind === 'thermostat')?.metrics.target_temperature?.seriesId;
   const ids = [...indoorIds, ...(outdoorId ? [outdoorId] : []), ...(targetId ? [targetId] : [])];
   const readings = useReadings(ids, range);
+  const now = useNow();
+  // Boiler-firing bands, from the Nest's heating state (bucket averages above 0.5 count as on).
+  const hvacId = pick(nest, 'hvac_heating', 'boiler')?.series.id;
+  const hvac = useReadings(hvacId ? [hvacId] : [], range);
+  const hvacData = hvac.data;
+  const bands = hvacData?.series[0]
+    ? stateRuns(hvacData.series[0].points, BUCKET_HOLD_SECONDS[hvacData.bucket], now).map(
+        (r) => [r.from, r.to] as const,
+      )
+    : [];
 
   const byId = new Map((readings.data?.series ?? []).map((s) => [s.meta.id, s]));
   const indoor = averageSeries(indoorIds.map((id) => byId.get(id)?.points ?? []));
@@ -343,6 +369,12 @@ function TemperaturePanel({
               Nest target
             </span>
           )}
+          {bands.length > 0 && (
+            <span>
+              <span className="swatch swatch--band" style={{ background: 'var(--heat-band)' }} />
+              Boiler firing
+            </span>
+          )}
         </span>
       }
     >
@@ -354,6 +386,7 @@ function TemperaturePanel({
         <TimeChart
           series={series}
           unit="°C"
+          bands={bands}
           spanSeconds={RANGE_SECONDS[range]}
           ariaLabel={`Line chart: ${[describe('indoor', indoorStats), describe('outdoor', outdoorStats)].filter(Boolean).join(', ')}.`}
         />
@@ -363,11 +396,92 @@ function TemperaturePanel({
 }
 
 function HeatingPanel({ source }: { source: SourceInfo | undefined }) {
+  if (source && !source.enabled) {
+    return (
+      <Panel id="heat-h" title="Heating" flex="1 1 300px" badge={<SourceBadge source={source} />}>
+        <NotConnected source={source}>
+          Nest thermostat and boiler probes aren&apos;t connected yet
+        </NotConnected>
+      </Panel>
+    );
+  }
+  return <HeatingCard source={source} />;
+}
+
+function HeatingCard({ source }: { source: SourceInfo | undefined }) {
+  const summary = useHeatingSummary();
+  const nest = useLatest({ source: 'nest' });
+  const probes = useLatest({ source: 'boiler_probes' });
+  const flow = valueOf(probes.data, 'temperature', 'boiler_flow');
+  const ret = valueOf(probes.data, 'temperature', 'boiler_return');
+  const humidity = valueOf(nest.data, 'humidity');
+  const mode = valueOf(nest.data, 'thermostat_mode');
+  const s = summary.data;
   return (
-    <Panel id="heat-h" title="Heating" flex="1 1 300px" badge={<SourceBadge source={source} />}>
-      <NotConnected source={source}>
-        Nest thermostat and boiler probes aren't connected yet
-      </NotConnected>
+    <Panel
+      id="heat-h"
+      title="Heating"
+      flex="1 1 300px"
+      badge={
+        s?.freshness ? (
+          <FreshnessBadge freshness={s.freshness} compact />
+        ) : (
+          <SourceBadge source={source} />
+        )
+      }
+      meta={
+        mode !== null && (
+          <Chip>Nest · {['Off', 'Heat', 'Cool', 'Heat-cool'][mode] ?? 'Unknown'} mode</Chip>
+        )
+      }
+    >
+      {flow !== null || ret !== null ? (
+        <>
+          <div className="boxes">
+            <div className="box">
+              <span>Flow</span>
+              <span>{flow === null ? '—' : `${formatNumber(flow)} °C`}</span>
+            </div>
+            <div className="box">
+              <span>Return</span>
+              <span>{ret === null ? '—' : `${formatNumber(ret)} °C`}</span>
+            </div>
+          </div>
+          {ret !== null && (
+            <p className="line">
+              <span
+                className={`dot dot--${ret < CONDENSING_LIMIT_C ? 'good' : 'warn'}`}
+                aria-hidden="true"
+              />
+              {ret < CONDENSING_LIMIT_C
+                ? `Condensing: return below ${CONDENSING_LIMIT_C} °C`
+                : `Not condensing: return above ${CONDENSING_LIMIT_C} °C`}
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="meta">
+          No boiler pipe probes yet: flow and return temperatures appear when they&apos;re fitted.
+        </p>
+      )}
+      <dl className="facts">
+        <div>
+          <dt>Boiler on today</dt>
+          <dd>{s ? formatMinutes(s.boiler.minutesOn * 60) : '—'}</dd>
+        </div>
+        <div>
+          <dt>Firing cycles</dt>
+          <dd>{s ? s.boiler.cycles : '—'}</dd>
+        </div>
+        <div>
+          <dt>Warm-up rate</dt>
+          <dd>{s?.warmUp ? `${formatNumber(s.warmUp.ratePerHour, 1)} °C / h` : '—'}</dd>
+        </div>
+        <div>
+          <dt>Nest humidity</dt>
+          <dd>{humidity === null ? '—' : `${formatNumber(humidity)} %`}</dd>
+        </div>
+      </dl>
     </Panel>
   );
 }

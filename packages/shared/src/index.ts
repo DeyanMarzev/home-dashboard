@@ -11,3 +11,4 @@ export * from './pi-health.js';
 export * from './series-math.js';
 export * from './weather.js';
 export * from './grid.js';
+export * from './heating.js';

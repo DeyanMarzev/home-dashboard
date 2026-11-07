@@ -6,7 +6,7 @@ export type { Sql };
 export interface DbOptions {
   /** Connection URL; default: the standard PG* environment variables (PGHOST, PGUSER, ...). */
   url?: string;
-  /** Pool size (docs/04: max 10 for the API). */
+  /** Pool size (docs/04: max 10 for the API). DB_POOL_MAX in the environment overrides it. */
   max?: number;
   /** Shows up in pg_stat_activity, e.g. 'api' or 'collector'. */
   applicationName: string;
@@ -15,8 +15,11 @@ export interface DbOptions {
 
 export function createDb(options: DbOptions): Sql {
   const log = options.log ?? silentLogger;
+  // An override for tuning, and for PGlite in local tests: it runs every connection in one
+  // session, so prepared statements from parallel connections collide (use DB_POOL_MAX=1).
+  const override = Number(process.env.DB_POOL_MAX);
   const config = {
-    max: options.max ?? 5,
+    max: Number.isInteger(override) && override > 0 ? override : (options.max ?? 5),
     idle_timeout: 60,
     connect_timeout: 10,
     connection: { application_name: options.applicationName, TimeZone: 'UTC' },

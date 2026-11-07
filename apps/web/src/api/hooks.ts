@@ -1,12 +1,14 @@
 import {
   EventsResponseSchema,
   HealthSchema,
+  HeatingSummarySchema,
   LatestResponseSchema,
   ReadingsResponseSchema,
   SourcesResponseSchema,
   type Bucket,
   type EventItem,
   type FreshnessPolicy,
+  type HeatingSummary,
   type LatestResponse,
   type ReadingsResponse,
   type SourceInfo,
@@ -107,6 +109,18 @@ export function useHealth() {
     queryKey: ['health'],
     queryFn: () =>
       getJson<{ ok: true; db: 'up' | 'down'; version: string }>('/api/health', HealthSchema),
+    refetchInterval: MINUTE,
+  });
+}
+
+export function useHeatingSummary(date?: string) {
+  return useQuery({
+    queryKey: ['heating', date ?? 'today'],
+    queryFn: () =>
+      getJson<HeatingSummary>(
+        `/api/summary/heating${date ? `?date=${date}` : ''}`,
+        HeatingSummarySchema,
+      ),
     refetchInterval: MINUTE,
   });
 }
