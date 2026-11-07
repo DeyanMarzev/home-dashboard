@@ -1,0 +1,38 @@
+{
+  "veId": "REDACTED-ve-1",
+  "name": "DCC Sourced",
+  "resources": [
+    {
+      "resourceId": "REDACTED-resource-electricity",
+      "resourceTypeId": "REDACTED",
+      "name": "electricity consumption",
+      "classifier": "electricity.consumption",
+      "baseUnit": "kWh",
+      "active": true
+    },
+    {
+      "resourceId": "REDACTED-resource-electricity-cost",
+      "resourceTypeId": "REDACTED",
+      "name": "electricity cost",
+      "classifier": "electricity.consumption.cost",
+      "baseUnit": "pence",
+      "active": true
+    },
+    {
+      "resourceId": "REDACTED-resource-gas",
+      "resourceTypeId": "REDACTED",
+      "name": "gas consumption",
+      "classifier": "gas.consumption",
+      "baseUnit": "kWh",
+      "active": true
+    },
+    {
+      "resourceId": "REDACTED-resource-gas-cost",
+      "resourceTypeId": "REDACTED",
+      "name": "gas cost",
+      "classifier": "gas.consumption.cost",
+      "baseUnit": "pence",
+      "active": true
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "veId": "REDACTED-ve-1",
+    "name": "DCC Sourced",
+    "active": true,
+    "applicationId": "b0f1b774-a586-4f72-9edd-27ead8aa7a8d",
+    "postalCode": "REDACTED",
+    "resources": [
+      {
+        "resourceId": "REDACTED-resource-electricity",
+        "resourceTypeId": "REDACTED",
+        "name": "electricity consumption"
+      }
+    ]
+  }
+]

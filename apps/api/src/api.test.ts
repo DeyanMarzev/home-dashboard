@@ -219,7 +219,7 @@ describe('GET /api/sources', () => {
       dataTo: '2026-11-06T13:50:00.000Z',
     });
     expect(byId.smart_meters).toMatchObject({
-      enabled: false,
+      enabled: true,
       expectedDelay: '1d',
       freshness: {
         state: 'delayed',

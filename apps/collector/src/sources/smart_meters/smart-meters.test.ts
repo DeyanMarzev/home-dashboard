@@ -95,7 +95,7 @@ describe('smart_meters collector', () => {
 
   it('refuses an unknown provider, pointing at the open question', async () => {
     await expect(run({}, { METER_PROVIDER: 'octopus' }).promise).rejects.toThrow(
-      /METER_PROVIDER "octopus" isn't supported yet/,
+      /METER_PROVIDER "octopus" isn't supported/,
     );
   });
 });
