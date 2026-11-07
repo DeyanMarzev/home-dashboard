@@ -43,25 +43,27 @@ Every response that contains data includes a `freshness` object for each series,
 
 ## Endpoints
 
+Schemas for every request and response are in `packages/shared/src/api.ts` (`*QuerySchema` validated at runtime; `*ResponseSchema` checked in the API's tests). Handlers: `apps/api/src/routes/data.ts`, `apps/api/src/stream.ts`. Query parameters that aren't listed are rejected (400), so typos don't silently return everything.
+
 ### `GET /api/health`
 `{ ok: true, db: 'up' | 'down', version: string }`. Always 200 once the API is listening (it only starts listening after migrations and the registry sync). `db` is a `select 1` with a 2 s timeout.
 
 ### `GET /api/sources`
-All sources with registry info, freshness of their newest series, and the last collector run.
+All sources in registry order (disabled ones too, with `enabled: false`), with freshness of their newest series (`forecast_*` excluded), the last collector run, and failed runs in the last 24 h. Cached 30 s.
 ```json
-[{ "id": "smart_meters", "name": "Smart meters", "kind": "api", "poll": "6h",
+[{ "id": "smart_meters", "name": "Smart meters", "kind": "api", "poll": "6h", "pushInterval": null,
    "expectedDelay": "1d", "enabled": true,
-   "freshness": { "state": "delayed", "dataTo": "2026-11-05T23:30:00Z", "lagSeconds": 73800,
-                  "daysBehind": 1, "label": "Data to 5 Nov · 1 day behind" },
-   "lastRun": { "startedAt": "...", "ok": true, "rowsWritten": 96, "durationMs": 1900, "error": null },
+   "freshness": { "state": "delayed", "dataTo": "2026-11-06T00:00:00Z", "lagSeconds": 50400,
+                  "daysBehind": 1, "label": "Data to 5 Nov · 1 day behind", "compactLabel": "1 day behind" },
+   "lastRun": { "startedAt": "...", "finishedAt": "...", "ok": true, "rowsWritten": 96, "durationMs": 1900, "error": null },
    "errors24h": 0 }]
 ```
 
 ### `GET /api/series?source=&metric=&entity=`
-List of `SeriesMeta`, filterable.
+List of `SeriesMeta`, filterable (all filters combine), ordered by source, metric, entity.
 
 ### `GET /api/latest?series=1,2,3` or `?source=room_sensors` or `?metric=co2`
-Latest value per series:
+Latest value per series (filters combine, `entity=` also allowed; at least one of `series`, `source`, `metric`). A series with no readings has `ts`/`value` null and freshness "No data yet". The combined freshness is the worst of the items.
 ```json
 { "items": [{ "series": { ...SeriesMeta }, "ts": "...", "value": 780, "freshness": { ... } }],
   "freshness": { ...combined } }
@@ -76,6 +78,11 @@ Query: `series` (comma ids, required), `from`, `to` (ISO, default last 24 h), `b
 ```
 Max 600 points per series; the server picks a coarser bucket if needed and says so in `bucket`.
 
+- **Default bucket:** raw up to 2 h, otherwise the finest of `5m`, `15m`, `1h`, `1d` that fits 600 points (24 h → `5m`, 7 d → `1h`, 30 d → `1d`). A requested bucket is only ever made coarser, never finer. `raw` is limited to 48 h and is coarsened if any series has more than 600 readings in the range.
+- **Where from:** `raw`, `5m`, `15m` from `readings` (`date_bin`); `1h`, `1d` from `readings_hourly` (real-time, see migration 003), averages weighted by sample count. `1d` buckets are calendar days in `tz` (23 h and 25 h days at the clock changes).
+- **Points** are `[start of bucket (UTC), value]`, in time order; `series` comes back in the order asked. Unknown series ids → 404. Ranges are `[from, to)`, at most 600 days.
+- `agg=auto`: `sum` for `interval_total`, `avg` otherwise (for 0/1 states that's the share of time on, when sampled evenly; exact time-weighting comes with the heating summary).
+
 ### `GET /api/summary/energy?from=&to=`
 Daily electricity and gas kWh and cost (using `tariffs`), baseload (lowest 30 min average overnight → W), totals. Freshness combined from `smart_meters`.
 
@@ -86,10 +93,12 @@ Boiler minutes on, cycles, condensing share (minutes with `boiler_return` < 55 �
 Daily litres, hourly profile for a day, nightly minimum flow (leak check).
 
 ### `GET /api/events?limit=50&level=`
-Recent events, newest first.
+Recent events, newest first: `{ "items": [{ "id", "ts", "level", "sourceId", "kind", "message", "data", "resolvedAt" }] }`. `limit` 1–500.
 
 ### `GET /api/tariffs` · `PUT /api/tariffs`
 Read and replace tariff rows. Validate no overlapping periods per fuel.
+
+`{ "items": [{ "id", "fuel": "electricity" | "gas" | "water", "unitRatePence", "standingPence", "validFrom": "2026-10-01", "validTo": "2027-03-31" | null }] }`. `validTo` is the last day the rate applies (inclusive); null = still current. PUT takes `{ "items": [...] }` without ids, replaces every row in one transaction, and returns the new list. Pence have at most 3 decimals.
 
 ### `GET /api/stream` (Server-Sent Events)
 - `event: reading` → `{ seriesId, ts, value }` for every new live reading (from Postgres `LISTEN readings`).
@@ -97,6 +106,11 @@ Read and replace tariff rows. Validate no overlapping periods per fuel.
 - `event: event` → a new `events` row.
 - Heartbeat comment every 25 s (Cloudflare closes idle connections around 100 s).
 - The web app falls back to polling `/api/latest` every 60 s if SSE drops.
+- On connect: `retry: 5000`, then one `freshness` event per source with its current state, so a client is in sync without a separate request.
+- `freshness` is re-checked every 30 s, and within 1 s when a reading arrives for a source that isn't Live (so a badge flips back promptly).
+- `event` is sent for new and for resolved events (`resolvedAt` set).
+- Never compressed (compression would buffer the stream). At most 50 clients; more get 503. One Postgres `LISTEN` connection serves all clients. Clients that stop reading (> 1 MB buffered) are dropped.
+- Through Cloudflare: browsers authenticate with the Access cookie (EventSource can't send headers); the Android app's service token headers work the same way.
 
 ## Errors
 
@@ -106,4 +120,4 @@ Read and replace tariff rows. Validate no overlapping periods per fuel.
 
 - Postgres pool max 10.
 - Cache `GET /api/sources` and summary endpoints for 30 s in memory.
-- Gzip responses. Target < 100 ms p95 on the Pi for `/api/latest` and 24 h `/api/readings`.
+- Gzip responses over 1 KB (`@fastify/compress`); not the SSE stream. Target < 100 ms p95 on the Pi for `/api/latest` and 24 h `/api/readings`.

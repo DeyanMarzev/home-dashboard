@@ -140,7 +140,7 @@ The `collector` checks freshness every 5 minutes (first check 5 minutes after st
 
 - **Pull sources** (`PullLoop`): interval sources run immediately at startup (2 s apart), then at a fixed rate; cron sources at the next match in Europe/London. Each run gets a time limit (its poll interval, 30 s–5 min; 10 min for cron) and an `AbortSignal`, and is logged to `collector_runs` (start, finish, ok, rows, error ≤ 500 chars).
 - **Retries**: after a failure the next attempt waits min(poll, 5 min), doubling each consecutive failure, capped at poll × 4 (1 day for cron). Source-specific limits (e.g. Thames Water's 3 logins a day) belong in the source's module.
-- **Push sources** (MQTT): one summary row per minute in `collector_runs` (rows written, last error), not one per write.
+- **Push sources** (MQTT): one summary row per minute in `collector_runs` (rows written, last error), not one per 1 s write.
 - Errors anywhere are caught and logged; one source failing never affects another. `collector_runs` older than 30 days are pruned every 6 h.
 - An enabled source without a module, or a module not in the registry, is logged as a warning at startup.
 
@@ -171,9 +171,9 @@ interface CollectorContext {
 - Topic `home/sensors/<entity>/<metric>`, payload JSON `{ "value": 20.6, "ts": "2026-11-06T13:41:00Z", "rssi": -48 }`. `ts` optional (default: receive time). `rssi` becomes a `wifi_rssi` series for that entity (feeds the Wi-Fi "signal by room" panel).
 - Also accepted: a bare number payload (`20.6`), common in ESP32 firmware.
 - Units are fixed per metric: `temperature` °C, `humidity` %, `co2` ppm, `pressure` hPa. Unknown metrics are rejected.
-- Rejected and logged (once per 5 s per reason), never stored: bad topics, non-snake_case entities, non-JSON, `ts` without a zone, `ts` more than 5 min in the future or 7 days in the past (a sensor that never got NTP time), `rssi` outside −120…0.
+- Rejected and logged (grouped per reason at each flush), never stored: bad topics, non-snake_case entities, non-JSON, `ts` without a zone, `ts` more than 5 min in the future or 7 days in the past (a sensor that never got NTP time), `rssi` outside −120…0.
 - Clients connect with MQTT 3.1.1, the most widely supported version; Mosquitto accepts 3.1.1 and 5. Sensors use `MQTT_SENSOR_USERNAME` (publish-only on `home/sensors/#`).
-- Writes are batched every 5 s. If the database is down, up to 20,000 readings are kept and retried; beyond that the oldest are dropped and the drop is reported in `collector_runs`.
+- Writes are batched every 1 s. If the database is down, up to 20,000 readings are kept and retried; beyond that the oldest are dropped and the drop is reported in `collector_runs`.
 - **Fake sensor** (`apps/collector/src/tools/fake-sensor.ts`, built into the collector image rather than `scripts/` so it can run on the Pi): publishes realistic values for `living_room`, `kitchen`, `bedroom` every 30 s through the same topic contract. Local: `pnpm fake-sensor`. Pi: `docker compose --profile fake up -d fake-sensor`.
 - Entities from the mockup: `living_room`, `kitchen`, `bedroom`. Metrics: `temperature`, `humidity`, `co2`, `pressure`.
 - **Open question:** what hardware the existing sensors are and how they report today. See `docs/08`. Build the MQTT path; if the existing sensors can't publish MQTT, a bridge collector is added later.

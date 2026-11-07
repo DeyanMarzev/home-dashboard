@@ -87,7 +87,7 @@ Disable `timescaledb-tune` auto-tuning in the image (`NO_TS_TUNE=true`) so these
 
 ## Data flow
 
-1. **Push sources** (room sensors): ESP32 → MQTT topic → `collector` subscriber → batch insert every 5 s.
+1. **Push sources** (room sensors): ESP32 → MQTT topic → `collector` subscriber → batch insert every 1 s (fast enough for SSE to show a reading within ~2 s; a sensor's burst of metrics still lands in one write).
 2. **Pull sources** (APIs, files, scrapes): scheduler in `collector` runs each source on its `poll` schedule → parse → upsert.
 3. **Derived values** (dew point, costs, degree-days, baseload): computed in SQL views or at query time in the API, never stored as if they were measurements. Exception: daily rollups that are expensive can be stored in a `derived` source with clear lineage.
 4. `collector` sends `NOTIFY readings, '<series_id>'` after each batch. `api` `LISTEN`s and pushes updates to browsers over SSE.

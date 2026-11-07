@@ -158,6 +158,10 @@ SELECT add_retention_policy('readings', INTERVAL '90 days');      -- raw kept 90
 -- readings_hourly is kept forever.
 ```
 
+Migration `003_hourly_realtime.sql` turns on real-time aggregation (`timescaledb.materialized_only = false`): since TimescaleDB 2.13 continuous aggregates are materialized-only by default, and with the refresh policy stopping an hour short of now, the latest hour(s) would otherwise be missing from every chart.
+
+The API's queries use plain Postgres (`date_bin`, `date_trunc(..., tz)`) rather than `time_bucket`, so they run unchanged on PGlite in tests.
+
 Daily totals for the UI are computed from `readings_hourly` using Europe/London day boundaries:
 
 ```sql

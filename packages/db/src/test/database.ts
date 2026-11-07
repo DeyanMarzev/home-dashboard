@@ -1,6 +1,6 @@
 import { PGlite } from '@electric-sql/pglite';
 import { PGLiteSocketServer } from '@electric-sql/pglite-socket';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -25,16 +25,28 @@ export interface TestDatabase {
   close(): Promise<void>;
 }
 
-/**
- * PGlite has no TimescaleDB, so: stub the two Timescale functions 001 calls, drop its
- * CREATE EXTENSION line, and skip 002 (Timescale policies). Everything else is real Postgres.
- */
+/** PGlite has no TimescaleDB: stub the two Timescale functions 001 calls. */
 const TIMESCALE_STUB = `
 CREATE FUNCTION by_range(column_name name, partition_interval interval) RETURNS text
   LANGUAGE sql AS $$ SELECT column_name::text $$;
 CREATE FUNCTION create_hypertable(relation regclass, dimension text, create_default_indexes boolean DEFAULT true)
   RETURNS void LANGUAGE plpgsql AS $$ BEGIN END $$;
 `;
+
+/**
+ * How each real migration is adapted for PGlite: 001 without CREATE EXTENSION; Timescale-only
+ * files replaced by plain-Postgres equivalents (readings_hourly as an ordinary view with the
+ * same columns) or skipped. Everything else is real Postgres.
+ */
+const PGLITE_MIGRATIONS: Record<string, (sql: string) => string | null> = {
+  '001_init.sql': (sql) => sql.replace(/^CREATE EXTENSION IF NOT EXISTS timescaledb;$/m, ''),
+  '002_timescale_policies.sql': () => `
+    CREATE VIEW readings_hourly AS
+    SELECT series_id, date_bin(INTERVAL '1 hour', ts, TIMESTAMPTZ '2000-01-01') AS bucket,
+           avg(value) AS avg, min(value) AS min, max(value) AS max, sum(value) AS sum, count(*) AS n
+    FROM readings GROUP BY series_id, bucket;`,
+  '003_hourly_realtime.sql': () => null,
+};
 
 export async function startPglite(): Promise<TestDatabase> {
   const db = await PGlite.create();
@@ -44,11 +56,13 @@ export async function startPglite(): Promise<TestDatabase> {
 
   const migrationsDir = await mkdtemp(join(tmpdir(), 'home-migrations-'));
   await writeFile(join(migrationsDir, '000_timescale_stub.sql'), TIMESCALE_STUB);
-  const init = await readFile(join(MIGRATIONS_DIR, '001_init.sql'), 'utf8');
-  await writeFile(
-    join(migrationsDir, '001_init.sql'),
-    init.replace(/^CREATE EXTENSION IF NOT EXISTS timescaledb;$/m, ''),
-  );
+  for (const name of (await readdir(MIGRATIONS_DIR)).filter((n) => n.endsWith('.sql'))) {
+    const adapt = PGLITE_MIGRATIONS[name];
+    if (!adapt)
+      throw new Error(`New migration ${name}: add it to PGLITE_MIGRATIONS (keep, adapt or skip)`);
+    const content = adapt(await readFile(join(MIGRATIONS_DIR, name), 'utf8'));
+    if (content !== null) await writeFile(join(migrationsDir, name), content);
+  }
 
   const connect = () =>
     postgres({

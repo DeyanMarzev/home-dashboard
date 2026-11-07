@@ -14,11 +14,13 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@fastify/compress": "^9.3.0",
     "@fastify/static": "^10.1.10",
     "@home/db": "workspace:*",
     "@home/shared": "workspace:*",
     "fastify": "^5.12.8",
     "jose": "^6.2.15",
+    "pino": "^10.4.0",
     "zod": "^4.6.7"
   }
 }

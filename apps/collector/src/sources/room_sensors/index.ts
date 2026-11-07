@@ -4,8 +4,12 @@ import type { PushCollector } from '../../collector.js';
 import { describeError } from '../../errors.js';
 import { parseSensorMessage, SensorMessageError } from './parse.js';
 
-/** Batch database writes (CLAUDE.md rule 8): flush every 5 s. */
-const FLUSH_INTERVAL_MS = 5000;
+/**
+ * Batch database writes (CLAUDE.md rule 8), but flush every second so a reading reaches the
+ * browser within ~2 s (M4). A sensor's burst of metrics still lands in one write; an empty
+ * buffer costs nothing.
+ */
+const FLUSH_INTERVAL_MS = 1000;
 /** If the database is down, keep at most this many readings, dropping the oldest. */
 const MAX_BUFFERED = 20_000;
 
