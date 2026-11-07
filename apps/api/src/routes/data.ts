@@ -240,7 +240,9 @@ export function registerDataRoutes(
     const q = parseInput(EventsQuerySchema, request.query);
     const rows = await db<EventRow[]>`
       select id, ts, level, source_id, kind, message, data, resolved_at from events
-      ${q.level ? db`where level = ${q.level}` : db``}
+      where true
+      ${q.level ? db`and level = ${q.level}` : db``}
+      ${q.kind ? db`and kind = ${q.kind}` : db``}
       order by ts desc, id desc limit ${q.limit}`;
     return { items: rows.map(toEventItem) };
   });

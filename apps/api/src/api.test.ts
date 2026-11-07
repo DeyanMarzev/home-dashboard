@@ -389,6 +389,14 @@ describe('GET /api/events', () => {
     });
     expect((await get('/api/events?limit=0')).status).toBe(400);
   });
+
+  it('filters by kind', async () => {
+    const late = EventsResponseSchema.parse((await get('/api/events?kind=source_late')).body);
+    expect(late.items.map((e) => e.kind)).toEqual(['source_late']);
+    const none = EventsResponseSchema.parse((await get('/api/events?kind=backup')).body);
+    expect(none.items).toEqual([]);
+    expect((await get('/api/events?kind=Bad-Kind')).status).toBe(400);
+  });
 });
 
 describe('GET / PUT /api/tariffs', () => {

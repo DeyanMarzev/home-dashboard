@@ -264,11 +264,92 @@ Builds on the Pi are slow; acceptable for v1. Later option: build `linux/arm64` 
 
 ## 8. Backups
 
-- Nightly at 03:00: `pg_dump -Fc` from the postgres container to `/mnt/ssd/home-dashboard/backups/home-YYYY-MM-DD.dump`, keep 7.
-- If `BACKUP_RCLONE_REMOTE` is set, copy the newest dump off the Pi with `rclone`.
-- Write the result to `events` (`kind: 'backup'`) so the System page can show "Last backup".
-- Provide `scripts/backup.sh` and `scripts/restore.sh`, and a host cron line (or a tiny `backup` container with cron).
-- Document a restore test in this file once done.
+What happens every night at 03:00 (`scripts/backup.sh`, run by the host's cron):
+
+1. `pg_dump -Fc` from the postgres container to `$DATA_DIR/backups/home-YYYY-MM-DD.dump` (on the SSD), written as `.partial` and renamed when complete.
+2. Checked with `pg_restore --list` (a truncated dump fails here).
+3. Only the newest **7** dumps are kept on the Pi.
+4. If `BACKUP_RCLONE_REMOTE` is set, the dump is copied to Google Drive and copies older than **30 days** there are deleted.
+5. The result goes into `events` (`kind: 'backup'`): the System page shows the last backup, its size and whether it reached Google Drive, turning red if it failed or is more than 36 h old. A failure names the step (`pg_dump`, `verify`, `copy to gdrive:…`).
+
+The output goes to `$DATA_DIR/backups/backup.log` (trimmed to the last 2,000 lines).
+
+### 8.1 Google Drive (rclone)
+
+`rclone` runs on the Pi itself, not in a container. The Drive connection uses the `drive.file` scope: rclone can only see and delete the files it uploaded, never the rest of the Drive.
+
+```bash
+sudo apt install -y rclone
+rclone config
+```
+
+In `rclone config`:
+
+- `n` (new remote), name **`gdrive`**, storage **`drive`** (Google Drive).
+- `client_id` and `client_secret`: leave empty.
+- `scope`: **`drive.file`**.
+- `service_account_file`: empty. Advanced config: `n`.
+- "Use web browser to automatically authenticate?": **`n`** (the Pi has no browser). rclone prints a command like `rclone authorize "drive" "eyJ…"`.
+- On the Windows PC: `winget install Rclone.Rclone`, open a new terminal, run that exact command, sign in to Google in the browser that opens, and paste the token it prints back into the Pi.
+- Shared drive: `n`. Keep the remote: `y`. Quit: `q`.
+
+Then in `.env`:
+
+```bash
+BACKUP_RCLONE_REMOTE=gdrive:home-dashboard-backups
+```
+
+The token rclone stores lives in `~/.config/rclone/rclone.conf` (mode 600), outside the repo.
+
+### 8.2 Install the nightly job and run it once
+
+Cron uses the Pi's own timezone (Debian's cron ignores `CRON_TZ`), so set it to UK time first:
+
+```bash
+sudo timedatectl set-timezone Europe/London
+cd /opt/home-dashboard
+scripts/install-backup-cron.sh     # idempotent; prints the installed line
+scripts/backup.sh                  # run one now
+rclone ls gdrive:home-dashboard-backups
+```
+
+The System page (Storage and backups) should now show "Last backup · just now · N MB" and "7 nightly on the Pi · 30 days off-site".
+
+### 8.3 Restore test (do this monthly, and once now)
+
+```bash
+scripts/restore.sh --test          # newest dump; or: scripts/restore.sh --test /path/to/home-YYYY-MM-DD.dump
+```
+
+It restores into a scratch database (`home_restore_test`), prints row counts for `readings`, `series`, `events`, `sources` and `tariffs` next to the live ones, and drops the scratch database. The live database is not touched. Restored counts can be a little lower: rows written since the dump aren't in it. A restored `readings` count of 0, or an error, means the backups are not usable: investigate before relying on them.
+
+To restore from Google Drive (e.g. after losing the SSD), copy a dump back first:
+
+```bash
+rclone copy gdrive:home-dashboard-backups/home-YYYY-MM-DD.dump "$DATA_DIR/backups/"
+```
+
+### 8.4 Real restore
+
+```bash
+scripts/restore.sh --replace /mnt/ssd/home-dashboard/backups/home-YYYY-MM-DD.dump
+```
+
+Asks for confirmation, stops `api` and `collector`, renames the live database to `home_old` (kept, in case), restores the dump into a fresh `home` and starts everything again. Collectors refill the gap since the dump where their source allows (delayed sources re-send overlapping windows). When happy: `docker compose exec postgres dropdb -U home home_old`.
+
+### 8.5 Hardening, logs and resources (M10)
+
+- **Containers:** every container has `no-new-privileges`. `api`, `collector` and `fake-sensor` drop all Linux capabilities and have a read-only root filesystem; `netprobe` keeps only `NET_ADMIN` and `NET_RAW`. Postgres isn't published to the host; the API only on `127.0.0.1:3000`.
+- **HTTP:** the API sends a strict `Content-Security-Policy` (same-origin scripts only, no framing), `X-Frame-Options: DENY`, `nosniff` and `Referrer-Policy: same-origin`, on top of Cloudflare Access.
+- **Logs:** Docker's `local` log driver, 10 MB × 3 files per container (about 200 MB at most for everything). `docker compose logs --tail=100 <service>`. The backup log trims itself.
+- **Dependencies:** `pnpm audit:prod` (production dependencies only). 2026-11-07: no known vulnerabilities. The full `pnpm audit` also lists a moderate `minimatch` issue in dev-only lint tooling, which never runs on the Pi: accepted.
+- **Resource check:** under normal load (fake sensor running, a page open in the browser):
+
+  ```bash
+  scripts/resource-check.sh
+  ```
+
+  Prints each container's memory against its limit (flagging anything above 80 %), plus `free -h` and disk use. If a container is near its limit, raise it only within the budget in `docs/01-architecture.md`.
 
 ## 9. Coexisting with the FastAPI project
 

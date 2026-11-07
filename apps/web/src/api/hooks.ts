@@ -112,11 +112,11 @@ export function useReadings(ids: readonly number[], range: Range, options: Readi
   });
 }
 
-export function useEvents(limit = 20) {
+export function useEvents(limit = 20, kind?: string) {
+  const q = `limit=${limit}${kind ? `&kind=${kind}` : ''}`;
   return useQuery({
-    queryKey: ['events', limit],
-    queryFn: () =>
-      getJson<{ items: EventItem[] }>(`/api/events?limit=${limit}`, EventsResponseSchema),
+    queryKey: ['events', limit, kind],
+    queryFn: () => getJson<{ items: EventItem[] }>(`/api/events?${q}`, EventsResponseSchema),
     refetchInterval: 5 * MINUTE,
   });
 }

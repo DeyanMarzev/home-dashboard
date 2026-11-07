@@ -181,6 +181,10 @@ export const EVENT_LEVELS = ['info', 'warning', 'alert'] as const;
 export const EventsQuerySchema = z.strictObject({
   limit: z.coerce.number().int().min(1).max(500).default(50),
   level: z.enum(EVENT_LEVELS).optional(),
+  kind: z
+    .string()
+    .regex(/^[a-z][a-z0-9_]*$/)
+    .optional(),
 });
 
 export const EventItemSchema = z.object({

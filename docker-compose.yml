@@ -10,6 +10,10 @@ x-logging: &logging
     max-size: 10m
     max-file: '3'
 
+# Hardening (M10). Every container: no privilege gain via setuid binaries. Our own Node
+# containers also drop every capability and run with a read-only root filesystem.
+x-no-new-privileges: &no-new-privileges ['no-new-privileges:true']
+
 services:
   postgres:
     image: timescale/timescaledb:2.31.0-pg17
@@ -36,6 +40,7 @@ services:
       resources:
         limits:
           memory: 1g
+    security_opt: *no-new-privileges
     networks: [home]
     logging: *logging
 
@@ -67,6 +72,7 @@ services:
       resources:
         limits:
           memory: 64m
+    security_opt: *no-new-privileges
     networks: [home]
     logging: *logging
 
@@ -122,6 +128,10 @@ services:
       resources:
         limits:
           memory: 256m
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs: [/tmp]
     networks: [home]
     logging: *logging
 
@@ -156,6 +166,10 @@ services:
       resources:
         limits:
           memory: 384m
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs: [/tmp]
     networks: [home]
     logging: *logging
 
@@ -168,7 +182,13 @@ services:
     image: home-dashboard/netprobe
     restart: unless-stopped
     network_mode: host
+    # Root inside the container, but with only these two capabilities: NET_ADMIN for Wi-Fi
+    # scans (iw), NET_RAW for ping and arp-scan.
+    cap_drop: [ALL]
     cap_add: [NET_ADMIN, NET_RAW]
+    security_opt: *no-new-privileges
+    read_only: true
+    tmpfs: [/tmp]
     environment:
       MQTT_URL: mqtt://127.0.0.1:1883
       MQTT_NETPROBE_USERNAME: ${MQTT_NETPROBE_USERNAME:?set MQTT_NETPROBE_USERNAME in .env}
@@ -197,6 +217,9 @@ services:
     image: home-dashboard/collector
     restart: unless-stopped
     command: ['node', 'dist/tools/fake-sensor.js']
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
     environment:
       MQTT_URL: mqtt://mosquitto:1883
       MQTT_SENSOR_USERNAME: ${MQTT_SENSOR_USERNAME}
@@ -223,6 +246,7 @@ services:
       resources:
         limits:
           memory: 128m
+    security_opt: *no-new-privileges
     networks: [home]
     logging: *logging
 
