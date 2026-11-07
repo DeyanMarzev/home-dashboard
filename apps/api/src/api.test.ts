@@ -190,6 +190,8 @@ describe('GET /api/sources', () => {
       'pi_stats',
       'open_meteo',
       'carbon_intensity',
+      'wifi',
+      'speed_test',
       'boiler_probes',
       'nest',
       'smart_meters',

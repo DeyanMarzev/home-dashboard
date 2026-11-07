@@ -1,0 +1,48 @@
+{
+  "note": "Shaped like a Velop devicelist/GetDevices3 output as described by community clients; replace with a capture (router-capture.ts).",
+  "revision": 1234,
+  "devices": [
+    {
+      "deviceID": "node-1",
+      "isAuthority": true,
+      "nodeType": "Master",
+      "knownInterfaces": [{ "macAddress": "00:00:00:00:00:01", "interfaceType": "Wired" }],
+      "connections": [{ "macAddress": "00:00:00:00:00:01" }]
+    },
+    {
+      "deviceID": "node-2",
+      "isAuthority": false,
+      "nodeType": "Slave",
+      "knownInterfaces": [{ "macAddress": "00:00:00:00:00:02", "interfaceType": "Wireless" }],
+      "connections": [{ "macAddress": "00:00:00:00:00:02" }]
+    },
+    {
+      "deviceID": "a",
+      "friendlyName": "device 1",
+      "knownInterfaces": [
+        { "macAddress": "00:00:00:00:00:0a", "interfaceType": "Wireless", "band": "5GHz" }
+      ],
+      "connections": [{ "macAddress": "00:00:00:00:00:0a", "ipAddress": "192.168.1.x" }]
+    },
+    {
+      "deviceID": "b",
+      "friendlyName": "device 2",
+      "knownInterfaces": [
+        { "macAddress": "00:00:00:00:00:0b", "interfaceType": "Wireless", "band": "2.4GHz" }
+      ],
+      "connections": [{ "macAddress": "00:00:00:00:00:0b", "ipAddress": "192.168.1.x" }]
+    },
+    {
+      "deviceID": "c",
+      "friendlyName": "device 3",
+      "knownInterfaces": [{ "macAddress": "00:00:00:00:00:0c", "interfaceType": "Wired" }],
+      "connections": [{ "macAddress": "00:00:00:00:00:0c", "ipAddress": "192.168.1.x" }]
+    },
+    {
+      "deviceID": "d",
+      "friendlyName": "device 4 (offline)",
+      "knownInterfaces": [{ "macAddress": "00:00:00:00:00:0d", "interfaceType": "Wireless" }],
+      "connections": []
+    }
+  ]
+}

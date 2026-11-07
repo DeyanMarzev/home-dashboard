@@ -9,7 +9,7 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 | 3 | Where will smart meter data come from (energy supplier API, Hildebrand Glowmarkt/Bright, n3rgy, other)? Owner has said it arrives 1 day late. Gas assumed the same. | M7 real data | Built (M7) with a `fake` provider: adding the real one is one file in `apps/collector/src/sources/smart_meters/providers/` (docs/03). |
 | 4 | Energy tariff: unit rates and standing charges for electricity and gas; fixed or time-of-use? | M7 costs | Fixed rates can already be entered on the Energy page (Tariff → Edit rates). If time-of-use, `tariffs` needs time bands. |
 | 5 | Home location for weather and carbon intensity (`HOME_LAT`, `HOME_LON`, postcode outcode). | M3 | Ask the owner to fill `.env`; don't hardcode. |
-| 6 | Router make/model. Does it have an API for connected devices and signal strength? | M9 | Without one, device count comes from ARP scanning and signal per device isn't available. |
+| 6b | Linksys MX4200: a capture of its device list (`docker compose exec netprobe node dist/netprobe/router-capture.js`, names and addresses are redacted) | M9 device list | Counts work already via JNAP `devicelist/GetDevices3` (or ARP without `ROUTER_PASSWORD`); the per-device table (name, band, signal) waits for the real format. |
 | 7 | Smart plugs: brand and which appliances? | Later | Shelly and Tapo have local APIs. |
 | 8 | Boiler probes: fitted yet? 1-Wire IDs for flow and return? | M6 | Collector must run fine with no probes. |
 | 10 | Off-Pi backup destination (Google Drive, OneDrive, Backblaze B2, NAS)? | M10 | Via `rclone`. |
@@ -23,3 +23,4 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 | 12a | Git hosting | GitHub. A public repo is fine; secrets stay in `.env` (git-ignored) and never enter the repo (2026-11-07). |
 | 9 | Cloudflare Access allowed emails | `deyanmarzev@gmail.com` (2026-11-07). |
 | 11 | Water: tariff or volume only? | Volume, and cost where possible: add a `water` rate (p/m³ + standing p/day) on the Energy page's tariff editor; costs show wherever one applies (2026-11-07). |
+| 6 | Router make/model | Linksys MX4200 (Velop mesh). Local JNAP API (`POST http://<router>/JNAP/`, admin password): used for device counts (2026-11-07). |

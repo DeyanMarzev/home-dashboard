@@ -1,0 +1,11 @@
+Connected to a4:c3:f0:11:22:33 (on wlan0)
+	SSID: HomeMesh
+	freq: 5180.0
+	RX: 51234567 bytes (40213 packets)
+	TX: 8123456 bytes (21456 packets)
+	signal: -58 dBm
+	rx bitrate: 200.0 MBit/s VHT-MCS 9 80MHz short GI VHT-NSS 1
+	tx bitrate: 173.3 MBit/s VHT-MCS 8 80MHz short GI VHT-NSS 1
+	bss flags: short-slot-time
+	dtim period: 3
+	beacon int: 100

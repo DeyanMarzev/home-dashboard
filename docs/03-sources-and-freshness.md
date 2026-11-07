@@ -244,4 +244,10 @@ interface CollectorContext {
 
 - `wifi` (netprobe container): Pi's own link (`iw dev wlan0 link`), channel scan (`iw dev wlan0 scan`), device count (`arp-scan --localnet`), ping latency/loss to router and 1.1.1.1. Router API if the owner's router supports one (open question).
 - `speed_test`: daily at 12:00 (Ookla CLI arm64 or equivalent).
+- Implemented (M9): the `netprobe` container (`apps/collector/src/netprobe/`) measures and publishes `{ readings, errors }` to MQTT; the collector's `wifi` and `speed_test` modules (one shared `mqttReadingsCollector`) write the readings and record the errors in `collector_runs`. Both are push sources (`kind: local` with `push_interval`).
+  - Every 5 min (`wifi`): `wifi_rssi` dBm and `wifi_bitrate` Mbit/s on `pi` (skipped on Ethernet); `latency` ms and `packet_loss` % on `router` and `internet` (`ping -c 10` to the gateway and `PING_TARGET`); `devices_connected` (and `devices_wifi` / `devices_wired` from the router) on `network`.
+  - Devices: with `ROUTER_PASSWORD`, the Linksys MX4200's local JNAP API (`devicelist/GetDevices3`: clients with an active connection, excluding the router and mesh nodes); otherwise `arp-scan --localnet`. The JNAP format is taken from community clients; confirm it with `router-capture.js` (docs/08 6b).
+  - Every 30 min (`wifi`): `iw dev wlan0 scan` → per band (`band_2_4ghz`, `band_5ghz`, `band_6ghz`): `neighbour_networks`, `neighbours_on_channel`, and `wifi_channel` (state). Networks with our own SSID (mesh nodes) aren't neighbours.
+  - Daily 12:00 London (`speed_test`): Cloudflare's speed endpoints over HTTPS (latency median of 5, 25 MB down, 10 MB up, each net of one round trip): `download`, `upload` Mbit/s on `internet`, `latency` ms on `speed_test`. No binary or licence needed.
+  - Room sensors' `wifi_rssi` (room_sensors) completes the "signal by room" list.
 - `smart_plugs`: per-appliance power/energy (brand is an open question; Shelly and Tapo have local APIs).

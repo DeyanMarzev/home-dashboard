@@ -14,3 +14,4 @@ export * from './grid.js';
 export * from './heating.js';
 export * from './energy.js';
 export * from './water.js';
+export * from './wifi.js';

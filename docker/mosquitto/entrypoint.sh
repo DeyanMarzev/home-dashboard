@@ -15,6 +15,10 @@ touch "$auth/passwd"
 chmod 0600 "$auth/passwd"
 mosquitto_passwd -b "$auth/passwd" "$MQTT_USERNAME" "$MQTT_PASSWORD"
 mosquitto_passwd -b "$auth/passwd" "$MQTT_SENSOR_USERNAME" "$MQTT_SENSOR_PASSWORD"
+# Optional: the netprobe container's user (M9).
+if [ -n "${MQTT_NETPROBE_USERNAME:-}" ] && [ -n "${MQTT_NETPROBE_PASSWORD:-}" ]; then
+  mosquitto_passwd -b "$auth/passwd" "$MQTT_NETPROBE_USERNAME" "$MQTT_NETPROBE_PASSWORD"
+fi
 
 cat > "$auth/acl" <<ACL
 # collector: reads everything under home/ and broker stats (healthcheck)
@@ -26,6 +30,9 @@ topic read \$SYS/#
 user $MQTT_SENSOR_USERNAME
 topic write home/sensors/#
 ACL
+if [ -n "${MQTT_NETPROBE_USERNAME:-}" ]; then
+  printf '\n# netprobe: may only publish network measurements\nuser %s\ntopic write home/net/#\n' "$MQTT_NETPROBE_USERNAME" >> "$auth/acl"
+fi
 chmod 0600 "$auth/acl"
 chown -R mosquitto:mosquitto "$auth" /mosquitto/data
 

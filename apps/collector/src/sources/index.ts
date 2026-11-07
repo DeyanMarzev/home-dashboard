@@ -6,7 +6,9 @@ import { openMeteo } from './open_meteo/index.js';
 import { piStats } from './pi_stats/index.js';
 import { roomSensors } from './room_sensors/index.js';
 import { smartMeters } from './smart_meters/index.js';
+import { speedTest } from './speed_test/index.js';
 import { thamesWater } from './thames_water/index.js';
+import { wifi } from './wifi/index.js';
 
 /** Every collector module. A source runs when it's here AND enabled in config/sources.yaml. */
 export const collectors: readonly Collector[] = [
@@ -18,4 +20,6 @@ export const collectors: readonly Collector[] = [
   boilerProbes,
   smartMeters,
   thamesWater,
+  wifi,
+  speedTest,
 ];

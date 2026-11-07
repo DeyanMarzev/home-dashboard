@@ -33,10 +33,11 @@
 | `collector` | built from `apps/collector` | Runs every collector + MQTT subscriber | 256 MB |
 | `api` | built from `apps/api` | REST, SSE, serves `apps/web` build | 384 MB |
 | `cloudflared` | `cloudflare/cloudflared:2026.10.7` | Tunnel to Cloudflare | 128 MB |
+| `netprobe` | built from the root `Dockerfile` (target `netprobe`) | Wi-Fi, latency, devices, channel scans, speed test (host network) | 96 MB |
 
 Image tags are pinned in `docker-compose.yml`; all have `linux/arm64` variants (checked 2026-11-07). `api` and `collector` are built from the root `Dockerfile` (targets `api` / `collector`, base `node:24-trixie-slim`).
 
-Total about 1.8 GB, leaving room for the OS, page cache and the owner's existing FastAPI project on a 4 GB Pi.
+Total about 1.9 GB with `netprobe`, leaving room for the OS, page cache and the owner's existing FastAPI project on a 4 GB Pi.
 
 ### Postgres tuning for 4 GB Pi (set via `command:` args or a mounted conf)
 
@@ -67,7 +68,7 @@ Disable `timescaledb-tune` auto-tuning in the image (`NO_TS_TUNE=true`) so these
 |---|---|
 | Pi CPU temperature, throttling, memory, disk | Mount `/sys` and `/proc` read-only into `collector` (`/host/sys`, `/host/proc`) and the SSD + root fs for `statfs`. Throttle flags: `/sys/devices/platform/soc/soc:firmware/get_throttled` (verify on the Pi; fallback: a host cron running `vcgencmd get_throttled` that publishes to MQTT). |
 | DS18B20 boiler pipe probes (1-Wire on GPIO4) | Mount `/sys/bus/w1/devices` read-only. Requires `dtoverlay=w1-gpio` on the host. |
-| Wi-Fi scans, ARP scans, ping | A separate small container `netprobe` with `network_mode: host` and `cap_add: [NET_ADMIN, NET_RAW]`, publishing results to MQTT. Added in a later milestone. |
+| Wi-Fi scans, ARP scans, ping | A separate small container `netprobe` with `network_mode: host` and `cap_add: [NET_ADMIN, NET_RAW]`, publishing results to MQTT (`home/net/wifi`, `home/net/speed_test`) as its own MQTT user. Runs as root inside the container (the capabilities apply to root). Code: `apps/collector/src/netprobe/`. |
 
 ## Public access
 

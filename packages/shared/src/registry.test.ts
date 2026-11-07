@@ -120,6 +120,16 @@ describe('parseRegistry', () => {
     );
   });
 
+  it('lets a non-sensor source push (e.g. the netprobe container), but not poll as well', () => {
+    const [pushed] = parseRegistry({
+      sources: { x: { name: 'X', kind: 'local', push_interval: '5m' } },
+    }).sources;
+    expect(pushed).toMatchObject({ poll: null, pushIntervalSeconds: 300 });
+    expect(
+      problemsOf({ sources: { x: { name: 'X', kind: 'local', push_interval: '5m', poll: '5m' } } }),
+    ).toMatch(/not both/);
+  });
+
   it('rejects a cron poll on a live source (no fixed cadence for the Live window)', () => {
     expect(
       problemsOf({ sources: { x: { name: 'X', kind: 'api', poll: 'cron: */5 * * * *' } } }),
