@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "pnpm --parallel --filter \"./apps/*\" dev",
     "dev:services": "docker compose -f docker-compose.dev.yml up -d",
+    "fake-sensor": "pnpm --filter @home/collector fake-sensor",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "typecheck": "pnpm -r typecheck",

@@ -1,0 +1,58 @@
+{
+  "data": [
+    {
+      "regionid": 13,
+      "dnoregion": "UKPN London",
+      "shortname": "London",
+      "postcode": "SW1A",
+      "data": [
+        {
+          "from": "2026-11-07T11:30Z",
+          "to": "2026-11-07T12:00Z",
+          "intensity": {
+            "forecast": 261,
+            "index": "very high"
+          },
+          "generationmix": [
+            {
+              "fuel": "biomass",
+              "perc": 6.1
+            },
+            {
+              "fuel": "coal",
+              "perc": 0
+            },
+            {
+              "fuel": "imports",
+              "perc": 7.3
+            },
+            {
+              "fuel": "gas",
+              "perc": 62.9
+            },
+            {
+              "fuel": "nuclear",
+              "perc": 9.8
+            },
+            {
+              "fuel": "other",
+              "perc": 0
+            },
+            {
+              "fuel": "hydro",
+              "perc": 0.1
+            },
+            {
+              "fuel": "solar",
+              "perc": 12.5
+            },
+            {
+              "fuel": "wind",
+              "perc": 1.4
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

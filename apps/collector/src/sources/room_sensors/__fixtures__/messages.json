@@ -1,0 +1,22 @@
+[
+  {
+    "note": "Full JSON payload as specified in docs/03",
+    "topic": "home/sensors/living_room/temperature",
+    "payload": "{\"value\": 20.6, \"ts\": \"2026-11-06T13:41:00Z\", \"rssi\": -48}"
+  },
+  {
+    "note": "No ts: stored at receive time",
+    "topic": "home/sensors/kitchen/co2",
+    "payload": "{\"value\": 780}"
+  },
+  {
+    "note": "Bare number (common ESP32 firmware style)",
+    "topic": "home/sensors/bedroom/humidity",
+    "payload": "54.2"
+  },
+  {
+    "note": "Offset timestamp",
+    "topic": "home/sensors/bedroom/pressure",
+    "payload": "{\"value\": 1012.8, \"ts\": \"2026-11-06T13:41:00+00:00\", \"rssi\": -67}"
+  }
+]

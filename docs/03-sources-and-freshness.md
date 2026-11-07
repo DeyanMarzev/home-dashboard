@@ -126,9 +126,23 @@ interface Freshness {
 
 A panel or tile built from several series shows the **worst** state: `late` > `delayed` > `live`. For two delayed series with different `dataTo`, show the oldest. Expose `combineFreshness(list)` from the shared package.
 
+### Which series count
+
+A source's freshness is that of its newest series (the one whose data reaches furthest). **Metrics named `forecast_*` never count**: they are predictions with future timestamps and would make a dead source look Live (`packages/db/src/latest.ts`). Collectors must name forecasts that way.
+
 ### Late → events
 
-The API (or a small job in `collector`) checks freshness every 5 minutes. When a source goes `late`, insert an `events` row (`kind: 'source_late'`, level `warning`), and resolve it when it recovers. No duplicate open events per source.
+The `collector` checks freshness every 5 minutes (first check 5 minutes after startup; `apps/collector/src/late-check.ts`). When a source goes `late`, it inserts an `events` row (`kind: 'source_late'`, level `warning`, message e.g. "Room sensors: no data since 13:10", `data` = the freshness object), and resolves it when the source recovers. No duplicate open events per source (unique index). A source that never reported counts as late ("no data yet"). Disabled sources never stay late. Inserting or resolving an event sends `NOTIFY events, '<id>'`.
+
+## The collector process
+
+`apps/collector` runs every enabled source that has a module in `src/sources/index.ts`:
+
+- **Pull sources** (`PullLoop`): interval sources run immediately at startup (2 s apart), then at a fixed rate; cron sources at the next match in Europe/London. Each run gets a time limit (its poll interval, 30 s–5 min; 10 min for cron) and an `AbortSignal`, and is logged to `collector_runs` (start, finish, ok, rows, error ≤ 500 chars).
+- **Retries**: after a failure the next attempt waits min(poll, 5 min), doubling each consecutive failure, capped at poll × 4 (1 day for cron). Source-specific limits (e.g. Thames Water's 3 logins a day) belong in the source's module.
+- **Push sources** (MQTT): one summary row per minute in `collector_runs` (rows written, last error), not one per write.
+- Errors anywhere are caught and logged; one source failing never affects another. `collector_runs` older than 30 days are pruned every 6 h.
+- An enabled source without a module, or a module not in the registry, is logged as a warning at startup.
 
 ## Adding a new source (checklist)
 
@@ -155,6 +169,12 @@ interface CollectorContext {
 ### room_sensors (push, MQTT): live
 
 - Topic `home/sensors/<entity>/<metric>`, payload JSON `{ "value": 20.6, "ts": "2026-11-06T13:41:00Z", "rssi": -48 }`. `ts` optional (default: receive time). `rssi` becomes a `wifi_rssi` series for that entity (feeds the Wi-Fi "signal by room" panel).
+- Also accepted: a bare number payload (`20.6`), common in ESP32 firmware.
+- Units are fixed per metric: `temperature` °C, `humidity` %, `co2` ppm, `pressure` hPa. Unknown metrics are rejected.
+- Rejected and logged (once per 5 s per reason), never stored: bad topics, non-snake_case entities, non-JSON, `ts` without a zone, `ts` more than 5 min in the future or 7 days in the past (a sensor that never got NTP time), `rssi` outside −120…0.
+- Clients connect with MQTT 3.1.1, the most widely supported version; Mosquitto accepts 3.1.1 and 5. Sensors use `MQTT_SENSOR_USERNAME` (publish-only on `home/sensors/#`).
+- Writes are batched every 5 s. If the database is down, up to 20,000 readings are kept and retried; beyond that the oldest are dropped and the drop is reported in `collector_runs`.
+- **Fake sensor** (`apps/collector/src/tools/fake-sensor.ts`, built into the collector image rather than `scripts/` so it can run on the Pi): publishes realistic values for `living_room`, `kitchen`, `bedroom` every 30 s through the same topic contract. Local: `pnpm fake-sensor`. Pi: `docker compose --profile fake up -d fake-sensor`.
 - Entities from the mockup: `living_room`, `kitchen`, `bedroom`. Metrics: `temperature`, `humidity`, `co2`, `pressure`.
 - **Open question:** what hardware the existing sensors are and how they report today. See `docs/08`. Build the MQTT path; if the existing sensors can't publish MQTT, a bridge collector is added later.
 
@@ -163,6 +183,8 @@ interface CollectorContext {
 - CPU temperature (`/host/sys/class/thermal/thermal_zone0/temp`, millidegrees).
 - Throttle flags (`get_throttled` bitmask): store as `state` series `throttle_flags`; the API decodes bits: 0 under-voltage now, 1 frequency capped now, 2 throttled now, 3 soft temp limit now, 16–19 the same "has occurred since boot".
 - Memory (`/host/proc/meminfo`), load (`/host/proc/loadavg`), uptime, disk usage for `/` and `/mnt/ssd` (`statfs`), database size (`pg_database_size`).
+- Series (entity `pi` unless noted): `cpu_temperature` °C · `throttle_flags` (state, `flags`) · `memory_total`, `memory_used` MB (used = total − available) · `load_1m`, `load_5m`, `load_15m` · `uptime` s · `disk_used`, `disk_free` GB for entities `sd_card` and `ssd` (free = available to non-root, as `df` shows) · `database_size` MB.
+- The thermal and throttle files only exist on a Pi; if missing, those two metrics are skipped with one warning. The fixture in `__fixtures__/` is representative; replace it with a capture from the Pi.
 
 ### boiler_probes (local): live
 
@@ -187,11 +209,13 @@ interface CollectorContext {
 - `https://api.open-meteo.com/v1/forecast` with `latitude`, `longitude` from env (`HOME_LAT`, `HOME_LON`), `current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m`, `hourly=temperature_2m` for the next 24 h.
 - No API key. Entity `outdoor`.
 - Store forecast separately (metric `forecast_temperature`) so it's never confused with measurements.
+- Requested with `timeformat=unixtime` (no time zone ambiguity) and `wind_speed_unit=kmh`. Series: `temperature` °C, `humidity` %, `precipitation` mm, `weather_code` (state, `wmo`), `wind_speed` km/h, `forecast_temperature` °C (24 hourly points). The parser fails if Open-Meteo answers in other units.
 
 ### carbon_intensity (NESO Carbon Intensity API): live
 
 - Regional current value and 48 h forecast by postcode outcode (env `HOME_POSTCODE_OUTCODE`).
-- `https://api.carbonintensity.org.uk/regional/postcode/{outcode}` (current) and `/regional/intensity/{from}/fw48h/postcode/{outcode}` (forecast). Verify paths against the current docs.
+- `https://api.carbonintensity.org.uk/regional/postcode/{outcode}` (current) and `/regional/intensity/{from}/fw48h/postcode/{outcode}` (forecast). Verified 2026-11-07: current returns `data` as a list of one region, forecast returns the region object; timestamps like `2026-11-07T11:30Z`.
+- Series: `intensity` gCO₂/kWh (entity `grid`, ts = start of the current half-hour), `intensity_index` (state 0 very low … 4 very high), `generation_share` % per fuel (entity = fuel: `gas`, `wind`, `solar`, …), `forecast_intensity` gCO₂/kWh for the next 48 h. Regional values are forecasts by nature; NESO publishes no regional actuals.
 - Also store generation mix if cheap. Used for "greenest window" and for per-half-hour emissions of the household's electricity.
 
 ### smart_meters: 1 day behind

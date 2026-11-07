@@ -1,0 +1,13 @@
+{
+  "note": "Representative Raspberry Pi 4 (4 GB) host files, in the kernel's exact formats. Replace with a capture from the owner's Pi once deployed.",
+  "thermal": "61834\n",
+  "throttled": "50005\n",
+  "meminfo": "MemTotal:        3884136 kB\nMemFree:          412220 kB\nMemAvailable:    2134508 kB\nBuffers:           88124 kB\nCached:          1544932 kB\nSwapCached:            0 kB\nActive:          1702512 kB\nInactive:        1288844 kB\nSwapTotal:        204796 kB\nSwapFree:         204796 kB\n",
+  "loadavg": "0.42 0.37 0.31 2/412 18233\n",
+  "uptime": "864213.57 3384721.20\n",
+  "disks": [
+    { "entity": "sd_card", "bsize": 4096, "blocks": 7586304, "bfree": 5207880, "bavail": 4893256 },
+    { "entity": "ssd", "bsize": 4096, "blocks": 61049646, "bfree": 59820431, "bavail": 56709874 }
+  ],
+  "databaseBytes": 48332083
+}
