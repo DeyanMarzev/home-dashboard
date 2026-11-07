@@ -101,10 +101,54 @@ BACKUP_RCLONE_REMOTE=      # e.g. gdrive:home-dashboard-backups (optional)
 
 ## 5. Cloudflare (DNS is already on Cloudflare)
 
-1. Zero Trust → Networks → Tunnels → Create tunnel (cloudflared). Copy the token into `CLOUDFLARE_TUNNEL_TOKEN`.
-2. In the tunnel, add a public hostname: `home.deyan.uk` → service `http://api:3000`.
-3. Zero Trust → Access → Applications → Add self-hosted app for `home.deyan.uk`. Policy: Allow, Include → Emails → `deyanmarzev@gmail.com` (add more people here later). Copy the **Application Audience (AUD) tag** into `CF_ACCESS_AUD` and the team name into `CF_ACCESS_TEAM`.
-4. For the Android app later: Access → Service credentials → create a service token, and add a policy rule allowing it (Service Auth).
+Do these in order: the Access application goes in **before** the tunnel's public hostname, so `home.deyan.uk` is never reachable without a login, not even for a minute. (The API would still answer 401 without a valid Access token, but don't rely on that alone.)
+
+All of this is in the Cloudflare dashboard → **Zero Trust**. Menu names move around from time to time; search the Zero Trust dashboard for the bold names if a path below doesn't match.
+
+### 5.1 Team name and login method
+
+1. First time in Zero Trust: pick a **team name** and the **Free** plan (free for up to 50 users; Cloudflare may ask for a payment method even on Free).
+2. Find the team name later under **Settings** → team domain `<team>.cloudflareaccess.com`. Put `<team>` in `.env` as `CF_ACCESS_TEAM` (the full domain also works).
+3. Login method: **One-time PIN** is on by default (Cloudflare emails you a code). That's enough. Adding Google as an identity provider is optional.
+
+### 5.2 Access application (the login wall)
+
+1. **Access → Applications → Add an application → Self-hosted.**
+2. Name `Home dashboard`; public hostname: subdomain `home`, domain `deyan.uk`, no path.
+3. Session duration: your choice (e.g. 1 month, so the phone doesn't keep asking).
+4. Policy: name `Owner`, action **Allow**, Include → **Emails** → `deyanmarzev@gmail.com`.
+5. Save. Open the application again and copy its **Application Audience (AUD) Tag** into `.env` as `CF_ACCESS_AUD`.
+
+### 5.3 Tunnel
+
+1. **Networks → Tunnels → Create a tunnel → Cloudflared**, name it `home-pi`.
+2. On the install screen choose **Docker**. Don't run the command it shows; just copy the long token after `--token` into `.env` as `CLOUDFLARE_TUNNEL_TOKEN`. (`docker compose` runs `cloudflared` for you.)
+3. Next → **Public hostname**: subdomain `home`, domain `deyan.uk`, service type **HTTP**, URL `api:3000`. Save. If Cloudflare says a DNS record for `home` already exists, delete that record in the DNS tab first.
+
+### 5.4 Check it (after `docker compose up -d --build`, §6)
+
+```bash
+docker compose ps                                  # all services "running"/"healthy"
+curl -s  http://127.0.0.1:3000/api/health          # {"ok":true,...}: health is open on the Pi
+curl -si http://127.0.0.1:3000/ | head -1          # HTTP/1.1 401: no Access token, no page
+```
+
+- In the Zero Trust dashboard the tunnel shows **Healthy**.
+- In a private browser window, `https://home.deyan.uk` shows the Cloudflare login. Enter your email and the emailed code, then you see **"Home dashboard is running"**.
+- From outside, every path (including `/api/health`) goes through the login first. Only the Pi itself can reach `/api/health` without one.
+
+Troubleshooting:
+
+| You see | Likely cause |
+|---|---|
+| Browser: `{"error":{"code":"UNAUTHORIZED"...}}` after logging in | `CF_ACCESS_AUD` or `CF_ACCESS_TEAM` doesn't match the Access app. `docker compose logs api \| grep rejected` shows the reason (`ERR_JWT_CLAIM_VALIDATION_FAILED` = wrong AUD or team). Fix `.env`, then `docker compose up -d api`. |
+| Browser: `SERVICE_UNAVAILABLE` | The Pi can't fetch Access's signing keys from `https://<team>.cloudflareaccess.com`. Check the Pi's internet/DNS. |
+| Cloudflare error 502 / 1033 | Tunnel is up but `api` isn't answering (`docker compose ps`, `docker compose logs api`), or the hostname's service URL isn't `http://api:3000`. |
+| `api` exits with "Invalid environment" | The message lists exactly which `.env` values are missing or wrong. |
+
+### 5.5 Service token (for the Android app, M11)
+
+**Access → Service credentials → Service Tokens → Create.** Then in the `Home dashboard` application add a second policy: action **Service Auth**, Include → **Service Token** → the new token. Nothing changes in the API.
 
 ## 6. Start
 
