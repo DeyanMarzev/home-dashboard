@@ -7,6 +7,7 @@ import {
   ReadingsResponseSchema,
   SourcesResponseSchema,
   TariffsResponseSchema,
+  WaterSummarySchema,
   type Bucket,
   type EnergySummary,
   type EventItem,
@@ -17,6 +18,7 @@ import {
   type SourceInfo,
   type Tariff,
   type TariffInput,
+  type WaterSummary,
 } from '@home/shared';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
@@ -175,5 +177,16 @@ export function useSaveTariffs() {
       queryClient.setQueryData(['tariffs'], data);
       await queryClient.invalidateQueries({ queryKey: ['energy'] });
     },
+  });
+}
+
+/** Water summary for the `days` ending the latest covered day (default 28). */
+export function useWaterSummary(days?: number, enabled = true) {
+  const q = days ? `?days=${days}` : '';
+  return useQuery({
+    queryKey: ['water', q],
+    enabled,
+    queryFn: () => getJson<WaterSummary>(`/api/summary/water${q}`, WaterSummarySchema),
+    refetchInterval: 15 * MINUTE,
   });
 }

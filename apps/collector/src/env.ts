@@ -35,6 +35,13 @@ const EnvSchema = z.object({
   // Smart meters: which MeterProvider fetches the data (docs/08 question 3).
   METER_PROVIDER: z.preprocess(blankToUndefined, z.string().trim().default('fake')),
 
+  // Thames Water: which WaterProvider fetches the data (`fake` until the real one is built).
+  WATER_PROVIDER: z.preprocess(blankToUndefined, z.string().trim().default('fake')),
+  THAMES_EMAIL: optionalString,
+  THAMES_PASSWORD: optionalString,
+  THAMES_ACCOUNT_NUMBER: optionalString,
+  THAMES_METER_ID: optionalString,
+
   // DS18B20 boiler pipe probes (1-Wire ids like 28-0123456789ab). Unset until fitted.
   BOILER_FLOW_W1_ID: optionalString,
   BOILER_RETURN_W1_ID: optionalString,

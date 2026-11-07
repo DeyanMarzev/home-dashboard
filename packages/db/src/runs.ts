@@ -59,3 +59,15 @@ function truncateError(error: string | null | undefined): string | null {
   if (!error) return null;
   return error.length > MAX_ERROR_LENGTH ? `${error.slice(0, MAX_ERROR_LENGTH - 1)}…` : error;
 }
+
+/**
+ * Finished runs since `since` that actually did work (failed, or wrote rows): for sources that
+ * must limit their attempts, e.g. Thames Water's 3 logins a day. Skipped runs don't count.
+ */
+export async function attemptsSince(sql: Sql, sourceId: string, since: Date): Promise<number> {
+  const [row] = await sql<{ n: number }[]>`
+    select count(*)::int as n from collector_runs
+    where source_id = ${sourceId} and started_at >= ${since.toISOString()}::timestamptz
+      and finished_at is not null and (ok = false or rows_written > 0)`;
+  return row?.n ?? 0;
+}

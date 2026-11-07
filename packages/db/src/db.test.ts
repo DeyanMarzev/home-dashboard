@@ -9,7 +9,7 @@ import { latestBySource } from './latest.js';
 import { migrate, MigrationError } from './migrate.js';
 import { createReadingWriter, lastDataTo, READINGS_CHANNEL } from './readings.js';
 import { loadRegistryFile } from './registry-file.js';
-import { finishRun, pruneRuns, recordRun, startRun } from './runs.js';
+import { attemptsSince, finishRun, pruneRuns, recordRun, startRun } from './runs.js';
 import { syncSources } from './sources.js';
 import { SOURCES_FILE, testBackends, type TestDatabase } from './test/database.js';
 
@@ -366,6 +366,19 @@ describe.each(testBackends)('database ($name)', ({ start }) => {
       expect(run).toMatchObject({ ok: false, rows_written: 0 });
       expect(Number(run?.ms)).toBe(2000);
       expect(run?.error.length).toBe(500); // truncated
+    });
+
+    it('counts attempts that did work, not skipped runs', async () => {
+      const since = new Date('2026-11-07T00:00:00Z');
+      const run = async (ok: boolean, rows: number) => {
+        const id = await startRun(sql, 'thames_water', new Date('2026-11-07T06:00:00Z'));
+        await finishRun(sql, id, { ok, rowsWritten: rows, error: ok ? null : 'login failed' });
+      };
+      await run(false, 0); // failed login
+      await run(true, 0); // skipped: limit reached
+      await run(true, 168); // success
+      expect(await attemptsSince(sql, 'thames_water', since)).toBe(2);
+      expect(await attemptsSince(sql, 'thames_water', new Date('2026-11-08T00:00:00Z'))).toBe(0);
     });
 
     it('records a summarised run in one go and prunes old history', async () => {

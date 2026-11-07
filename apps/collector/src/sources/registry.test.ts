@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { collectors } from './index.js';
 
 /** Registry sources whose collector belongs to a later milestone (docs/07). */
-const NOT_BUILT_YET = ['thames_water'];
+const NOT_BUILT_YET: string[] = [];
 
 describe('collector registration', () => {
   it('has a collector for every source in config/sources.yaml (except later milestones)', async () => {
