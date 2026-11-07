@@ -58,7 +58,16 @@ sources:
     grace: 1d
 ```
 
-Durations use the format `30s`, `15m`, `6h`, `1d`. `poll` may also be a cron string (Europe/London).
+Durations use the format `30s`, `15m`, `6h`, `1d` (`1d` = exactly 24 h). `poll` may also be a cron string (Europe/London).
+
+Validation (`packages/shared/src/registry.ts`, every problem reported at once; api and collector refuse to start on an invalid registry):
+
+- Keys allowed per source: `name`, `kind`, `poll`, `push_interval`, `expected_delay` (default `0s`), `grace`, `enabled` (default `true`), `mqtt_topic`, `options`. Unknown keys are errors, so typos are caught.
+- `options`: free-form, non-secret settings for the source's collector (secrets go in `.env`).
+- `kind: sensor` (push) needs `push_interval` and no `poll`; every other kind needs `poll`.
+- A live-capable source (`expected_delay` ≤ 15m) can't use a cron `poll`: its Live window comes from the poll interval.
+- Removing a source from the file disables it in the database; its history stays.
+- Sources whose collector isn't built yet are listed with `enabled: false`.
 
 ## Freshness: one rule for every source
 
@@ -92,10 +101,11 @@ type FreshnessState = 'live' | 'delayed' | 'late';
 
 interface Freshness {
   state: FreshnessState;
-  dataTo: string;          // ISO timestamp, UTC
-  lagSeconds: number;
-  daysBehind: number;      // whole calendar days between dataTo and now, in Europe/London
-  label: string;           // ready to render, see below
+  dataTo: string | null;     // ISO timestamp, UTC; null = never reported
+  lagSeconds: number | null;
+  daysBehind: number | null; // whole calendar days between the last day covered and today, in Europe/London
+  label: string;             // ready to render, see below
+  compactLabel: string;      // for tiles
 }
 ```
 
@@ -106,7 +116,11 @@ interface Freshness {
 | live | `Live` | Live |
 | delayed | `Data to {d MMM} · {n} day(s) behind` | Data to 5 Nov · 1 day behind |
 | delayed (compact, for tiles) | `{n} day(s) behind` | 3 days behind |
-| late | `No data since {HH:mm}` if today, else `No data since {d MMM}` | No data since 13:10 |
+| delayed, already covers today | `Data to {d MMM} · up to date` (compact: `Up to date`) | Data to 6 Nov · up to date |
+| late | `No data since {HH:mm}` if today, else `No data since {d MMM}` (same compact) | No data since 13:10 |
+| never reported | `No data yet` (state `late`) | No data yet |
+
+"The last day covered" is the London date of `dataTo` for gauges, and of `dataTo` minus 1 ms for `interval_total` series, so half-hourly data ending at 00:00 on 6 Nov reads "Data to 5 Nov". Month names are fixed English abbreviations (`Sep`, not ICU's `Sept`). The implementation (`freshness(policy, latest, now)`, `combineFreshness`, `freshnessPolicy(source)`) is in `packages/shared/src/freshness.ts` and `registry.ts`.
 
 ### Combining
 

@@ -1,3 +1,4 @@
+import { pingDb, type Sql } from '@home/db';
 import Fastify, { type FastifyInstance } from 'fastify';
 import type { JWTVerifyGetKey } from 'jose';
 import { registerAccessAuth } from './auth.js';
@@ -6,6 +7,8 @@ import { registerErrorHandler } from './errors.js';
 import { registerWebApp } from './web-app.js';
 
 export interface ServerDeps {
+  /** Database pool; without one, /api/health reports the database as down. */
+  db?: Sql;
   /** Override Cloudflare's signing keys (tests). */
   accessKeys?: JWTVerifyGetKey;
 }
@@ -32,8 +35,11 @@ export async function buildServer(config: Config, deps: ServerDeps = {}): Promis
   registerAccessAuth(app, config.auth, deps.accessKeys);
 
   // Unauthenticated (Docker healthcheck). Returns no data.
-  // The database check is added with the DB in M2.
-  app.get('/api/health', { logLevel: 'warn' }, () => ({ ok: true, version: config.version }));
+  app.get('/api/health', { logLevel: 'warn' }, async () => ({
+    ok: true,
+    db: deps.db && (await pingDb(deps.db)) ? 'up' : 'down',
+    version: config.version,
+  }));
 
   await registerWebApp(app, config.publicDir);
 

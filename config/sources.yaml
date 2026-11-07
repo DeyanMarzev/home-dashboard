@@ -1,0 +1,69 @@
+# The source registry: the source of truth for every data source (docs/03-sources-and-freshness.md).
+# Validated at startup by api and collector (packages/shared/src/registry.ts) and mirrored into
+# the `sources` table. Source ids are stable forever. Removing a source here disables it
+# (its history stays in the database).
+#
+# Fields: name, kind (sensor | api | scrape | local | derived), poll (duration or "cron: <expr>",
+# Europe/London) for pull sources, push_interval for push sources (kind: sensor),
+# expected_delay (default 0s), grace (default 12h for delayed sources), enabled (default true),
+# mqtt_topic, options (non-secret settings for the collector; secrets go in .env).
+# Durations: 30s, 15m, 6h, 1d.
+
+sources:
+  room_sensors:
+    name: Room sensors
+    kind: sensor # pushed over MQTT
+    expected_delay: 0s
+    push_interval: 30s # how often sensors normally report (sets the Live window)
+    mqtt_topic: home/sensors/+/+ # home/sensors/<entity>/<metric>
+
+  pi_stats:
+    name: Raspberry Pi
+    kind: local
+    poll: 1m
+    expected_delay: 0s
+
+  open_meteo:
+    name: Open-Meteo weather
+    kind: api
+    poll: 15m
+    expected_delay: 0s
+
+  carbon_intensity:
+    name: Grid carbon intensity
+    kind: api
+    poll: 30m
+    expected_delay: 0s
+
+  # Not built yet: enabled in the milestone that adds the collector (docs/07-build-plan.md).
+  # Disabled sources don't show as Late or raise events.
+
+  boiler_probes: # M6
+    name: Boiler pipe probes
+    kind: local
+    poll: 30s
+    expected_delay: 0s
+    enabled: false
+
+  nest: # M6
+    name: Nest thermostat
+    kind: api
+    poll: 2m
+    expected_delay: 0s
+    enabled: false
+
+  smart_meters: # M7
+    name: Smart meters
+    kind: api
+    poll: 6h
+    expected_delay: 1d # readings arrive the next day
+    grace: 12h
+    enabled: false
+
+  thames_water: # M8
+    name: Thames Water
+    kind: scrape
+    poll: 'cron: 0 6 * * *' # daily 06:00 Europe/London
+    expected_delay: 3d
+    grace: 1d
+    enabled: false

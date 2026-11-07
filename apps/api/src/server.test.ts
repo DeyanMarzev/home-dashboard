@@ -61,7 +61,7 @@ describe('with Cloudflare Access enabled', () => {
   it('serves /api/health without a token, with no data in it', async () => {
     const res = await get('/api/health');
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toEqual({ ok: true, version: '1.2.3' });
+    expect(res.json()).toEqual({ ok: true, db: 'down', version: '1.2.3' });
   });
 
   it('serves HEAD /api/health without a token', async () => {

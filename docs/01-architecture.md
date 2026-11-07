@@ -110,7 +110,8 @@ home-dashboard/
   db/
     migrations/             # 001_init.sql, 002_...
   packages/
-    shared/                 # types, zod, freshness, units
+    shared/                 # types, zod, freshness, units (browser-safe)
+    db/                     # postgres.js client, migration runner, registry sync, writeReadings
   apps/
     collector/
       src/sources/<source_id>/  # one folder per source: index.ts, parse.ts, __fixtures__/

@@ -106,6 +106,7 @@ services:
       BOILER_FLOW_W1_ID: ${BOILER_FLOW_W1_ID:-}
       BOILER_RETURN_W1_ID: ${BOILER_RETURN_W1_ID:-}
     volumes:
+      - ./config:/app/config:ro # source registry; edit + `docker compose restart api collector`
       # Pi health (pi_stats) and 1-Wire boiler probes (/host/sys/bus/w1/devices). Read-only.
       - /sys:/host/sys:ro
       - /proc:/host/proc:ro
@@ -141,6 +142,8 @@ services:
       CF_ACCESS_TEAM: ${CF_ACCESS_TEAM:?set CF_ACCESS_TEAM in .env (docs/06 §5.1)}
       CF_ACCESS_AUD: ${CF_ACCESS_AUD:?set CF_ACCESS_AUD in .env (docs/06 §5.2)}
       AUTH_DISABLED: ${AUTH_DISABLED:-false}
+    volumes:
+      - ./config:/app/config:ro
     ports:
       - '127.0.0.1:3000:3000' # local debugging on the Pi only; never port 8000 (FastAPI project)
     depends_on:
