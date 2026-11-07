@@ -1,0 +1,5 @@
+dist/
+coverage/
+pnpm-lock.yaml
+# Docs are written by hand; don't reflow them.
+*.md

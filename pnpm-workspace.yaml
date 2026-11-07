@@ -1,0 +1,9 @@
+packages:
+  - packages/*
+  - apps/*
+
+# Needed by `pnpm deploy` (Dockerfile) to copy built workspace packages into the image.
+injectWorkspacePackages: true
+
+onlyBuiltDependencies:
+  - esbuild
