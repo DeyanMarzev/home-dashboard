@@ -32,6 +32,9 @@ const EnvSchema = z.object({
   NEST_CLIENT_SECRET: optionalString,
   NEST_REFRESH_TOKEN: optionalString,
 
+  // Smart meters: which MeterProvider fetches the data (docs/08 question 3).
+  METER_PROVIDER: z.preprocess(blankToUndefined, z.string().trim().default('fake')),
+
   // DS18B20 boiler pipe probes (1-Wire ids like 28-0123456789ab). Unset until fitted.
   BOILER_FLOW_W1_ID: optionalString,
   BOILER_RETURN_W1_ID: optionalString,

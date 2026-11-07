@@ -1,21 +1,26 @@
 import {
   EventsResponseSchema,
+  EnergySummarySchema,
   HealthSchema,
   HeatingSummarySchema,
   LatestResponseSchema,
   ReadingsResponseSchema,
   SourcesResponseSchema,
+  TariffsResponseSchema,
   type Bucket,
+  type EnergySummary,
   type EventItem,
   type FreshnessPolicy,
   type HeatingSummary,
   type LatestResponse,
   type ReadingsResponse,
   type SourceInfo,
+  type Tariff,
+  type TariffInput,
 } from '@home/shared';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { getJson } from './client.js';
+import { getJson, putJson } from './client.js';
 import { useLive } from './live-context.js';
 import { RANGE_SECONDS, type Range } from '../lib/range.js';
 
@@ -67,22 +72,32 @@ export interface ReadingsOptions {
   agg?: 'avg' | 'sum' | 'min' | 'max';
   /** A window relative to now instead of the page range, e.g. the next 24 h of forecasts. */
   window?: { fromOffsetSeconds: number; toOffsetSeconds: number; key: string };
+  /** A fixed window instead (ISO instants), e.g. one London day. */
+  between?: { from: string; to: string };
 }
 
 /** Readings for the page's range (from = now - range), refreshed every 5 minutes. */
 export function useReadings(ids: readonly number[], range: Range, options: ReadingsOptions = {}) {
   const sorted = [...ids];
   return useQuery({
-    queryKey: ['readings', sorted, options.window?.key ?? range, options.bucket, options.agg],
+    queryKey: [
+      'readings',
+      sorted,
+      options.between ?? options.window?.key ?? range,
+      options.bucket,
+      options.agg,
+    ],
     enabled: ids.length > 0,
     placeholderData: keepPreviousData,
     refetchInterval: 5 * MINUTE,
     queryFn: () => {
       const now = Date.now();
-      const from = new Date(
-        now + (options.window?.fromOffsetSeconds ?? -RANGE_SECONDS[range]) * 1000,
-      );
-      const to = new Date(now + (options.window?.toOffsetSeconds ?? 0) * 1000);
+      const from = options.between
+        ? new Date(options.between.from)
+        : new Date(now + (options.window?.fromOffsetSeconds ?? -RANGE_SECONDS[range]) * 1000);
+      const to = options.between
+        ? new Date(options.between.to)
+        : new Date(now + (options.window?.toOffsetSeconds ?? 0) * 1000);
       const q = new URLSearchParams({
         series: sorted.join(','),
         from: from.toISOString(),
@@ -122,5 +137,43 @@ export function useHeatingSummary(date?: string) {
         HeatingSummarySchema,
       ),
     refetchInterval: MINUTE,
+  });
+}
+
+/** Energy summary for London dates [from, to]; without them, the 14 days ending the latest day. */
+export function useEnergySummary(
+  range?: { from: string; to: string } | { days: number },
+  enabled = true,
+) {
+  const q = !range
+    ? ''
+    : 'days' in range
+      ? `?days=${range.days}`
+      : `?from=${range.from}&to=${range.to}`;
+  return useQuery({
+    queryKey: ['energy', q],
+    enabled,
+    queryFn: () => getJson<EnergySummary>(`/api/summary/energy${q}`, EnergySummarySchema),
+    refetchInterval: 5 * MINUTE,
+  });
+}
+
+export function useTariffs() {
+  return useQuery({
+    queryKey: ['tariffs'],
+    queryFn: () => getJson<{ items: Tariff[] }>('/api/tariffs', TariffsResponseSchema),
+  });
+}
+
+/** Replaces every tariff row (PUT /api/tariffs); costs are recomputed on the next fetch. */
+export function useSaveTariffs() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (items: TariffInput[]) =>
+      putJson<{ items: Tariff[] }>('/api/tariffs', { items }, TariffsResponseSchema),
+    onSuccess: async (data) => {
+      queryClient.setQueryData(['tariffs'], data);
+      await queryClient.invalidateQueries({ queryKey: ['energy'] });
+    },
   });
 }

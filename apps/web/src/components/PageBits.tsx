@@ -25,7 +25,7 @@ export function PageFreshness({ freshness: f }: { freshness: Freshness | null })
  * The one-line key under Overview/Energy headers explaining Live vs Delayed. Its examples are
  * computed with the real freshness rules from the registry's delayed sources, not typed in.
  */
-export function FreshnessKey() {
+export function FreshnessKey({ delayedNote }: { delayedNote?: string } = {}) {
   const now = useNow();
   const { data } = useSources();
   const delayed = (data ?? [])
@@ -58,7 +58,8 @@ export function FreshnessKey() {
       {delayedExample && (
         <span>
           <FreshnessBadge freshness={delayedExample} compact />
-          supplier data that arrives later: {delayed.map((s) => `${s.name} ${days(s)}`).join(', ')}
+          {delayedNote ??
+            `supplier data that arrives later: ${delayed.map((s) => `${s.name} ${days(s)}`).join(', ')}`}
         </span>
       )}
     </p>

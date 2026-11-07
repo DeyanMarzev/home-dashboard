@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router';
 import { Layout } from './components/Layout.js';
+import { EnergyPage } from './pages/Energy.js';
 import { HeatingPage } from './pages/Heating.js';
 import { NotYetPage } from './pages/NotYet.js';
 import { OverviewPage } from './pages/Overview.js';
@@ -12,10 +13,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <OverviewPage /> },
       { path: '/rooms', element: <RoomsPage /> },
-      {
-        path: '/energy',
-        element: <NotYetPage title="Energy" sourceIds={['smart_meters']} milestone="M7" />,
-      },
+      { path: '/energy', element: <EnergyPage /> },
       { path: '/heating', element: <HeatingPage /> },
       {
         path: '/water',

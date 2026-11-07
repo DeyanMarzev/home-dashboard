@@ -90,6 +90,26 @@ Max 600 points per series; the server picks a coarser bucket if needed and says 
 ### `GET /api/summary/energy?from=&to=`
 Daily electricity and gas kWh and cost (using `tariffs`), baseload (lowest 30 min average overnight → W), totals. Freshness combined from `smart_meters`.
 
+`from`/`to` are London dates, inclusive (default: the 14 days ending the last day the meters cover; at most 400 days). Response (`EnergySummarySchema`):
+
+```json
+{ "from": "2026-10-23", "to": "2026-11-05", "latestDay": "2026-11-05",
+  "days": [{ "date": "2026-11-05",
+             "electricity": { "kwh": 9.7, "energyPence": 238, "standingPence": 61 },
+             "gas": { "kwh": 32, "energyPence": 202, "standingPence": 32 },
+             "complete": true, "outdoorC": 9.1, "degreeDays": 6.4 }],
+  "month": { "from": "2026-11-01", "to": "2026-11-05", "costPence": 2332, "projectedPence": 13992 },
+  "baseload": { "watts": 168, "night": "2026-11-05", "yearlyPence": 36056, "previousWatts": 142 },
+  "carbon": { "electricityKg": 10.9, "gasKg": 41.5 },
+  "freshness": { "...": "smart_meters" } }
+```
+
+- Days are summed from `readings_hourly` on London calendar days (46/48/50 half-hours). `complete` = every half-hour present for each fuel that has a series. `latestDay` = the newest complete day.
+- Costs use the tariff valid on each date (`validTo` inclusive); `energyPence`/`standingPence` are null without one. Fixed rates only: time-of-use bands wait for question 4.
+- `month` includes standing charges; the projection is straight-line over the days counted.
+- `baseload` = the lowest half-hour between 00:00 and 05:00 on `latestDay` as a constant draw; `previousWatts` is the same 28 days earlier.
+- Carbon: electricity = Σ kWh × the `carbon_intensity` recorded for the same half-hour (null if under 90 % of half-hours have one); gas = kWh × 0.183 kg/kWh (UK government factor). Cached 30 s. Logic: `apps/api/src/routes/energy.ts`, `packages/shared/src/energy.ts`.
+
 ### `GET /api/summary/heating?date=`
 Boiler minutes on, cycles, condensing share (minutes with `boiler_return` < 55 °C while heating ÷ minutes heating), warm-up rate, schedule-derived next change if available.
 

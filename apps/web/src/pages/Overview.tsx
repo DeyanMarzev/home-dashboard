@@ -1,5 +1,7 @@
 import {
   averageByWindow,
+  formatPounds,
+  londonDayBounds,
   CONDENSING_LIMIT_C,
   formatMinutes,
   stateRuns,
@@ -26,10 +28,18 @@ import {
   type LatestResponse,
   type SourceInfo,
 } from '@home/shared';
-import { useEvents, useHeatingSummary, useLatest, useReadings, useSources } from '../api/hooks.js';
+import {
+  useEnergySummary,
+  useEvents,
+  useHeatingSummary,
+  useLatest,
+  useReadings,
+  useSources,
+} from '../api/hooks.js';
 import { useLive } from '../api/live-context.js';
 import { AlertStrip } from '../components/AlertStrip.js';
-import { Panel, ProgressBar, Skeleton, StatTile } from '../components/Cards.js';
+import { Empty, Panel, ProgressBar, Skeleton, StatTile } from '../components/Cards.js';
+import { BarChart } from '../components/charts/BarChart.js';
 import { TimeChart } from '../components/charts/TimeChart.js';
 import { token } from '../components/charts/theme.js';
 import { FreshnessBadge } from '../components/FreshnessBadge.js';
@@ -39,6 +49,7 @@ import { Chip, Status } from '../components/Status.js';
 import { useCombinedFreshness, useFreshnessNow } from '../lib/freshness.js';
 import { useNow } from '../lib/now-context.js';
 import { RANGE_LABEL, RANGE_SECONDS, useRange, type Range } from '../lib/range.js';
+import { dayLabel, dayPence, weekdayLabel } from '../model/energy.js';
 import { pick, valueOf } from '../model/latest.js';
 import { buildRooms, valuesOf, type Room } from '../model/rooms.js';
 import { COLLECTOR_STATUS_TEXT, collectorStatus, describePoll } from '../model/sources.js';
@@ -91,22 +102,8 @@ export function OverviewPage() {
       </div>
       <RoomsSection rooms={rooms} loading={sensors.isPending} />
       <div className="row">
-        <Panel
-          id="elec-h"
-          title="Electricity"
-          flex="1 1 420px"
-          badge={<SourceBadge source={source('smart_meters')} />}
-        >
-          <NotConnected source={source('smart_meters')} />
-        </Panel>
-        <Panel
-          id="gas-h"
-          title="Gas"
-          flex="1 1 420px"
-          badge={<SourceBadge source={source('smart_meters')} />}
-        >
-          <NotConnected source={source('smart_meters')} />
-        </Panel>
+        <ElectricityPanel source={source('smart_meters')} />
+        <GasPanel source={source('smart_meters')} />
         <GridPanel latest={grid.data} source={source('carbon_intensity')} />
       </div>
       <div className="row">
@@ -264,12 +261,7 @@ function Tiles({
           )
         }
       />
-      <StatTile
-        label="Energy"
-        badge={<SourceBadge source={source('smart_meters')} compact />}
-        value="—"
-        context={`${source('smart_meters')?.name ?? 'Smart meters'}: not connected yet`}
-      />
+      <EnergyTile source={source('smart_meters')} />
       <StatTile
         label="Water"
         badge={<SourceBadge source={source('thames_water')} compact />}
@@ -557,6 +549,153 @@ function RoomsSection({ rooms, loading }: { rooms: Room[]; loading: boolean }) {
         })}
       </div>
     </section>
+  );
+}
+
+// --- Energy ------------------------------------------------------------------------------
+
+function EnergyTile({ source }: { source: SourceInfo | undefined }) {
+  const at = useFreshnessNow();
+  const summary = useEnergySummary(undefined, !!source?.enabled);
+  const s = summary.data;
+  const day = s?.days.find((d) => d.date === s.latestDay);
+  if (!source?.enabled || !s || !day) {
+    return (
+      <StatTile
+        label="Energy"
+        badge={<SourceBadge source={source} compact />}
+        value="—"
+        context={
+          source && !source.enabled ? `${source.name}: not connected yet` : 'No complete day yet'
+        }
+      />
+    );
+  }
+  const pence = dayPence(day, true);
+  return (
+    <StatTile
+      label={`Energy · ${weekdayLabel(day.date)}`}
+      badge={s.freshness && <FreshnessBadge freshness={at(s.freshness, 'smart_meters')} compact />}
+      value={
+        pence === null
+          ? `${formatNumber((day.electricity?.kwh ?? 0) + (day.gas?.kwh ?? 0))} kWh`
+          : formatPounds(pence)
+      }
+      context={`${formatNumber(day.electricity?.kwh ?? 0, 1)} kWh elec · ${formatNumber(day.gas?.kwh ?? 0)} kWh gas`}
+    />
+  );
+}
+
+/** The latest complete day's electricity by hour, with the overnight baseload as a dashed line. */
+function ElectricityPanel({ source }: { source: SourceInfo | undefined }) {
+  const at = useFreshnessNow();
+  const summary = useEnergySummary(undefined, !!source?.enabled);
+  const meters = useLatest({ source: 'smart_meters' });
+  const s = summary.data;
+  const elecId = pick(meters.data, 'energy_import', 'electricity')?.series.id;
+  const bounds = s?.latestDay ? londonDayBounds(s.latestDay) : null;
+  const hourly = useReadings(elecId && bounds ? [elecId] : [], '24h', {
+    bucket: '1h',
+    agg: 'sum',
+    between: bounds ? { from: bounds.from.toISOString(), to: bounds.to.toISOString() } : undefined,
+  });
+  const points = hourly.data?.series[0]?.points ?? [];
+  const day = s?.days.find((d) => d.date === s.latestDay);
+  const baseloadKwh = s?.baseload ? s.baseload.watts / 1000 : undefined;
+  const peak = points.reduce<(typeof points)[number] | null>(
+    (a, p) => (!a || p[1] > a[1] ? p : a),
+    null,
+  );
+
+  return (
+    <Panel
+      id="elec-h"
+      title={day ? `Electricity, ${weekdayLabel(day.date)}` : 'Electricity'}
+      flex="1 1 420px"
+      badge={
+        s?.freshness && source?.enabled ? (
+          <FreshnessBadge freshness={at(s.freshness, 'smart_meters')} />
+        ) : (
+          <SourceBadge source={source} />
+        )
+      }
+      meta={
+        day?.electricity && (
+          <>
+            {formatNumber(day.electricity.kwh, 1)} kWh
+            {day.electricity.energyPence !== null &&
+              ` · ${formatPounds(day.electricity.energyPence)}`}
+            {s?.baseload && ` · dashed line = baseload ${s.baseload.watts} W`}
+          </>
+        )
+      }
+    >
+      {!source?.enabled ? (
+        <NotConnected source={source} />
+      ) : points.length === 0 ? (
+        hourly.isPending && elecId ? (
+          <Skeleton height={180} />
+        ) : (
+          <Empty>No complete day of meter data yet</Empty>
+        )
+      ) : (
+        <BarChart
+          labels={points.map(([t]) => formatLondonTime(new Date(t)).slice(0, 2))}
+          series={[
+            { name: 'Electricity', color: token('--cool'), values: points.map(([, v]) => v) },
+          ]}
+          reference={baseloadKwh}
+          ariaLabel={`Bar chart of hourly electricity use${day ? ` on ${weekdayLabel(day.date)}` : ''}${peak ? `, highest at ${formatLondonTime(new Date(peak[0]))}` : ''}.`}
+        />
+      )}
+    </Panel>
+  );
+}
+
+/** Daily gas for the last 7 days, and kWh per heating degree-day. */
+function GasPanel({ source }: { source: SourceInfo | undefined }) {
+  const at = useFreshnessNow();
+  const summary = useEnergySummary(undefined, !!source?.enabled);
+  const days = (summary.data?.days ?? []).slice(-7).filter((d) => d.gas);
+  const total = days.reduce((t, d) => t + (d.gas?.kwh ?? 0), 0);
+  const degreeDays = days.reduce((t, d) => t + (d.degreeDays ?? 0), 0);
+  const s = summary.data;
+  return (
+    <Panel
+      id="gas-h"
+      title={
+        days.length ? `Gas, ${dayLabel(days[0]!.date)} – ${dayLabel(days.at(-1)!.date)}` : 'Gas'
+      }
+      flex="1 1 420px"
+      badge={
+        s?.freshness && source?.enabled ? (
+          <FreshnessBadge freshness={at(s.freshness, 'smart_meters')} />
+        ) : (
+          <SourceBadge source={source} />
+        )
+      }
+      meta={
+        days.length > 0 &&
+        `${formatNumber(total)} kWh${degreeDays > 0 ? ` · ${formatNumber(total / degreeDays, 1)} kWh per degree-day` : ''}`
+      }
+    >
+      {!source?.enabled ? (
+        <NotConnected source={source} />
+      ) : days.length === 0 ? (
+        summary.isPending ? (
+          <Skeleton height={180} />
+        ) : (
+          <Empty>No gas data yet</Empty>
+        )
+      ) : (
+        <BarChart
+          labels={days.map((d) => weekdayLabel(d.date).slice(0, 3))}
+          series={[{ name: 'Gas', color: token('--heat'), values: days.map((d) => d.gas!.kwh) }]}
+          valueLabels={days.map((d) => formatNumber(d.gas!.kwh))}
+          ariaLabel={`Bar chart of daily gas use for the last ${days.length} days, ${formatNumber(total)} kWh in total.`}
+        />
+      )}
+    </Panel>
   );
 }
 

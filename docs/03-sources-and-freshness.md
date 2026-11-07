@@ -227,6 +227,9 @@ interface CollectorContext {
 - **Open question:** which provider/API the owner will use (supplier API such as Octopus, or a DCC-based service such as Hildebrand Glowmarkt/Bright, or n3rgy). Implement behind an interface `MeterProvider { fetch(from, to): ReadingInput[] }` with a `fake` provider generating plausible data until confirmed.
 - Each run fetches from `lastDataTo - 2 days` to now (overlap is safe because writes are upserts).
 - Gas from some providers comes in m³: convert with `kWh = m³ × 1.02264 × CV / 3.6` (CV default 39.5, configurable).
+- Implemented (`apps/collector/src/sources/smart_meters/`): `METER_PROVIDER` picks a provider from `PROVIDERS`; only `fake` exists until question 3 is answered. The first run backfills 30 days; later runs re-fetch from 2 days before the older fuel's `lastDataTo`. Series: `energy_import` on `electricity` and `gas`, interval_total, 30 min, kWh (`gasKwhFromM3` in `packages/shared` for m³ providers).
+- The `fake` provider is deterministic (the same half-hour always gets the same value) and, like a real feed, a day behind: it returns nothing after London midnight today. It's sample data: keep `smart_meters` disabled in production until a real provider exists, or the dashboard shows invented numbers.
+- Adding the real provider: a file in `providers/` implementing `MeterProvider`, a parser test with a recorded payload, its env vars in `.env.example`, an entry in `PROVIDERS`. Nothing else changes.
 
 ### thames_water (scrape): 3 days behind
 
