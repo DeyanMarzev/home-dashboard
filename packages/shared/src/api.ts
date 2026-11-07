@@ -271,3 +271,46 @@ export const StreamReadingSchema = z.object({
 export const StreamFreshnessSchema = z.object({ sourceId: z.string(), freshness: FreshnessSchema });
 export type StreamReading = z.infer<typeof StreamReadingSchema>;
 export type StreamFreshness = z.infer<typeof StreamFreshnessSchema>;
+
+// --- GET /api/summary/heating ------------------------------------------------------------
+
+export const HeatingSummaryQuerySchema = z.strictObject({
+  /** London calendar date; default today. */
+  date: IsoDate.optional(),
+});
+
+const RunSchema = z.object({ from: IsoTimestamp, to: IsoTimestamp });
+
+export const HeatingSummarySchema = z.object({
+  date: IsoDate,
+  boiler: z.object({
+    /** Whether the Nest reports heating right now (null when the date isn't today or no data). */
+    heatingNow: z.boolean().nullable(),
+    minutesOn: z.number().int(),
+    cycles: z.number().int(),
+    shortCycles: z.number().int(),
+    /** When the boiler fired during the day (also the "boiler firing" chart bands). */
+    runs: z.array(RunSchema),
+  }),
+  /** Share (0–1) of firing time with the return below 55 °C; null without boiler probes. */
+  condensingShare: z.number().nullable(),
+  flowPeakC: z.number().nullable(),
+  warmUp: z
+    .object({
+      ratePerHour: z.number(),
+      longest: z.object({
+        from: IsoTimestamp,
+        to: IsoTimestamp,
+        startC: z.number(),
+        endC: z.number(),
+      }),
+    })
+    .nullable(),
+  /** The 7 days ending `date`, oldest first. */
+  days: z.array(z.object({ date: IsoDate, minutesOn: z.number().int(), cycles: z.number().int() })),
+  /** The Nest's target temperature during the day: [time, °C], as observed (SDM exposes no schedule). */
+  setpoints: z.array(z.tuple([IsoTimestamp, z.number()])),
+  tips: z.array(z.object({ title: z.string(), detail: z.string() })),
+  freshness: FreshnessSchema.nullable(),
+});
+export type HeatingSummary = z.infer<typeof HeatingSummarySchema>;

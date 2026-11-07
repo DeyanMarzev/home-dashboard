@@ -1,4 +1,4 @@
-import { LineChart } from 'echarts/charts';
+import { BarChart, LineChart } from 'echarts/charts';
 import {
   GridComponent,
   MarkAreaComponent,
@@ -9,8 +9,9 @@ import * as echarts from 'echarts/core';
 import { SVGRenderer } from 'echarts/renderers';
 import { useEffect, useRef } from 'react';
 
-// Tree-shaken: only what the dashboard draws (docs/05). Bar charts join with the Energy page.
+// Tree-shaken: only what the dashboard draws (docs/05).
 echarts.use([
+  BarChart,
   LineChart,
   GridComponent,
   MarkAreaComponent,

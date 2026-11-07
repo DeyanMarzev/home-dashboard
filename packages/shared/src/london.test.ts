@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  addLondonDays,
   formatLondonDayMonth,
   formatLondonTime,
   londonCalendarDaysBetween,
+  londonDateString,
+  londonDayBounds,
+  londonMidnight,
   londonParts,
 } from './london.js';
 
@@ -74,5 +78,30 @@ describe('formatLondonDayMonth', () => {
     ['2026-06-30T23:30:00Z', '1 Jul'], // BST
   ])('%s → %s', (iso, text) => {
     expect(formatLondonDayMonth(at(iso))).toBe(text);
+  });
+});
+
+describe('London days', () => {
+  it('starts days at local midnight in winter and summer', () => {
+    expect(londonMidnight('2026-11-06').toISOString()).toBe('2026-11-06T00:00:00.000Z');
+    expect(londonMidnight('2026-07-01').toISOString()).toBe('2026-06-30T23:00:00.000Z');
+  });
+
+  it('has a 23-hour day in March and a 25-hour day in October', () => {
+    const march = londonDayBounds('2026-03-29');
+    expect((march.to.getTime() - march.from.getTime()) / 3600_000).toBe(23);
+    const october = londonDayBounds('2026-10-25');
+    expect(october.from.toISOString()).toBe('2026-10-24T23:00:00.000Z');
+    expect((october.to.getTime() - october.from.getTime()) / 3600_000).toBe(25);
+  });
+
+  it('names the London date of an instant', () => {
+    expect(londonDateString(new Date('2026-06-30T23:30:00Z'))).toBe('2026-07-01');
+    expect(londonDateString(new Date('2026-11-06T23:30:00Z'))).toBe('2026-11-06');
+  });
+
+  it('adds calendar days', () => {
+    expect(addLondonDays('2026-11-01', -7)).toBe('2026-10-25');
+    expect(addLondonDays('2026-12-31', 1)).toBe('2027-01-01');
   });
 });

@@ -93,6 +93,25 @@ Daily electricity and gas kWh and cost (using `tariffs`), baseload (lowest 30 mi
 ### `GET /api/summary/heating?date=`
 Boiler minutes on, cycles, condensing share (minutes with `boiler_return` < 55 °C while heating ÷ minutes heating), warm-up rate, schedule-derived next change if available.
 
+`date` is a London calendar date (default today). Response (`HeatingSummarySchema` in `packages/shared`):
+
+```json
+{ "date": "2026-11-06",
+  "boiler": { "heatingNow": false, "minutesOn": 125, "cycles": 3, "shortCycles": 1,
+              "runs": [{ "from": "2026-11-06T06:00:00Z", "to": "2026-11-06T07:30:00Z" }] },
+  "condensingShare": 0.71, "flowPeakC": 66,
+  "warmUp": { "ratePerHour": 1.4, "longest": { "from": "...", "to": "...", "startC": 16, "endC": 20.5 } },
+  "days": [{ "date": "2026-10-31", "minutesOn": 118, "cycles": 3 }, "... 7 days, oldest first"],
+  "setpoints": [["2026-11-06T00:00:00Z", 16], ["2026-11-06T06:00:00Z", 20.5]],
+  "tips": [{ "title": "Lower the boiler flow temperature", "detail": "..." }],
+  "freshness": { "...": "combined nest + boiler_probes" } }
+```
+
+- Firing time: each `hvac_heating` reading holds until the next, at most 3 × the Nest's poll interval (a gap isn't counted as on). A run still going at the end of the day isn't a short cycle (< 15 min) yet.
+- `heatingNow` is null for past days or when the Nest data isn't live. `condensingShare` and `flowPeakC` are null without probes; `warmUp` is null without firing runs of 20 min or more.
+- No "next change": SDM doesn't expose schedules. `setpoints` are the targets observed during the day.
+- Cached 30 s per date. Logic: `apps/api/src/routes/heating.ts` and `packages/shared/src/heating.ts`.
+
 ### `GET /api/summary/water?from=&to=`
 Daily litres, hourly profile for a day, nightly minimum flow (leak check).
 

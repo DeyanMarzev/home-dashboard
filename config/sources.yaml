@@ -42,7 +42,7 @@ sources:
   # Not built yet: enabled in the milestone that adds the collector (docs/07-build-plan.md).
   # Disabled sources don't show as Late or raise events.
 
-  boiler_probes: # M6
+  boiler_probes: # built (M6); enable once the probes are fitted and their ids are in .env (docs/06 §5c)
     name: Boiler pipe probes
     description: Flow and return temperature
     kind: local
@@ -50,7 +50,7 @@ sources:
     expected_delay: 0s
     enabled: false
 
-  nest: # M6
+  nest: # built (M6); enable once the NEST_* values are in .env (docs/06 §5b)
     name: Nest thermostat
     description: Temp, humidity, target, boiler status
     kind: api
