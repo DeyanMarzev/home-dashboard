@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Home dashboard – Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F4F1}
+a{color:#0F5F59}a:hover{color:#0A4540}
+</style>
+</head>
+<body>
+<div style="min-height: 100vh; background: #F3F4F1; color: #1B1F1D; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+<div style="max-width: 1360px; margin: 0 auto; padding: 28px 24px 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<!-- Header -->
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h1 style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -0.02em">Home</h1>
+<p style="margin: 0; font-size: 13px; color: #5A615C">Friday 6 November · updated 13:41 · sample data</p>
+</div>
+<nav aria-label="Sections" style="display: flex; flex-wrap: wrap; gap: 4px; background: #E7E9E4; padding: 4px; border-radius: 12px">
+<a href="01-overview.html" aria-current="page" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 600 14px Inter, sans-serif; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.08)">Overview</a>
+<a href="02-rooms.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Rooms</a>
+<a href="03-energy.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Energy</a>
+<a href="04-heating.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Heating</a>
+<a href="05-water.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Water</a>
+<a href="06-wifi.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Wi-Fi</a>
+<a href="07-system.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">System</a>
+</nav>
+<div role="group" aria-label="Time range" style="display: flex; gap: 6px">
+<button type="button" aria-pressed="true" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #0F766E; border-radius: 9px; background: #0F766E; color: #FFFFFF; font: 600 13px Inter, sans-serif">24h</button>
+<button type="button" aria-pressed="false" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">7d</button>
+<button type="button" aria-pressed="false" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">30d</button>
+</div>
+</header>
+
+<p style="margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; font-size: 13px; color: #5A615C"><span style="display: inline-flex; align-items: center; gap: 8px"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span>updates within minutes</span><span style="display: inline-flex; align-items: center; gap: 8px"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>1 day behind</span>supplier data that arrives later: smart meters 1 day, Thames Water 3 days</span></p>
+
+<!-- Alerts -->
+<section aria-label="Alerts" style="display: flex; flex-wrap: wrap; gap: 12px">
+<div style="flex: 1 1 380px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #FFF3EA; border: 1px solid #F5CDAF; border-radius: 12px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 10v4"></path><path d="M12 17h.01"></path></svg>
+<p style="margin: 0; font-size: 14px; color: #7C2D12"><strong style="font-weight: 600">Kitchen CO₂ 1,240 ppm</strong> · above 1,000 for 25 min, open a window</p>
+</div>
+<div style="flex: 1 1 380px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 12px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3F4A44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
+<p style="margin: 0; font-size: 14px; color: #3F4A44"><strong style="font-weight: 600">Overnight baseload 168 W</strong> · about 4 kWh a day of always-on devices</p>
+</div>
+</section>
+
+<!-- KPI tiles -->
+<section aria-label="Current readings" style="display: flex; flex-wrap: wrap; gap: 14px">
+<div style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>Indoor temperature</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">20.4<span style="font-size: 18px; color: #5A615C">°C</span></span>
+<span style="font-size: 13px; color: #5A615C">Target 20.5 °C · heating idle</span>
+</div>
+<div style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>Outdoor</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">9.4<span style="font-size: 18px; color: #5A615C">°C</span></span>
+<span style="font-size: 13px; color: #5A615C">Light rain later · Open-Meteo</span>
+</div>
+<div style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>Humidity (avg)</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">54<span style="font-size: 18px; color: #5A615C">%</span></span>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #5A615C"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>Dew point 10.8 °C · mould risk low</span>
+</div>
+<div style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>CO₂ (living room)</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">780<span style="font-size: 18px; color: #5A615C"> ppm</span></span>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #5A615C"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>Good · pressure 1012 hPa</span>
+</div>
+<div style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>Energy · Thu 5 Nov</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>1 day behind</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">£4.39</span>
+<span style="font-size: 13px; color: #5A615C">9.7 kWh elec · 32 kWh gas</span>
+</div>
+<div style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>Water · Tue 3 Nov</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>3 days behind</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">312<span style="font-size: 18px; color: #5A615C"> L</span></span>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #5A615C"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>No leak · night minimum 0 L/h</span>
+</div>
+</section>
+
+<!-- Temperature chart + Heating -->
+<div style="display: flex; flex-wrap: wrap; gap: 14px">
+<section aria-labelledby="temp-h" style="flex: 999 1 620px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="temp-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Temperature, last 24 hours</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: #3F4A44">
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 3px; border-radius: 2px; background: #C2410C"></span>Indoor</span>
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 3px; border-radius: 2px; background: #2563EB"></span>Outdoor</span>
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 0; border-top: 2px dashed #3F4A44"></span>Nest target</span>
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 3px; background: #FBE3D3"></span>Boiler firing</span>
+</div>
+</div>
+<svg viewBox="0 0 770 232" role="img" aria-label="Line chart: indoor temperature between 17.5 and 20.6 °C, outdoor between 4.2 and 11 °C, boiler fired three times." style="width: 100%; height: auto; display: block">
+<g transform="translate(36,8)">
+<rect x="47" y="0" width="78.3" height="200" fill="#FBE3D3"></rect>
+<rect x="500.9" y="0" width="78.3" height="200" fill="#FBE3D3"></rect>
+<rect x="673" y="0" width="31.3" height="200" fill="#FBE3D3"></rect>
+<line x1="0" y1="46" x2="720" y2="46" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="86" x2="720" y2="86" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="126" x2="720" y2="126" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="166" x2="720" y2="166" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="200" x2="720" y2="200" stroke="#CDD1CA" stroke-width="1"></line>
+<polyline points="0,42 250.4,42 250.4,78 500.9,78 500.9,42 720,42" fill="none" stroke="#3F4A44" stroke-width="1.5" stroke-dasharray="5 4"></polyline>
+<polyline points="0,118 31.3,118 62.6,126 93.9,134 125.2,138 156.5,142 187.8,146 219.1,150 250.4,154 281.7,158 313,162 344.3,166 375.7,167.6 407,170 438.3,171.6 469.6,172.4 500.9,170 532.2,166 563.5,158 594.8,150 626.1,142 657.4,135.6 688.7,132.4 720,130.8" fill="none" stroke="#2563EB" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>
+<polyline points="0,47.6 31.3,46 62.6,43.6 93.9,42 125.2,41.2 156.5,42 187.8,42.8 219.1,44.4 250.4,49.2 281.7,54 313,57.2 344.3,59.6 375.7,62 407,63.6 438.3,65.2 469.6,66 500.9,58.8 532.2,49.2 563.5,43.6 594.8,44.4 626.1,46 657.4,45.2 688.7,43.6 720,42.8" fill="none" stroke="#C2410C" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>
+<circle cx="720" cy="42.8" r="4" fill="#C2410C"></circle>
+<circle cx="720" cy="130.8" r="4" fill="#2563EB"></circle>
+</g>
+<g font-family="Inter, sans-serif" font-size="11" fill="#5A615C">
+<text x="28" y="58" text-anchor="end">20°</text>
+<text x="28" y="98" text-anchor="end">15°</text>
+<text x="28" y="138" text-anchor="end">10°</text>
+<text x="28" y="178" text-anchor="end">5°</text>
+<text x="36" y="226" text-anchor="start">14:00</text>
+<text x="161.2" y="226" text-anchor="middle">18:00</text>
+<text x="286.4" y="226" text-anchor="middle">22:00</text>
+<text x="411.7" y="226" text-anchor="middle">02:00</text>
+<text x="536.9" y="226" text-anchor="middle">06:00</text>
+<text x="662.1" y="226" text-anchor="middle">10:00</text>
+<text x="756" y="226" text-anchor="end">now</text>
+</g>
+</svg>
+</section>
+
+<section aria-labelledby="heat-h" style="flex: 1 1 300px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="heat-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Heating</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></div>
+<span style="font-size: 12px; font-weight: 600; color: #3F4A44; background: #ECEEE9; padding: 4px 10px; border-radius: 999px">Nest · Heat mode</span>
+</div>
+<div style="display: flex; gap: 12px">
+<div style="flex: 1 1 0; background: #F6F7F4; border-radius: 10px; padding: 12px">
+<span style="display: block; font-size: 12px; color: #5A615C">Flow</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 24px; font-weight: 600">58 °C</span>
+</div>
+<div style="flex: 1 1 0; background: #F6F7F4; border-radius: 10px; padding: 12px">
+<span style="display: block; font-size: 12px; color: #5A615C">Return</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 24px; font-weight: 600">44 °C</span>
+</div>
+</div>
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 14px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D; flex: none"></span>Condensing: return below 55 °C</p>
+<dl style="margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px">
+<div><dt style="font-size: 12px; color: #5A615C">Boiler on today</dt><dd style="margin: 0; font-weight: 600">2 h 05 min</dd></div>
+<div><dt style="font-size: 12px; color: #5A615C">Firing cycles</dt><dd style="margin: 0; font-weight: 600">3</dd></div>
+<div><dt style="font-size: 12px; color: #5A615C">Warm-up rate</dt><dd style="margin: 0; font-weight: 600">1.4 °C / h</dd></div>
+<div><dt style="font-size: 12px; color: #5A615C">Nest humidity</dt><dd style="margin: 0; font-weight: 600">55 %</dd></div>
+</dl>
+<p style="margin: 0; font-size: 13px; color: #5A615C">Next: 16:00 → 20.5 °C, then 16 °C from 22:00</p>
+</section>
+</div>
+
+<!-- Rooms -->
+<section aria-labelledby="rooms-h" style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="rooms-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Rooms</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 14px">
+<article style="flex: 1 1 240px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h3 style="margin: 0; font-size: 15px; font-weight: 600">Living room</h3><span style="font-size: 12px; color: #5A615C">30 s ago</span></div>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 28px; font-weight: 600">20.6 °C</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: #3F4A44"><span>53 % RH</span><span>780 ppm</span><span>1012 hPa</span></div>
+</article>
+<article style="flex: 1 1 240px; background: #FFFFFF; border: 1px solid #F5CDAF; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h3 style="margin: 0; font-size: 15px; font-weight: 600">Kitchen</h3><span style="font-size: 12px; color: #5A615C">30 s ago</span></div>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 28px; font-weight: 600">21.3 °C</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: #3F4A44"><span>61 % RH</span><span style="color: #9A3412; font-weight: 600">1,240 ppm · high</span><span>1012 hPa</span></div>
+</article>
+<article style="flex: 1 1 240px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h3 style="margin: 0; font-size: 15px; font-weight: 600">Bedroom</h3><span style="font-size: 12px; color: #5A615C">30 s ago</span></div>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 28px; font-weight: 600">19.1 °C</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: #3F4A44"><span>57 % RH</span><span>640 ppm</span><span>1012 hPa</span></div>
+</article>
+<article style="flex: 1 1 240px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h3 style="margin: 0; font-size: 15px; font-weight: 600">Hallway (Nest)</h3><span style="font-size: 12px; color: #5A615C">2 min ago</span></div>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 28px; font-weight: 600">20.4 °C</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: #3F4A44"><span>55 % RH</span><span>Target 20.5 °C</span></div>
+</article>
+</div>
+</section>
+
+<!-- Energy -->
+<div style="display: flex; flex-wrap: wrap; gap: 14px">
+<section aria-labelledby="elec-h" style="flex: 1 1 420px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="elec-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Electricity, Thu 5 Nov</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Data to 5 Nov · 1 day behind</span></div>
+<span style="font-size: 13px; color: #5A615C">9.7 kWh · £2.38 · dashed line = baseload 168 W</span>
+</div>
+<svg viewBox="0 0 720 180" role="img" aria-label="Bar chart of hourly electricity use on 5 November, with a morning peak at 07:00 and the highest use at 18:00." style="width: 100%; height: auto; display: block">
+<line x1="0" y1="150" x2="720" y2="150" stroke="#CDD1CA" stroke-width="1"></line>
+<rect x="4" y="123.6" width="22" height="26.4" rx="3" fill="#2563EB"></rect>
+<rect x="34" y="125.1" width="22" height="24.9" rx="3" fill="#2563EB"></rect>
+<rect x="64" y="126.7" width="22" height="23.3" rx="3" fill="#2563EB"></rect>
+<rect x="94" y="126.7" width="22" height="23.3" rx="3" fill="#2563EB"></rect>
+<rect x="124" y="125.1" width="22" height="24.9" rx="3" fill="#2563EB"></rect>
+<rect x="154" y="123.6" width="22" height="26.4" rx="3" fill="#2563EB"></rect>
+<rect x="184" y="87.8" width="22" height="62.2" rx="3" fill="#2563EB"></rect>
+<rect x="214" y="44.2" width="22" height="105.8" rx="3" fill="#2563EB"></rect>
+<rect x="244" y="69.1" width="22" height="80.9" rx="3" fill="#2563EB"></rect>
+<rect x="274" y="94" width="22" height="56" rx="3" fill="#2563EB"></rect>
+<rect x="304" y="101.8" width="22" height="48.2" rx="3" fill="#2563EB"></rect>
+<rect x="334" y="80" width="22" height="70" rx="3" fill="#2563EB"></rect>
+<rect x="364" y="59.8" width="22" height="90.2" rx="3" fill="#2563EB"></rect>
+<rect x="394" y="97.1" width="22" height="52.9" rx="3" fill="#2563EB"></rect>
+<rect x="424" y="103.3" width="22" height="46.7" rx="3" fill="#2563EB"></rect>
+<rect x="454" y="100.2" width="22" height="49.8" rx="3" fill="#2563EB"></rect>
+<rect x="484" y="86.2" width="22" height="63.8" rx="3" fill="#2563EB"></rect>
+<rect x="514" y="38" width="22" height="112" rx="3" fill="#2563EB"></rect>
+<rect x="544" y="16.2" width="22" height="133.8" rx="3" fill="#2563EB"></rect>
+<rect x="574" y="39.6" width="22" height="110.4" rx="3" fill="#2563EB"></rect>
+<rect x="604" y="69.1" width="22" height="80.9" rx="3" fill="#2563EB"></rect>
+<rect x="634" y="90.9" width="22" height="59.1" rx="3" fill="#2563EB"></rect>
+<rect x="664" y="108" width="22" height="42" rx="3" fill="#2563EB"></rect>
+<rect x="694" y="118.9" width="22" height="31.1" rx="3" fill="#2563EB"></rect>
+<line x1="0" y1="123.9" x2="720" y2="123.9" stroke="#3F4A44" stroke-width="1" stroke-dasharray="4 4"></line>
+<g font-family="Inter, sans-serif" font-size="11" fill="#5A615C" text-anchor="middle">
+<text x="15" y="170">00</text>
+<text x="195" y="170">06</text>
+<text x="375" y="170">12</text>
+<text x="555" y="170">18</text>
+<text x="705" y="170">23</text>
+</g>
+</svg>
+</section>
+
+<section aria-labelledby="gas-h" style="flex: 1 1 420px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="gas-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Gas, 30 Oct – 5 Nov</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Data to 5 Nov · 1 day behind</span></div>
+<span style="font-size: 13px; color: #5A615C">227 kWh · 2.9 kWh per degree-day</span>
+</div>
+<svg viewBox="0 0 720 180" role="img" aria-label="Bar chart of daily gas use from 30 October to 5 November, between 28 and 38 kWh a day, highest on Monday." style="width: 100%; height: auto; display: block">
+<line x1="0" y1="150" x2="720" y2="150" stroke="#CDD1CA" stroke-width="1"></line>
+<rect x="14" y="52" width="74.9" height="98" rx="4" fill="#C2410C"></rect>
+<rect x="116.9" y="41.5" width="74.9" height="108.5" rx="4" fill="#C2410C"></rect>
+<rect x="219.7" y="27.5" width="74.9" height="122.5" rx="4" fill="#C2410C"></rect>
+<rect x="322.6" y="17" width="74.9" height="133" rx="4" fill="#C2410C"></rect>
+<rect x="425.4" y="34.5" width="74.9" height="115.5" rx="4" fill="#C2410C"></rect>
+<rect x="528.3" y="45" width="74.9" height="105" rx="4" fill="#C2410C"></rect>
+<rect x="631.1" y="38" width="74.9" height="112" rx="4" fill="#C2410C"></rect>
+<g font-family="Inter, sans-serif" font-size="11" fill="#5A615C" text-anchor="middle">
+<text x="51.5" y="170">Fri</text>
+<text x="154.4" y="170">Sat</text>
+<text x="257.2" y="170">Sun</text>
+<text x="360.1" y="170">Mon</text>
+<text x="462.9" y="170">Tue</text>
+<text x="565.8" y="170">Wed</text>
+<text x="668.6" y="170">Thu</text>
+</g>
+<g font-family="Inter, sans-serif" font-size="11" fill="#1B1F1D" text-anchor="middle" font-weight="600">
+<text x="51.5" y="44">28</text>
+<text x="154.4" y="34">31</text>
+<text x="257.2" y="20">35</text>
+<text x="360.1" y="10">38</text>
+<text x="462.9" y="27">33</text>
+<text x="565.8" y="38">30</text>
+<text x="668.6" y="31">32</text>
+</g>
+</svg>
+</section>
+
+<section aria-labelledby="grid-h" style="flex: 1 1 280px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="grid-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Grid right now</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></div>
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600">142</span><span style="font-size: 14px; color: #5A615C">gCO₂/kWh · moderate</span></div>
+<div aria-hidden="true" style="display: flex; gap: 3px; align-items: flex-end; height: 44px">
+<span style="flex: 1 1 0; height: 70%; background: #CDD1CA; border-radius: 2px"></span>
+<span style="flex: 1 1 0; height: 74%; background: #CDD1CA; border-radius: 2px"></span>
+<span style="flex: 1 1 0; height: 80%; background: #CDD1CA; border-radius: 2px"></span>
+<span style="flex: 1 1 0; height: 66%; background: #CDD1CA; border-radius: 2px"></span>
+<span style="flex: 1 1 0; height: 52%; background: #CDD1CA; border-radius: 2px"></span>
+<span style="flex: 1 1 0; height: 40%; background: #15803D; border-radius: 2px"></span>
+<span style="flex: 1 1 0; height: 34%; background: #15803D; border-radius: 2px"></span>
+<span style="flex: 1 1 0; height: 31%; background: #15803D; border-radius: 2px"></span>
+<span style="flex: 1 1 0; height: 38%; background: #15803D; border-radius: 2px"></span>
+<span style="flex: 1 1 0; height: 55%; background: #CDD1CA; border-radius: 2px"></span>
+<span style="flex: 1 1 0; height: 68%; background: #CDD1CA; border-radius: 2px"></span>
+<span style="flex: 1 1 0; height: 72%; background: #CDD1CA; border-radius: 2px"></span>
+</div>
+<p style="margin: 0; font-size: 14px">Greenest window: <strong style="font-weight: 600">00:00–04:00</strong>, good for the washing machine or dishwasher</p>
+<p style="margin: 0; font-size: 12px; color: #5A615C">Regional forecast, next 24 h · NESO Carbon Intensity API</p>
+</section>
+</div>
+
+<!-- Water + System -->
+<div style="display: flex; flex-wrap: wrap; gap: 14px">
+<section aria-labelledby="water-h" style="flex: 1 1 440px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="water-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Water, 28 Oct – 3 Nov</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Data to 3 Nov · 3 days behind</span></div>
+<span style="font-size: 13px; color: #5A615C">avg 319 L/day</span>
+</div>
+<svg viewBox="0 0 720 180" role="img" aria-label="Bar chart of daily water use from 28 October to 3 November, between 276 and 402 litres a day." style="width: 100%; height: auto; display: block">
+<line x1="0" y1="150" x2="720" y2="150" stroke="#CDD1CA" stroke-width="1"></line>
+<rect x="14" y="57.3" width="74.9" height="92.7" rx="4" fill="#0F766E"></rect>
+<rect x="116.9" y="43.9" width="74.9" height="106.1" rx="4" fill="#0F766E"></rect>
+<rect x="219.7" y="64.1" width="74.9" height="85.9" rx="4" fill="#0F766E"></rect>
+<rect x="322.6" y="24.9" width="74.9" height="125.1" rx="4" fill="#0F766E"></rect>
+<rect x="425.4" y="51.1" width="74.9" height="98.9" rx="4" fill="#0F766E"></rect>
+<rect x="528.3" y="60.1" width="74.9" height="89.9" rx="4" fill="#0F766E"></rect>
+<rect x="631.1" y="52.9" width="74.9" height="97.1" rx="4" fill="#0F766E"></rect>
+<g font-family="Inter, sans-serif" font-size="11" fill="#5A615C" text-anchor="middle">
+<text x="51.5" y="170">Wed</text>
+<text x="154.4" y="170">Thu</text>
+<text x="257.2" y="170">Fri</text>
+<text x="360.1" y="170">Sat</text>
+<text x="462.9" y="170">Sun</text>
+<text x="565.8" y="170">Mon</text>
+<text x="668.6" y="170">Tue</text>
+</g>
+<g font-family="Inter, sans-serif" font-size="11" fill="#1B1F1D" text-anchor="middle" font-weight="600">
+<text x="51.5" y="50">298</text>
+<text x="154.4" y="37">341</text>
+<text x="257.2" y="57">276</text>
+<text x="360.1" y="18">402</text>
+<text x="462.9" y="44">318</text>
+<text x="565.8" y="53">289</text>
+<text x="668.6" y="46">312</text>
+</g>
+</svg>
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 14px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D; flex: none"></span>Leak check passed: usage reached 0 L/h between 02:00 and 05:00 every night</p>
+<p style="margin: 0; font-size: 12px; color: #5A615C">Thames Water hourly data arrives about 3 days late</p>
+</section>
+
+<section aria-labelledby="sys-h" style="flex: 1 1 440px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="sys-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Raspberry Pi</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></div>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #14532D; background: #E3F2E7; padding: 4px 10px; border-radius: 999px"><span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 50%; background: #15803D"></span>Healthy</span>
+</div>
+<dl style="margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 16px">
+<div><dt style="font-size: 12px; color: #5A615C">CPU temp</dt><dd style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 22px; font-weight: 600">52 °C</dd></div>
+<div><dt style="font-size: 12px; color: #5A615C">Throttling</dt><dd style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 22px; font-weight: 600">None</dd></div>
+<div><dt style="font-size: 12px; color: #5A615C">Uptime</dt><dd style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 22px; font-weight: 600">23 d</dd></div>
+<div><dt style="font-size: 12px; color: #5A615C">Memory</dt><dd style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 22px; font-weight: 600">38 %</dd></div>
+<div><dt style="font-size: 12px; color: #5A615C">Load (5 min)</dt><dd style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 22px; font-weight: 600">0.21</dd></div>
+<div><dt style="font-size: 12px; color: #5A615C">Wi-Fi</dt><dd style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 22px; font-weight: 600">−58 dBm</dd></div>
+</dl>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; font-size: 13px"><span>SD card · 12.1 of 29.5 GB</span><span style="color: #5A615C">DB grows 9 MB/day</span></div>
+<div role="img" aria-label="Disk 41 percent used" style="height: 8px; background: #ECEEE9; border-radius: 999px; overflow: hidden"><div style="width: 41%; height: 8px; background: #0F766E; border-radius: 999px"></div></div>
+</div>
+</section>
+</div>
+
+<!-- Data sources -->
+<section aria-labelledby="src-h" style="background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 id="src-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Data sources</h2>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 620px; border-collapse: collapse; font-size: 14px">
+<thead>
+<tr style="text-align: left; color: #5A615C; font-size: 12px">
+<th scope="col" style="padding: 8px 12px 8px 0; font-weight: 500; border-bottom: 1px solid #E1E4DE">Source</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Provides</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Polled</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Last reading</th>
+<th scope="col" style="padding: 8px 0 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Room sensors</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">Temp, humidity, CO₂, pressure</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">30 s</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">13:41</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>OK</span></td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Nest (SDM API)</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">Temp, humidity, target, boiler status</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">2 min</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">13:40</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>OK</span></td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Boiler pipe probes</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">Flow and return temperature</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">30 s</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">13:41</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>OK</span></td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Smart meters</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">Electricity and gas, half-hourly</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">Every 6 h</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">5 Nov 23:30</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>1 day behind · expected</span></td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Thames Water</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">Water, hourly</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">Daily</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">3 Nov 23:00</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>3 days behind · expected</span></td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Open-Meteo</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">Outdoor weather, forecast</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">15 min</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">13:30</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>OK</span></td></tr>
+<tr><td style="padding: 10px 12px 10px 0; font-weight: 600">Carbon Intensity</td><td style="padding: 10px 12px">Grid gCO₂/kWh, 48 h forecast</td><td style="padding: 10px 12px">30 min</td><td style="padding: 10px 12px">13:30</td><td style="padding: 10px 0 10px 12px"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>OK</span></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<p style="margin: 0; font-size: 12px; color: #5A615C">All figures on this mockup are sample data.</p>
+</div>
+</div>
+</body>
+</html>

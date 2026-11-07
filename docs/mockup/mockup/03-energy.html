@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Home dashboard – Energy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F4F1}
+a{color:#0F5F59}a:hover{color:#0A4540}
+</style>
+</head>
+<body>
+<div style="min-height: 100vh; background: #F3F4F1; color: #1B1F1D; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+<div style="max-width: 1360px; margin: 0 auto; padding: 28px 24px 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h1 style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -0.02em">Energy</h1>
+<p style="margin: 0; font-size: 13px; color: #5A615C">Friday 6 November · smart meter data to 5 Nov · sample data</p>
+</div>
+<nav aria-label="Sections" style="display: flex; flex-wrap: wrap; gap: 4px; background: #E7E9E4; padding: 4px; border-radius: 12px">
+<a href="01-overview.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Overview</a>
+<a href="02-rooms.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Rooms</a>
+<a href="03-energy.html" aria-current="page" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 600 14px Inter, sans-serif; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.08)">Energy</a>
+<a href="04-heating.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Heating</a>
+<a href="05-water.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Water</a>
+<a href="06-wifi.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Wi-Fi</a>
+<a href="07-system.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">System</a>
+</nav>
+<div role="group" aria-label="Time range" style="display: flex; gap: 6px">
+<button type="button" aria-pressed="false" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">24h</button>
+<button type="button" aria-pressed="true" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #0F766E; border-radius: 9px; background: #0F766E; color: #FFFFFF; font: 600 13px Inter, sans-serif">14d</button>
+<button type="button" aria-pressed="false" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">30d</button>
+</div>
+</header>
+
+<p style="margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; font-size: 13px; color: #5A615C"><span style="display: inline-flex; align-items: center; gap: 8px"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span>updates within minutes</span><span style="display: inline-flex; align-items: center; gap: 8px"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>1 day behind</span>smart meter readings arrive the next day, so today is not shown yet</span></p>
+
+<!-- KPIs -->
+<section aria-label="Energy totals" style="display: flex; flex-wrap: wrap; gap: 14px">
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>Latest day · Thu 5 Nov</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>1 day behind</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">£4.39</span>
+<span style="font-size: 13px; color: #5A615C">9.7 kWh elec · 32 kWh gas</span>
+</div>
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>November · 1–5 Nov</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>1 day behind</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">£23.32</span>
+<span style="font-size: 13px; color: #5A615C">On track for about £140 this month</span>
+</div>
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>Electricity · 30 Oct–5 Nov</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>1 day behind</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">72.7<span style="font-size: 18px; color: #5A615C"> kWh</span></span>
+<span style="font-size: 13px; color: #5A615C">+2 % on last week</span>
+</div>
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>Gas · 30 Oct–5 Nov</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>1 day behind</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">227<span style="font-size: 18px; color: #5A615C"> kWh</span></span>
+<span style="font-size: 13px; color: #5A615C">+21 % · outdoors 2 °C colder</span>
+</div>
+</section>
+
+<!-- Daily cost stacked -->
+<section aria-labelledby="cost-h" style="background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="cost-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Daily cost, 23 Oct – 5 Nov</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Data to 5 Nov · 1 day behind</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: #3F4A44">
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 3px; background: #2563EB"></span>Electricity</span>
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 3px; background: #C2410C"></span>Gas</span>
+<span>£61.35 total · excl. standing charges</span>
+</div>
+</div>
+<svg viewBox="0 0 770 190" role="img" aria-label="Stacked bar chart of daily energy cost over 14 days, between £3.79 and £4.92 a day, with gas rising in the colder second week." style="width: 100%; height: auto; display: block">
+<g transform="translate(40,4)">
+<line x1="0" y1="10" x2="720" y2="10" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="60" x2="720" y2="60" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="110" x2="720" y2="110" stroke="#ECEEE9" stroke-width="1"></line>
+<rect x="7" y="100" width="37.4" height="60" fill="#2563EB"></rect><rect x="7" y="64.4" width="37.4" height="34.6" fill="#C2410C"></rect>
+<rect x="58.4" y="96.3" width="37.4" height="63.7" fill="#2563EB"></rect><rect x="58.4" y="57.5" width="37.4" height="37.8" fill="#C2410C"></rect>
+<rect x="109.9" y="105.5" width="37.4" height="54.5" fill="#2563EB"></rect><rect x="109.9" y="62" width="37.4" height="42.5" fill="#C2410C"></rect>
+<rect x="161.3" y="104.3" width="37.4" height="55.7" fill="#2563EB"></rect><rect x="161.3" y="62.4" width="37.4" height="40.9" fill="#C2410C"></rect>
+<rect x="212.7" y="91.4" width="37.4" height="68.6" fill="#2563EB"></rect><rect x="212.7" y="43.2" width="37.4" height="47.2" fill="#C2410C"></rect>
+<rect x="264.1" y="86.5" width="37.4" height="73.5" fill="#2563EB"></rect><rect x="264.1" y="41.4" width="37.4" height="44.1" fill="#C2410C"></rect>
+<rect x="315.6" y="101.2" width="37.4" height="58.8" fill="#2563EB"></rect><rect x="315.6" y="51.4" width="37.4" height="48.8" fill="#C2410C"></rect>
+<rect x="367" y="99.4" width="37.4" height="60.6" fill="#2563EB"></rect><rect x="367" y="54.3" width="37.4" height="44.1" fill="#C2410C"></rect>
+<rect x="418.4" y="93.8" width="37.4" height="66.2" fill="#2563EB"></rect><rect x="418.4" y="44" width="37.4" height="48.8" fill="#C2410C"></rect>
+<rect x="469.9" y="102.4" width="37.4" height="57.6" fill="#2563EB"></rect><rect x="469.9" y="46.3" width="37.4" height="55.1" fill="#C2410C"></rect>
+<rect x="521.3" y="104.9" width="37.4" height="55.1" fill="#2563EB"></rect><rect x="521.3" y="44" width="37.4" height="59.9" fill="#C2410C"></rect>
+<rect x="572.7" y="89" width="37.4" height="71" fill="#2563EB"></rect><rect x="572.7" y="36" width="37.4" height="52" fill="#C2410C"></rect>
+<rect x="624.1" y="84.7" width="37.4" height="75.3" fill="#2563EB"></rect><rect x="624.1" y="36.5" width="37.4" height="47.2" fill="#C2410C"></rect>
+<rect x="675.6" y="100.6" width="37.4" height="59.4" fill="#2563EB"></rect><rect x="675.6" y="49.2" width="37.4" height="50.4" fill="#C2410C"></rect>
+<line x1="0" y1="160" x2="720" y2="160" stroke="#CDD1CA" stroke-width="1"></line>
+</g>
+<g font-family="Inter, sans-serif" font-size="11" fill="#5A615C">
+<text x="32" y="18" text-anchor="end">£6</text>
+<text x="32" y="68" text-anchor="end">£4</text>
+<text x="32" y="118" text-anchor="end">£2</text>
+<text x="65.7" y="182" text-anchor="middle">23 Oct</text>
+<text x="220" y="182" text-anchor="middle">26 Oct</text>
+<text x="374.3" y="182" text-anchor="middle">29 Oct</text>
+<text x="528.6" y="182" text-anchor="middle">1 Nov</text>
+<text x="734.3" y="182" text-anchor="middle">5 Nov</text>
+</g>
+</svg>
+</section>
+
+<!-- Where electricity goes + baseload + tariff -->
+<div style="display: flex; flex-wrap: wrap; gap: 14px">
+<section aria-labelledby="where-h" style="flex: 999 1 560px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="where-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Where the electricity went, 30 Oct – 5 Nov</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Data to 5 Nov · 1 day behind</span></div>
+<span style="font-size: 13px; color: #5A615C">Smart plugs are live; the total waits for the meter · 72.7 kWh</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 5px"><div style="display: flex; justify-content: space-between; font-size: 14px"><span>Fridge-freezer</span><span><strong style="font-weight: 600">7.4 kWh</strong> · £1.81</span></div><div role="img" aria-label="Fridge-freezer 10 percent" style="height: 10px; background: #ECEEE9; border-radius: 999px; overflow: hidden"><div style="width: 10.2%; height: 10px; background: #2563EB; border-radius: 999px"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 5px"><div style="display: flex; justify-content: space-between; font-size: 14px"><span>Office desk</span><span><strong style="font-weight: 600">6.1 kWh</strong> · £1.49</span></div><div role="img" aria-label="Office desk 8 percent" style="height: 10px; background: #ECEEE9; border-radius: 999px; overflow: hidden"><div style="width: 8.4%; height: 10px; background: #2563EB; border-radius: 999px"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 5px"><div style="display: flex; justify-content: space-between; font-size: 14px"><span>Washing machine</span><span><strong style="font-weight: 600">4.8 kWh</strong> · £1.18</span></div><div role="img" aria-label="Washing machine 7 percent" style="height: 10px; background: #ECEEE9; border-radius: 999px; overflow: hidden"><div style="width: 6.6%; height: 10px; background: #2563EB; border-radius: 999px"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 5px"><div style="display: flex; justify-content: space-between; font-size: 14px"><span>TV and media</span><span><strong style="font-weight: 600">3.9 kWh</strong> · £0.96</span></div><div role="img" aria-label="TV and media 5 percent" style="height: 10px; background: #ECEEE9; border-radius: 999px; overflow: hidden"><div style="width: 5.4%; height: 10px; background: #2563EB; border-radius: 999px"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 5px"><div style="display: flex; justify-content: space-between; font-size: 14px"><span>Tumble dryer</span><span><strong style="font-weight: 600">3.2 kWh</strong> · £0.78</span></div><div role="img" aria-label="Tumble dryer 4 percent" style="height: 10px; background: #ECEEE9; border-radius: 999px; overflow: hidden"><div style="width: 4.4%; height: 10px; background: #2563EB; border-radius: 999px"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 5px"><div style="display: flex; justify-content: space-between; font-size: 14px"><span>Not monitored (lights, oven, kettle, other)</span><span><strong style="font-weight: 600">47.3 kWh</strong> · £11.59</span></div><div role="img" aria-label="Not monitored 65 percent" style="height: 10px; background: #ECEEE9; border-radius: 999px; overflow: hidden"><div style="width: 65%; height: 10px; background: #9AA19C; border-radius: 999px"></div></div></div>
+</div>
+</section>
+
+<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<section aria-labelledby="base-h" style="background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="base-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Baseload</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>1 day behind</span></div>
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600">168 W</span><span style="font-size: 14px; color: #5A615C">lowest use, night of 4–5 Nov</span></div>
+<p style="margin: 0; font-size: 14px">Always-on devices use about 4 kWh a day, roughly <strong style="font-weight: 600">£360 a year</strong>.</p>
+<p style="margin: 0; font-size: 13px; color: #5A615C">Up from 142 W a month ago</p>
+</section>
+<section aria-labelledby="co2-h" style="background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="co2-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Carbon, 30 Oct – 5 Nov</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>1 day behind</span></div>
+<dl style="margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px">
+<div><dt style="font-size: 12px; color: #5A615C">Electricity</dt><dd style="margin: 0; font-weight: 600">10.9 kg CO₂</dd></div>
+<div><dt style="font-size: 12px; color: #5A615C">Gas</dt><dd style="margin: 0; font-weight: 600">41.5 kg CO₂</dd></div>
+</dl>
+<p style="margin: 0; font-size: 13px; color: #5A615C">Electricity uses the grid's actual half-hourly intensity</p>
+</section>
+</div>
+</div>
+
+<!-- Tariff -->
+<section aria-labelledby="tariff-h" style="background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<h2 id="tariff-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Tariff</h2>
+<button type="button" style="min-height: 40px; padding: 0 14px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">Edit rates</button>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 520px; border-collapse: collapse; font-size: 14px">
+<thead>
+<tr style="text-align: left; color: #5A615C; font-size: 12px">
+<th scope="col" style="padding: 8px 12px 8px 0; font-weight: 500; border-bottom: 1px solid #E1E4DE">Fuel</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Unit rate</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Standing charge</th>
+<th scope="col" style="padding: 8px 0 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Source</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Electricity</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">24.50 p/kWh</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">60.97 p/day</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE">Entered manually</td></tr>
+<tr><td style="padding: 10px 12px 10px 0; font-weight: 600">Gas</td><td style="padding: 10px 12px">6.30 p/kWh</td><td style="padding: 10px 12px">31.65 p/day</td><td style="padding: 10px 0 10px 12px">Entered manually</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<p style="margin: 0; font-size: 12px; color: #5A615C">All figures on this mockup, including tariff rates, are sample data.</p>
+</div>
+</div>
+</body>
+</html>

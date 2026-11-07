@@ -16,6 +16,8 @@ export type Poll = { type: 'every'; seconds: number } | { type: 'cron'; expressi
 export interface SourceConfig {
   id: string;
   name: string;
+  /** What it provides, shown in the data sources table, e.g. "Temp, humidity, CO₂, pressure". */
+  description: string | null;
   kind: SourceKind;
   /** How a pull source is scheduled; null for push sources (kind `sensor`). */
   poll: Poll | null;
@@ -69,6 +71,7 @@ const poll = z.string().transform((value, ctx): Poll => {
 const SourceEntrySchema = z
   .strictObject({
     name: z.string().min(1),
+    description: z.string().min(1).optional(),
     kind: z.enum(SOURCE_KINDS),
     poll: poll.optional(),
     push_interval: duration.optional(),
@@ -140,6 +143,7 @@ export function parseRegistry(raw: unknown): Registry {
     sources: Object.entries(result.data.sources).map(([id, s]) => ({
       id,
       name: s.name,
+      description: s.description ?? null,
       kind: s.kind,
       poll: s.poll ?? null,
       pushIntervalSeconds: s.push_interval ?? null,

@@ -3,3 +3,5 @@ coverage/
 pnpm-lock.yaml
 # Docs are written by hand; don't reflow them.
 *.md
+# The mockup is the owner's reference; never reformat it.
+docs/mockup/

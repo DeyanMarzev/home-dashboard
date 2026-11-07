@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   combineFreshness,
+  retick,
   dataToOf,
   freshness,
   type Freshness,
@@ -39,6 +40,7 @@ describe('live sources', () => {
     expect(f).toEqual({
       state: 'live',
       dataTo: '2026-11-06T13:10:00.000Z',
+      intervalSeconds: null,
       lagSeconds: 299,
       daysBehind: 0,
       label: 'Live',
@@ -114,6 +116,7 @@ describe('delayed sources', () => {
     expect(f).toEqual({
       state: 'delayed',
       dataTo: '2026-11-06T00:00:00.000Z',
+      intervalSeconds: 1800,
       lagSeconds: 14 * 3600,
       daysBehind: 1,
       label: 'Data to 5 Nov · 1 day behind',
@@ -243,6 +246,7 @@ describe('never reported', () => {
     expect(freshness(smartMeters, null, at('2026-11-06T12:00:00Z'))).toEqual({
       state: 'late',
       dataTo: null,
+      intervalSeconds: null,
       lagSeconds: null,
       daysBehind: null,
       label: 'No data yet',
@@ -294,5 +298,30 @@ describe('combineFreshness', () => {
     const all: Freshness[] = [live, delayed1, delayed3, late, never];
     expect(combineFreshness(all)).toBe(never);
     expect(combineFreshness([...all].reverse())).toBe(never);
+  });
+});
+
+describe('retick', () => {
+  it('turns a live badge late on its own as time passes', () => {
+    const f = freshness(roomSensors, { ts: '2026-11-06T13:10:00Z' }, at('2026-11-06T13:11:00Z'));
+    expect(f.state).toBe('live');
+    expect(retick(f, roomSensors, at('2026-11-06T13:20:00Z'))).toMatchObject({
+      state: 'late',
+      label: 'No data since 13:10',
+    });
+  });
+
+  it('matches a fresh server computation exactly, interval series included', () => {
+    const latest = { ts: '2026-11-05T23:30:00Z', intervalSeconds: HALF_HOUR };
+    const before = freshness(smartMeters, latest, at('2026-11-06T09:00:00Z'));
+    for (const later of ['2026-11-06T23:59:00Z', '2026-11-07T12:00:01Z', '2026-11-09T08:00:00Z']) {
+      expect(retick(before, smartMeters, at(later))).toEqual(
+        freshness(smartMeters, latest, at(later)),
+      );
+    }
+  });
+
+  it('keeps "No data yet"', () => {
+    expect(retick(freshness(roomSensors, null), roomSensors).label).toBe('No data yet');
   });
 });

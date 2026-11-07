@@ -15,6 +15,7 @@ const IsoTimestamp = z.iso.datetime({ offset: true });
 export const FreshnessSchema = z.object({
   state: z.enum(['live', 'delayed', 'late']),
   dataTo: IsoTimestamp.nullable(),
+  intervalSeconds: z.number().int().nullable(),
   lagSeconds: z.number().int().nullable(),
   daysBehind: z.number().int().nullable(),
   label: z.string(),
@@ -60,12 +61,19 @@ export const HealthSchema = z.object({
 export const SourceInfoSchema = z.object({
   id: z.string(),
   name: z.string(),
+  description: z.string().nullable(),
   kind: z.enum(SOURCE_KINDS),
   /** `15m`, `cron: 0 6 * * *`, or null for push sources. */
   poll: z.string().nullable(),
   pushInterval: z.string().nullable(),
   expectedDelay: z.string(),
   enabled: z.boolean(),
+  /** What freshness is computed from, so clients can re-tick badges (`retick`). */
+  policy: z.object({
+    expectedDelaySeconds: z.number().int(),
+    cadenceSeconds: z.number().int().nullable(),
+    graceSeconds: z.number().int().nullable(),
+  }),
   freshness: FreshnessSchema,
   lastRun: z
     .object({

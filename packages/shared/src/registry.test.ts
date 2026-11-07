@@ -51,6 +51,7 @@ describe('parseRegistry', () => {
     expect(sources[0]).toEqual({
       id: 'room_sensors',
       name: 'Room sensors',
+      description: null,
       kind: 'sensor',
       poll: null,
       pushIntervalSeconds: 30,

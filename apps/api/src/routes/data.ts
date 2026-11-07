@@ -2,6 +2,7 @@ import { latestBySource, type Sql } from '@home/db';
 import {
   EventsQuerySchema,
   formatDuration,
+  freshnessPolicy,
   LatestQuerySchema,
   MAX_POINTS,
   ReadingsQuerySchema,
@@ -111,6 +112,7 @@ export function registerDataRoutes(
       return {
         id: s.id,
         name: s.name,
+        description: s.description,
         kind: s.kind,
         poll:
           s.poll === null
@@ -121,6 +123,7 @@ export function registerDataRoutes(
         pushInterval: s.pushIntervalSeconds === null ? null : formatDuration(s.pushIntervalSeconds),
         expectedDelay: formatDuration(s.expectedDelaySeconds),
         enabled: s.enabled,
+        policy: freshnessPolicy(s),
         freshness: freshness.of(s.id, latest.get(s.id) ?? null),
         lastRun: run
           ? {
