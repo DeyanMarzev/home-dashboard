@@ -29,10 +29,26 @@ export interface ServerDeps {
   logger?: FastifyBaseLogger;
 }
 
+// Everything the web app loads is same-origin (fonts are self-hosted). Inline styles are
+// allowed because ECharts' SVG renderer writes style attributes.
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join('; ');
+
 const SECURITY_HEADERS = {
   'x-content-type-options': 'nosniff',
   'x-frame-options': 'DENY',
   'referrer-policy': 'same-origin',
+  'content-security-policy': CONTENT_SECURITY_POLICY,
 };
 
 export function createLogger(level: string): FastifyBaseLogger {

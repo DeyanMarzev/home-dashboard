@@ -150,8 +150,8 @@ Daily litres, hourly profile for a day, nightly minimum flow (leak check).
 - `costPence` = litres ÷ 1000 × the `water` tariff's unit rate (p/m³) + its standing charge; null without a water tariff for that date.
 - `complete` = every hour of the London day present (23/24/25). `hourly` is for `latestDay`. `nights` are keyed by the morning's date; `leak.state` is `ok`, `watch` (flow on the latest night or two), `leak` (3+ in a row) or `unknown`. Cached 30 s.
 
-### `GET /api/events?limit=50&level=`
-Recent events, newest first: `{ "items": [{ "id", "ts", "level", "sourceId", "kind", "message", "data", "resolvedAt" }] }`. `limit` 1–500.
+### `GET /api/events?limit=50&level=&kind=`
+Recent events, newest first: `{ "items": [{ "id", "ts", "level", "sourceId", "kind", "message", "data", "resolvedAt" }] }`. `limit` 1–500. `kind` filters to one event kind (e.g. `backup`, used by the System page for the last backup).
 
 ### `GET /api/tariffs` · `PUT /api/tariffs`
 Read and replace tariff rows. Validate no overlapping periods per fuel.

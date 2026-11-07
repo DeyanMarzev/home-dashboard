@@ -12,7 +12,6 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 | 6b | Linksys MX4200: a capture of its device list (`docker compose exec netprobe node dist/netprobe/router-capture.js`, names and addresses are redacted) | M9 device list | Counts work already via JNAP `devicelist/GetDevices3` (or ARP without `ROUTER_PASSWORD`); the per-device table (name, band, signal) waits for the real format. |
 | 7 | Smart plugs: brand and which appliances? | Later | Shelly and Tapo have local APIs. |
 | 8 | Boiler probes: fitted yet? 1-Wire IDs for flow and return? | M6 | Collector must run fine with no probes. |
-| 10 | Off-Pi backup destination (Google Drive, OneDrive, Backblaze B2, NAS)? | M10 | Via `rclone`. |
 | 13 | Thames Water account data: how does the account website load hourly usage (the request it makes and a sample response, personal details removed)? | M8 real data | The `thames` provider is a placeholder until then (`apps/collector/src/sources/thames_water/providers/thames.ts`); everything else runs on the `fake` provider. Easiest: browser dev tools → Network while opening the usage page. |
 | 12 | Build images in CI (GitHub Actions, `linux/arm64`) or keep building on the Pi? | M10 | Building on the Pi works but is slow. |
 
@@ -24,3 +23,4 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 | 9 | Cloudflare Access allowed emails | `deyanmarzev@gmail.com` (2026-11-07). |
 | 11 | Water: tariff or volume only? | Volume, and cost where possible: add a `water` rate (p/m³ + standing p/day) on the Energy page's tariff editor; costs show wherever one applies (2026-11-07). |
 | 6 | Router make/model | Linksys MX4200 (Velop mesh). Local JNAP API (`POST http://<router>/JNAP/`, admin password): used for device counts (2026-11-07). |
+| 10 | Off-Pi backup destination | Google Drive, via `rclone` with the `drive.file` scope (it only sees the files it uploads). Setup in `docs/06` § 8 (2026-11-07). |

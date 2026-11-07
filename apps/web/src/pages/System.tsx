@@ -25,6 +25,7 @@ import { Chip, Status, type Tone } from '../components/Status.js';
 import { useCombinedFreshness, useFreshnessNow } from '../lib/freshness.js';
 import { useNow } from '../lib/now-context.js';
 import { RANGE_LABEL, RANGE_SECONDS, useRange } from '../lib/range.js';
+import { BACKUP_OVERDUE_SECONDS, backupStatus } from '../model/backup.js';
 import { pick, valueOf } from '../model/latest.js';
 import {
   COLLECTOR_STATUS_TEXT,
@@ -54,6 +55,7 @@ export function SystemPage() {
   const pi = useLatest({ source: 'pi_stats' });
   const sources = useSources();
   const events = useEvents(10);
+  const backups = useEvents(1, 'backup');
 
   const cpuId = pick(pi.data, 'cpu_temperature')?.series.id;
   const cpu = useReadings(cpuId ? [cpuId] : [], range);
@@ -239,7 +241,7 @@ export function SystemPage() {
           latest={pi.data}
           sdPercent={sdPercent}
           dbGrowth={dbGrowth}
-          events={events.data?.items ?? []}
+          backup={backups.data?.items[0]}
         />
         <ApiPanel />
         <EventsPanel events={events.data?.items} />
@@ -341,12 +343,12 @@ function StoragePanel({
   latest,
   sdPercent,
   dbGrowth,
-  events,
+  backup: backupEvent,
 }: {
   latest: LatestResponse | undefined;
   sdPercent: number | null;
   dbGrowth: readonly (readonly [string, number])[];
-  events: EventItem[];
+  backup: EventItem | undefined;
 }) {
   const now = useNow();
   const sdUsed = valueOf(latest, 'disk_used', 'sd_card');
@@ -358,7 +360,9 @@ function StoragePanel({
   const last = dbGrowth[dbGrowth.length - 1];
   const days = first && last ? (Date.parse(last[0]) - Date.parse(first[0])) / 86_400_000 : 0;
   const perDay = first && last && days >= 1 ? (last[1] - first[1]) / days : null;
-  const backup = events.find((e) => e.kind === 'backup');
+  const backup = backupStatus(backupEvent);
+  const overdue =
+    backup !== null && (now.getTime() - Date.parse(backup.ts)) / 1000 > BACKUP_OVERDUE_SECONDS;
 
   return (
     <Panel id="db-h" title="Storage and backups" flex="1 1 300px">
@@ -401,8 +405,31 @@ function StoragePanel({
         </div>
         <div>
           <dt>Last backup</dt>
-          <dd>{backup ? formatWhen(backup.ts, now) : 'None yet'}</dd>
+          <dd>
+            {!backup ? (
+              'None yet'
+            ) : (
+              <Status tone={!backup.ok || overdue ? 'bad' : 'good'}>
+                {backup.ok
+                  ? `${formatWhen(backup.ts, now)}${backup.sizeMb === null ? '' : ` · ${formatSize(backup.sizeMb)}`}`
+                  : `Failed ${formatWhen(backup.ts, now)}${backup.failedStep ? ` (${backup.failedStep})` : ''}`}
+              </Status>
+            )}
+          </dd>
         </div>
+        {backup?.ok && (
+          <div>
+            <dt>Copies</dt>
+            <dd>
+              {backup.keptLocal === null ? 'Nightly' : `${backup.keptLocal} nightly`} on the Pi
+              {backup.offsite
+                ? backup.keptRemoteDays === null
+                  ? ' · off-site'
+                  : ` · ${backup.keptRemoteDays} days off-site`
+                : ' · no off-site copy'}
+            </dd>
+          </div>
+        )}
       </dl>
     </Panel>
   );

@@ -109,6 +109,10 @@ describe('with Cloudflare Access enabled', () => {
     expect(res.body).toContain('Home dashboard is running');
     expect(res.headers['cache-control']).toBe('no-cache');
     expect(res.headers['x-content-type-options']).toBe('nosniff');
+    const csp = String(res.headers['content-security-policy']);
+    expect(csp).toContain("script-src 'self'");
+    expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).not.toContain('unsafe-eval');
   });
 
   it('falls back to index.html for client-side routes', async () => {
