@@ -75,14 +75,13 @@ sources:
     expected_delay: 0s
     enabled: false
 
-  smart_meters: # built (M7) with only a `fake` provider (sample data); enable once the real provider exists (docs/08 question 3)
+  smart_meters: # Bright (Hildebrand Glowmarkt) API; needs BRIGHT_USERNAME/PASSWORD in .env (docs/06 § 5e)
     name: Smart meters
-    description: Electricity and gas, half-hourly
+    description: Electricity and gas, half-hourly (Bright)
     kind: api
     poll: 6h
     expected_delay: 1d # readings arrive the next day
     grace: 12h
-    enabled: false
 
   thames_water: # built (M8) with only a `fake` provider (sample data); enable once the real one exists (docs/08 question 13)
     name: Thames Water

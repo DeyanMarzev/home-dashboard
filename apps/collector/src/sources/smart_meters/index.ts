@@ -1,9 +1,13 @@
 import type { PullCollector } from '../../collector.js';
+import { brightProvider } from './providers/bright.js';
 import { fakeProvider } from './providers/fake.js';
 import type { MeterProvider } from './providers/types.js';
 
-/** Providers by METER_PROVIDER. The real one is added once docs/08 question 3 is answered. */
-export const PROVIDERS: Record<string, MeterProvider> = { fake: fakeProvider };
+/** Providers by METER_PROVIDER: `bright` for real data (docs/08 question 3), `fake` for development. */
+export const PROVIDERS: Record<string, MeterProvider> = {
+  bright: brightProvider,
+  fake: fakeProvider,
+};
 
 /** Re-fetch this far behind what we have: delayed sources re-send and revise (docs/03). */
 const OVERLAP_MS = 2 * 86400_000;
@@ -18,7 +22,7 @@ export const smartMeters: PullCollector = {
     const provider = PROVIDERS[ctx.env.METER_PROVIDER];
     if (!provider) {
       throw new Error(
-        `METER_PROVIDER "${ctx.env.METER_PROVIDER}" isn't supported yet (see docs/08 question 3)`,
+        `METER_PROVIDER "${ctx.env.METER_PROVIDER}" isn't supported (use bright, or fake for sample data)`,
       );
     }
     const [electricity, gas] = await Promise.all([

@@ -34,6 +34,9 @@ const EnvSchema = z.object({
 
   // Smart meters: which MeterProvider fetches the data (docs/08 question 3).
   METER_PROVIDER: z.preprocess(blankToUndefined, z.string().trim().default('fake')),
+  // Bright (Hildebrand Glowmarkt): the Bright app login. Secrets: never logged.
+  BRIGHT_USERNAME: optionalString,
+  BRIGHT_PASSWORD: optionalString,
 
   // Thames Water: which WaterProvider fetches the data (`fake` until the real one is built).
   WATER_PROVIDER: z.preprocess(blankToUndefined, z.string().trim().default('fake')),

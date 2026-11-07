@@ -201,6 +201,31 @@ docker compose exec netprobe iw dev wlan0 link   # the Pi's own Wi-Fi (nothing i
 
 Within 5 minutes the Wi-Fi page shows devices and latency; within 30 the channel scan; the speed test runs daily at 12:00. To confirm the router's device format (docs/08 6b): `docker compose exec netprobe node dist/netprobe/router-capture.js > devices.json` and send the file (names and addresses are redacted).
 
+## 5e. Smart meters (Bright)
+
+Electricity and gas come from the Bright app's API (Hildebrand Glowmarkt), free, a day behind. First check the Bright app itself shows your half-hourly electricity and gas usage: the dashboard gets exactly that data.
+
+In `.env`:
+
+```bash
+METER_PROVIDER=bright
+BRIGHT_USERNAME=you@example.com     # the Bright app login
+BRIGHT_PASSWORD=...
+```
+
+```bash
+docker compose up -d collector
+docker compose logs collector | grep smart_meters
+```
+
+The first run fetches the last 30 days, then it runs every 6 hours. The Energy page fills in, with its badge showing how far behind the data is (normally "1 day behind"). If the login is wrong, the System page shows Smart meters as Failing with "Bright refused the login".
+
+To confirm the data format (docs/08 3b), capture it once and send the file (ids and personal details are redacted):
+
+```bash
+docker compose exec collector node dist/tools/bright-capture.js > bright.json
+```
+
 ## 6. Start
 
 ```bash
