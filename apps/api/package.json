@@ -7,14 +7,17 @@
     "dist"
   ],
   "scripts": {
-    "dev": "tsx watch --conditions=development src/index.ts",
+    "dev": "NODE_ENV=development AUTH_DISABLED=true tsx watch --env-file-if-exists=../../.env --conditions=development src/index.ts",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
+    "@fastify/static": "^10.1.10",
     "@home/shared": "workspace:*",
-    "fastify": "^5.12.8"
+    "fastify": "^5.12.8",
+    "jose": "^6.2.15",
+    "zod": "^4.6.7"
   }
 }

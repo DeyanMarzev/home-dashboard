@@ -1,15 +1,41 @@
 import Fastify, { type FastifyInstance } from 'fastify';
+import type { JWTVerifyGetKey } from 'jose';
+import { registerAccessAuth } from './auth.js';
+import type { Config } from './config.js';
+import { registerErrorHandler } from './errors.js';
+import { registerWebApp } from './web-app.js';
 
-export const VERSION = process.env.APP_VERSION ?? '0.0.0-dev';
+export interface ServerDeps {
+  /** Override Cloudflare's signing keys (tests). */
+  accessKeys?: JWTVerifyGetKey;
+}
 
-export function buildServer(): FastifyInstance {
+export async function buildServer(config: Config, deps: ServerDeps = {}): Promise<FastifyInstance> {
   const app = Fastify({
-    logger: { level: process.env.LOG_LEVEL ?? 'info' },
+    logger: {
+      level: config.logLevel,
+      redact: ['req.headers["cf-access-jwt-assertion"]', 'req.headers.cookie'],
+    },
+    // Only reachable via cloudflared on the Docker network (or 127.0.0.1 on the Pi).
+    trustProxy: true,
   });
 
-  // Unauthenticated; used by the Docker healthcheck. Returns no data.
-  // M0 placeholder: the database check is added with the DB in M2.
-  app.get('/api/health', () => ({ ok: true, version: VERSION }));
+  registerErrorHandler(app);
+
+  app.addHook('onSend', async (_request, reply) => {
+    reply.header('x-content-type-options', 'nosniff');
+    reply.header('x-frame-options', 'DENY');
+    reply.header('referrer-policy', 'same-origin');
+  });
+
+  // Before any route, so every route (and the 404 handler) is behind it.
+  registerAccessAuth(app, config.auth, deps.accessKeys);
+
+  // Unauthenticated (Docker healthcheck). Returns no data.
+  // The database check is added with the DB in M2.
+  app.get('/api/health', { logLevel: 'warn' }, () => ({ ok: true, version: config.version }));
+
+  await registerWebApp(app, config.publicDir);
 
   return app;
 }

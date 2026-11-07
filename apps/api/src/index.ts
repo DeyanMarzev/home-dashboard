@@ -1,7 +1,16 @@
+import { ConfigError, loadConfig, type Config } from './config.js';
 import { buildServer } from './server.js';
 
-const app = buildServer();
-const port = Number(process.env.PORT ?? 3000);
+let config: Config;
+try {
+  config = loadConfig(process.env);
+} catch (err) {
+  if (!(err instanceof ConfigError)) throw err;
+  console.error(err.message);
+  process.exit(1);
+}
+
+const app = await buildServer(config);
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, () => {
@@ -10,4 +19,4 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   });
 }
 
-await app.listen({ host: '0.0.0.0', port });
+await app.listen({ host: '0.0.0.0', port: config.port });

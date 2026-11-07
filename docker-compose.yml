@@ -138,8 +138,8 @@ services:
       PGUSER: ${POSTGRES_USER}
       PGPASSWORD: ${POSTGRES_PASSWORD}
       PGDATABASE: ${POSTGRES_DB}
-      CF_ACCESS_TEAM: ${CF_ACCESS_TEAM:-}
-      CF_ACCESS_AUD: ${CF_ACCESS_AUD:-}
+      CF_ACCESS_TEAM: ${CF_ACCESS_TEAM:?set CF_ACCESS_TEAM in .env (docs/06 §5.1)}
+      CF_ACCESS_AUD: ${CF_ACCESS_AUD:?set CF_ACCESS_AUD in .env (docs/06 §5.2)}
       AUTH_DISABLED: ${AUTH_DISABLED:-false}
     ports:
       - '127.0.0.1:3000:3000' # local debugging on the Pi only; never port 8000 (FastAPI project)

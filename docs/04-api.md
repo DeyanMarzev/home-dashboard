@@ -9,6 +9,11 @@ Fastify 5, TypeScript, zod-validated inputs and outputs (schemas live in `packag
 - The Android app uses an Access **service token** (`CF-Access-Client-Id` / `CF-Access-Client-Secret` headers); Access then forwards a valid JWT, so the API needs no special case.
 - `AUTH_DISABLED=true` for local development only. The API must refuse to start with `AUTH_DISABLED=true` when `NODE_ENV=production`.
 - `/api/health` is unauthenticated (used by the Docker healthcheck), returns no data.
+- Only RS256 is accepted; issuer must be `https://${CF_ACCESS_TEAM}.cloudflareaccess.com`; 30 s clock tolerance. `CF_ACCESS_TEAM` may be given as `team`, `team.cloudflareaccess.com` or the full URL.
+- The check runs on every route, including static files and unknown paths (unauthenticated callers can't tell which paths exist). Rejections are logged with the reason code only, never the token.
+- If Access's signing keys can't be fetched (network down), respond **503** `SERVICE_UNAVAILABLE`, not 401, so an outage isn't mistaken for a bad login.
+- After verification the handler sees `request.identity`: `{ sub, email }` for a person, `{ sub, commonName }` for a service token.
+- Implementation: `apps/api/src/auth.ts`; config validation in `apps/api/src/config.ts` (the API refuses to start and lists every problem if the environment is wrong; it also refuses port 8000).
 
 ## Common shapes
 
