@@ -1,0 +1,173 @@
+# Home dashboard on the Raspberry Pi 4. See docs/01-architecture.md and docs/06-pi-setup-and-deploy.md.
+# Every image here has a linux/arm64 variant (checked 2026-11-07).
+# Memory limits are hard limits (CLAUDE.md rule 8); total ~1.8 GB.
+
+name: home-dashboard
+
+x-logging: &logging
+  driver: local
+  options:
+    max-size: 10m
+    max-file: '3'
+
+services:
+  postgres:
+    image: timescale/timescaledb:2.31.0-pg17
+    restart: unless-stopped
+    command: ['postgres', '-c', 'config_file=/etc/postgresql/postgresql.conf']
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+      NO_TS_TUNE: 'true' # keep the values in postgresql.conf
+      TZ: UTC
+    volumes:
+      - ${DATA_DIR:?set DATA_DIR in .env}/postgres:/var/lib/postgresql/data
+      - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    shm_size: 128m
+    # Not published to the host. If ever needed: "127.0.0.1:5433:5432" (5432 may be in use).
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    networks: [home]
+    logging: *logging
+
+  mosquitto:
+    image: eclipse-mosquitto:2.1.2-alpine
+    restart: unless-stopped
+    entrypoint: ['sh', '/mosquitto/config/entrypoint.sh']
+    environment:
+      MQTT_USERNAME: ${MQTT_USERNAME:?set MQTT_USERNAME in .env}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:?set MQTT_PASSWORD in .env}
+      MQTT_SENSOR_USERNAME: ${MQTT_SENSOR_USERNAME:?set MQTT_SENSOR_USERNAME in .env}
+      MQTT_SENSOR_PASSWORD: ${MQTT_SENSOR_PASSWORD:?set MQTT_SENSOR_PASSWORD in .env}
+    volumes:
+      - ./docker/mosquitto:/mosquitto/config:ro
+      - ${DATA_DIR}/mosquitto/data:/mosquitto/data
+    ports:
+      - '1883:1883' # ESP32 sensors on the home Wi-Fi connect here
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mosquitto_sub -h 127.0.0.1 -u "$$MQTT_USERNAME" -P "$$MQTT_PASSWORD" -t '$$SYS/broker/uptime' -C 1 -W 5
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    networks: [home]
+    logging: *logging
+
+  collector:
+    build:
+      context: .
+      target: collector
+    image: home-dashboard/collector
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=160
+      TZ: Europe/London
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      PGHOST: postgres
+      PGPORT: '5432'
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      MQTT_URL: mqtt://mosquitto:1883
+      MQTT_USERNAME: ${MQTT_USERNAME}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
+      HOST_SYS: /host/sys
+      HOST_PROC: /host/proc
+      HOST_ROOTFS: /host/rootfs
+      HOST_DATA_DIR: /host/data
+      HOME_LAT: ${HOME_LAT:-}
+      HOME_LON: ${HOME_LON:-}
+      HOME_POSTCODE_OUTCODE: ${HOME_POSTCODE_OUTCODE:-}
+      NEST_PROJECT_ID: ${NEST_PROJECT_ID:-}
+      NEST_CLIENT_ID: ${NEST_CLIENT_ID:-}
+      NEST_CLIENT_SECRET: ${NEST_CLIENT_SECRET:-}
+      NEST_REFRESH_TOKEN: ${NEST_REFRESH_TOKEN:-}
+      METER_PROVIDER: ${METER_PROVIDER:-fake}
+      THAMES_EMAIL: ${THAMES_EMAIL:-}
+      THAMES_PASSWORD: ${THAMES_PASSWORD:-}
+      THAMES_ACCOUNT_NUMBER: ${THAMES_ACCOUNT_NUMBER:-}
+      THAMES_METER_ID: ${THAMES_METER_ID:-}
+      BOILER_FLOW_W1_ID: ${BOILER_FLOW_W1_ID:-}
+      BOILER_RETURN_W1_ID: ${BOILER_RETURN_W1_ID:-}
+    volumes:
+      # Pi health (pi_stats) and 1-Wire boiler probes (/host/sys/bus/w1/devices). Read-only.
+      - /sys:/host/sys:ro
+      - /proc:/host/proc:ro
+      - /:/host/rootfs:ro # statfs of the SD card root filesystem
+      - ${DATA_DIR}:/host/data:ro # statfs of the SSD
+    depends_on:
+      postgres: { condition: service_healthy }
+      mosquitto: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    networks: [home]
+    logging: *logging
+
+  api:
+    build:
+      context: .
+      target: api
+    image: home-dashboard/api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=256
+      TZ: Europe/London
+      PORT: '3000'
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      PGHOST: postgres
+      PGPORT: '5432'
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      CF_ACCESS_TEAM: ${CF_ACCESS_TEAM:-}
+      CF_ACCESS_AUD: ${CF_ACCESS_AUD:-}
+      AUTH_DISABLED: ${AUTH_DISABLED:-false}
+    ports:
+      - '127.0.0.1:3000:3000' # local debugging on the Pi only; never port 8000 (FastAPI project)
+    depends_on:
+      postgres: { condition: service_healthy }
+    # Healthcheck is defined in the Dockerfile (GET /api/health).
+    deploy:
+      resources:
+        limits:
+          memory: 384m
+    networks: [home]
+    logging: *logging
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.10.7
+    restart: unless-stopped
+    command: ['tunnel', '--no-autoupdate', 'run']
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN in .env}
+    depends_on:
+      api: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    networks: [home]
+    logging: *logging
+
+networks:
+  home:
+    name: home
