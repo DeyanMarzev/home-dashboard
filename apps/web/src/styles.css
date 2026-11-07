@@ -824,3 +824,37 @@ table.data tr:last-child td {
   font-size: 14px;
   color: var(--text-secondary);
 }
+
+/* ---- Forms ------------------------------------------------------------------------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.tariff-edit input,
+.tariff-edit select {
+  width: 100%;
+  min-width: 90px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font: 400 14px var(--font-body);
+}
+
+.tariff-edit td {
+  padding: 6px 8px;
+  font-weight: 400 !important;
+}
+
+.pill:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

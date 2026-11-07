@@ -4,17 +4,21 @@ import { RANGES, type Range } from '../lib/range.js';
 import { SECTIONS } from '../lib/sections.js';
 
 /** Title, subtitle, section tabs and time range pills, on every page (docs/05 § Pages). */
-export function PageHeader({
+export function PageHeader<T extends string = Range>({
   title,
   subtitle,
   range,
+  ranges,
   onRange,
 }: {
   title: string;
   subtitle: ReactNode;
-  range?: Range;
-  onRange?: (r: Range) => void;
+  range?: T;
+  /** Page-specific options (docs/05 § TimeRangePills); default 24h / 7d / 30d. */
+  ranges?: readonly T[];
+  onRange?: (r: T) => void;
 }) {
+  const options = ranges ?? (RANGES as readonly string[] as readonly T[]);
   return (
     <header className="header">
       <div className="header-title">
@@ -30,7 +34,7 @@ export function PageHeader({
       </nav>
       {range && onRange ? (
         <div role="group" aria-label="Time range" className="pills">
-          {RANGES.map((r) => (
+          {options.map((r) => (
             <button
               key={r}
               type="button"

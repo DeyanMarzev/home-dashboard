@@ -1,4 +1,4 @@
-import { BarChart, LineChart } from 'echarts/charts';
+import { BarChart, LineChart, ScatterChart } from 'echarts/charts';
 import {
   GridComponent,
   MarkAreaComponent,
@@ -13,6 +13,7 @@ import { useEffect, useRef } from 'react';
 echarts.use([
   BarChart,
   LineChart,
+  ScatterChart,
   GridComponent,
   MarkAreaComponent,
   MarkLineComponent,

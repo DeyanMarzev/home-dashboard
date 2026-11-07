@@ -58,7 +58,7 @@ sources:
     expected_delay: 0s
     enabled: false
 
-  smart_meters: # M7
+  smart_meters: # built (M7) with only a `fake` provider (sample data); enable once the real provider exists (docs/08 question 3)
     name: Smart meters
     description: Electricity and gas, half-hourly
     kind: api

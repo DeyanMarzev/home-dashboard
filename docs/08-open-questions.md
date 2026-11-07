@@ -6,8 +6,8 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 |---|---|---|---|
 | 1 | What are the existing room sensors (model/firmware), and how do they send data today? Can they publish MQTT? | M3 real data | The MQTT topic contract is in `docs/03`. If they can't publish MQTT, add a bridge collector for whatever they do support. |
 | 2 | Which rooms have which sensors? Does any room have more than temperature/humidity? | M3, M5 | Mockup assumes living room, kitchen, bedroom with temp/humidity/CO₂/pressure, plus the Nest in the hallway. |
-| 3 | Where will smart meter data come from (energy supplier API, Hildebrand Glowmarkt/Bright, n3rgy, other)? Owner has said it arrives 1 day late. Gas assumed the same. | M7 real data | Build `MeterProvider` with a `fake` provider first. |
-| 4 | Energy tariff: unit rates and standing charges for electricity and gas; fixed or time-of-use? | M7 costs | Mockup used sample values. If time-of-use, `tariffs` needs time bands. |
+| 3 | Where will smart meter data come from (energy supplier API, Hildebrand Glowmarkt/Bright, n3rgy, other)? Owner has said it arrives 1 day late. Gas assumed the same. | M7 real data | Built (M7) with a `fake` provider: adding the real one is one file in `apps/collector/src/sources/smart_meters/providers/` (docs/03). |
+| 4 | Energy tariff: unit rates and standing charges for electricity and gas; fixed or time-of-use? | M7 costs | Fixed rates can already be entered on the Energy page (Tariff → Edit rates). If time-of-use, `tariffs` needs time bands. |
 | 5 | Home location for weather and carbon intensity (`HOME_LAT`, `HOME_LON`, postcode outcode). | M3 | Ask the owner to fill `.env`; don't hardcode. |
 | 6 | Router make/model. Does it have an API for connected devices and signal strength? | M9 | Without one, device count comes from ARP scanning and signal per device isn't available. |
 | 7 | Smart plugs: brand and which appliances? | Later | Shelly and Tapo have local APIs. |

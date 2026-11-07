@@ -314,3 +314,72 @@ export const HeatingSummarySchema = z.object({
   freshness: FreshnessSchema.nullable(),
 });
 export type HeatingSummary = z.infer<typeof HeatingSummarySchema>;
+
+// --- GET /api/summary/energy -------------------------------------------------------------
+
+export const EnergySummaryQuerySchema = z
+  .strictObject({
+    /** London calendar dates, inclusive. Default: the 14 days ending the latest day with data. */
+    from: IsoDate.optional(),
+    to: IsoDate.optional(),
+    /** Without `from`: how many days ending `to` (default 14). */
+    days: z.coerce.number().int().min(1).max(400).optional(),
+  })
+  .refine((q) => !q.from || !q.to || q.from <= q.to, 'from must not be after to')
+  .refine(
+    (q) => !q.from || !q.to || Date.parse(q.to) - Date.parse(q.from) <= 400 * 86400_000,
+    'at most 400 days',
+  );
+
+const FuelDaySchema = z.object({
+  kwh: z.number(),
+  /** kWh × unit rate; null without a tariff for that day. */
+  energyPence: z.number().int().nullable(),
+  standingPence: z.number().int().nullable(),
+});
+
+export const EnergyDaySchema = z.object({
+  date: IsoDate,
+  /** Null when the meter sent nothing for that fuel that day. */
+  electricity: FuelDaySchema.nullable(),
+  gas: FuelDaySchema.nullable(),
+  /** Every half-hour present for both fuels (46/48/50 on clock-change days). */
+  complete: z.boolean(),
+  /** Average outdoor temperature (Open-Meteo), and heating degree-days from it. */
+  outdoorC: z.number().nullable(),
+  degreeDays: z.number().nullable(),
+});
+export type EnergyDay = z.infer<typeof EnergyDaySchema>;
+
+export const EnergySummarySchema = z.object({
+  from: IsoDate,
+  to: IsoDate,
+  /** The newest day with complete data, if any. */
+  latestDay: IsoDate.nullable(),
+  days: z.array(EnergyDaySchema),
+  /** The month of `to`, from its 1st to `to`. */
+  month: z.object({
+    from: IsoDate,
+    to: IsoDate,
+    costPence: z.number().int(),
+    /** Straight-line projection for the whole month, including standing charges. */
+    projectedPence: z.number().int().nullable(),
+  }),
+  /** Lowest half-hour of electricity overnight (00:00–05:00) on `latestDay`, as watts. */
+  baseload: z
+    .object({
+      watts: z.number().int(),
+      night: IsoDate,
+      yearlyPence: z.number().int().nullable(),
+      /** The same measure 28 days earlier, for "up from 142 W a month ago". */
+      previousWatts: z.number().int().nullable(),
+    })
+    .nullable(),
+  carbon: z.object({
+    /** kWh × the grid's recorded half-hourly intensity; null if fewer than 90 % of half-hours have one. */
+    electricityKg: z.number().nullable(),
+    gasKg: z.number().nullable(),
+  }),
+  freshness: FreshnessSchema.nullable(),
+});
+export type EnergySummary = z.infer<typeof EnergySummarySchema>;

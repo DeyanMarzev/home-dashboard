@@ -4,13 +4,21 @@ import {
   formatLongDate,
   formatMinutes,
   formatNumber,
+  linearFit,
   type HeatingSummary,
   type LatestResponse,
   type SourceInfo,
 } from '@home/shared';
-import { useHeatingSummary, useLatest, useReadings, useSources } from '../api/hooks.js';
+import {
+  useEnergySummary,
+  useHeatingSummary,
+  useLatest,
+  useReadings,
+  useSources,
+} from '../api/hooks.js';
 import { Empty, Panel, Skeleton, StatTile } from '../components/Cards.js';
 import { BarChart } from '../components/charts/BarChart.js';
+import { ScatterChart } from '../components/charts/ScatterChart.js';
 import { TimeChart } from '../components/charts/TimeChart.js';
 import { token } from '../components/charts/theme.js';
 import { FreshnessBadge } from '../components/FreshnessBadge.js';
@@ -20,6 +28,7 @@ import { Status } from '../components/Status.js';
 import { useCombinedFreshness, useFreshnessNow } from '../lib/freshness.js';
 import { useNow } from '../lib/now-context.js';
 import { RANGE_LABEL, RANGE_SECONDS, useRange, type Range } from '../lib/range.js';
+import { dayLabel } from '../model/energy.js';
 import { hoursMinutes, setpointSegments } from '../model/heating.js';
 import { pick, valueOf } from '../model/latest.js';
 
@@ -60,16 +69,7 @@ export function HeatingPage() {
           </div>
           <div className="row">
             <RuntimePanel summary={summary.data} />
-            <Panel
-              id="eff-h"
-              title="Gas vs outdoor temperature"
-              flex="1 1 440px"
-              badge={<SourceBadge source={source('smart_meters')} />}
-            >
-              <NotConnected source={source('smart_meters')}>
-                Needs daily gas use from the smart meters
-              </NotConnected>
-            </Panel>
+            <GasVsOutdoor source={source('smart_meters')} />
           </div>
         </>
       )}
@@ -354,14 +354,74 @@ function RuntimePanel({ summary }: { summary: HeatingSummary | undefined }) {
         <Empty>No boiler running time recorded yet</Empty>
       ) : (
         <BarChart
-          bars={days.map((d) => ({
-            label: WEEKDAYS[new Date(`${d.date}T12:00:00Z`).getUTCDay()]!,
-            value: d.minutesOn,
-            valueLabel: hoursMinutes(d.minutesOn),
-          }))}
-          color={token('--heat')}
+          labels={days.map((d) => WEEKDAYS[new Date(`${d.date}T12:00:00Z`).getUTCDay()]!)}
+          series={[
+            { name: 'Running time', color: token('--heat'), values: days.map((d) => d.minutesOn) },
+          ]}
+          valueLabels={days.map((d) => hoursMinutes(d.minutesOn))}
           ariaLabel={`Bar chart of boiler running time per day for the last 7 days${longest ? `, longest ${hoursMinutes(longest.minutesOn)} on ${longest.date}` : ''}.`}
         />
+      )}
+    </Panel>
+  );
+}
+
+/** Daily gas against average outdoor temperature, with the trend (kWh per °C colder). */
+function GasVsOutdoor({ source }: { source: SourceInfo | undefined }) {
+  const at = useFreshnessNow();
+  const summary = useEnergySummary(undefined, !!source?.enabled);
+  const s = summary.data;
+  const days = (s?.days ?? []).filter((d) => d.complete && d.gas && d.outdoorC !== null);
+  const points = days.map(
+    (d) => [Math.round(d.outdoorC! * 10) / 10, Math.round(d.gas!.kwh * 10) / 10] as const,
+  );
+  const fit = linearFit(points);
+  return (
+    <Panel
+      id="eff-h"
+      title="Gas vs outdoor temperature"
+      flex="1 1 440px"
+      badge={
+        source?.enabled && s?.freshness ? (
+          <FreshnessBadge freshness={at(s.freshness, 'smart_meters')} />
+        ) : (
+          <SourceBadge source={source} />
+        )
+      }
+      meta={
+        days.length > 0 &&
+        `${dayLabel(days[0]!.date)} – ${dayLabel(days.at(-1)!.date)} · one dot per day`
+      }
+    >
+      {!source?.enabled ? (
+        <NotConnected source={source}>Needs daily gas use from the smart meters</NotConnected>
+      ) : summary.isPending ? (
+        <Skeleton height={240} />
+      ) : points.length < 3 ? (
+        <Empty>Needs at least 3 complete days of gas and weather data</Empty>
+      ) : (
+        <>
+          <ScatterChart
+            points={points}
+            color={token('--heat')}
+            xUnit="°C"
+            yUnit="kWh"
+            xName="Average outdoor temperature"
+            ariaLabel={`Scatter chart: daily gas use against outdoor temperature over ${points.length} days${fit ? `, about ${formatNumber(Math.abs(fit.slope), 1)} kWh ${fit.slope < 0 ? 'more' : 'less'} per degree colder` : ''}.`}
+          />
+          {fit && fit.slope <= -0.1 && fit.r2 >= 0.2 ? (
+            <p style={{ fontSize: 14 }}>
+              Each 1 °C colder outside adds about <strong>{formatNumber(-fit.slope, 1)} kWh</strong>{' '}
+              of gas a day. Track this line over the winter: if it gets flatter, the house is losing
+              less heat.
+            </p>
+          ) : (
+            <p className="meta">
+              No clear link between outdoor temperature and gas use yet; more days, and colder ones,
+              will show it.
+            </p>
+          )}
+        </>
       )}
     </Panel>
   );
