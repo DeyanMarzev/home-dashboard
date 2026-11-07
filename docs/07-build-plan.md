@@ -76,6 +76,8 @@ Work in this order. Each milestone ends with its checks passing and a short note
 
 ## M11 · Android app
 
+> **Deferred** by the owner (2026-11-07): build later, when asked. M0–M10 come first, including verifying them on the Pi.
+
 - Capacitor in `apps/mobile` wrapping the web build; Access service token stored securely (Capacitor secure storage); app icon and name; bottom navigation; push notifications for `alert` events (Firebase Cloud Messaging) as a stretch goal.
 
 **Done when:** a debug APK installs on the owner's phone and shows live data outside the home network.
