@@ -32,6 +32,8 @@ export interface Freshness {
   state: FreshnessState;
   /** Newest instant the data covers (ISO, UTC); null if the series never reported. */
   dataTo: string | null;
+  /** What each value covers, for interval_total series (null for gauges/states/never). */
+  intervalSeconds: number | null;
   lagSeconds: number | null;
   /** Whole Europe/London calendar days between the last covered day and today. */
   daysBehind: number | null;
@@ -71,6 +73,7 @@ export function freshness(
     return {
       state: 'late',
       dataTo: null,
+      intervalSeconds: null,
       lagSeconds: null,
       daysBehind: null,
       label: 'No data yet',
@@ -109,7 +112,30 @@ export function freshness(
       : `No data since ${formatLondonDayMonth(lastCovered)}`;
   }
 
-  return { state, dataTo: dataTo.toISOString(), lagSeconds, daysBehind, label, compactLabel };
+  return {
+    state,
+    dataTo: dataTo.toISOString(),
+    intervalSeconds: latest.intervalSeconds || null,
+    lagSeconds,
+    daysBehind,
+    label,
+    compactLabel,
+  };
+}
+
+/**
+ * Recomputes a freshness for `now` (the web app re-ticks badges every minute without
+ * refetching, so a source turns Late on screen on its own). Exactly what the server would
+ * answer at `now`, given the source's policy.
+ */
+export function retick(f: Freshness, policy: FreshnessPolicy, now: Date = new Date()): Freshness {
+  if (f.dataTo === null) return freshness(policy, null, now);
+  const interval = f.intervalSeconds ?? 0;
+  return freshness(
+    policy,
+    { ts: new Date(Date.parse(f.dataTo) - interval * 1000), intervalSeconds: f.intervalSeconds },
+    now,
+  );
 }
 
 const SEVERITY: Record<FreshnessState, number> = { live: 0, delayed: 1, late: 2 };

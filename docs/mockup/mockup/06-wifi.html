@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Home dashboard – Wi-Fi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F4F1}
+a{color:#0F5F59}a:hover{color:#0A4540}
+</style>
+</head>
+<body>
+<div style="min-height: 100vh; background: #F3F4F1; color: #1B1F1D; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+<div style="max-width: 1360px; margin: 0 auto; padding: 28px 24px 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<!-- Header -->
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h1 style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -0.02em">Wi-Fi</h1>
+<p style="margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Whole page live</span>Friday 6 November · updated 13:41 · sample data</p>
+</div>
+<nav aria-label="Sections" style="display: flex; flex-wrap: wrap; gap: 4px; background: #E7E9E4; padding: 4px; border-radius: 12px">
+<a href="01-overview.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Overview</a>
+<a href="02-rooms.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Rooms</a>
+<a href="03-energy.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Energy</a>
+<a href="04-heating.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Heating</a>
+<a href="05-water.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Water</a>
+<a href="06-wifi.html" aria-current="page" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 600 14px Inter, sans-serif; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.08)">Wi-Fi</a>
+<a href="07-system.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">System</a>
+</nav>
+<div role="group" aria-label="Time range" style="display: flex; gap: 6px">
+<button type="button" aria-pressed="true" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #0F766E; border-radius: 9px; background: #0F766E; color: #FFFFFF; font: 600 13px Inter, sans-serif">24h</button>
+<button type="button" aria-pressed="false" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">7d</button>
+<button type="button" aria-pressed="false" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">30d</button>
+</div>
+</header>
+
+<!-- Alert -->
+<section aria-label="Alerts" style="display: flex; flex-wrap: wrap; gap: 12px">
+<div style="flex: 1 1 380px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #FFF3EA; border: 1px solid #F5CDAF; border-radius: 12px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 10v4"></path><path d="M12 17h.01"></path></svg>
+<p style="margin: 0; font-size: 14px; color: #7C2D12"><strong style="font-weight: 600">New device joined at 09:12</strong> · unknown, 2.4 GHz · name it or block it on the router</p>
+</div>
+<div style="flex: 1 1 380px; display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 12px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3F4A44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
+<p style="margin: 0; font-size: 14px; color: #3F4A44"><strong style="font-weight: 600">Bedroom signal is fair</strong> · −72 dBm, the weakest room in the house</p>
+</div>
+</section>
+
+<!-- KPI tiles -->
+<section aria-label="Current network readings" style="display: flex; flex-wrap: wrap; gap: 14px">
+<div style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #5A615C">Connected devices</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">17</span>
+<span style="font-size: 13px; color: #5A615C">13 Wi-Fi · 4 wired · peak 23 at 21:00</span>
+</div>
+<div style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #5A615C">Wi-Fi quality</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">Good</span>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #5A615C"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>11 good or better · 2 fair · 0 poor</span>
+</div>
+<div style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #5A615C">Latency to internet</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">14<span style="font-size: 18px; color: #5A615C"> ms</span></span>
+<span style="font-size: 13px; color: #5A615C">Router 3 ms · packet loss 0 %</span>
+</div>
+<div style="flex: 1 1 190px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #5A615C">Broadband speed</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">70<span style="font-size: 18px; color: #5A615C"> Mbps</span></span>
+<span style="font-size: 13px; color: #5A615C">Upload 18 Mbps · tested 12:00</span>
+</div>
+</section>
+
+<!-- Devices over time + signal by room -->
+<div style="display: flex; flex-wrap: wrap; gap: 14px">
+<section aria-labelledby="dev-h" style="flex: 999 1 620px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px">
+<h2 id="dev-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Connected devices, last 24 hours</h2>
+<span style="font-size: 13px; color: #5A615C">Low 11 overnight · high 23 in the evening</span>
+</div>
+<svg viewBox="0 0 770 180" role="img" aria-label="Area chart: connected devices ranged from 11 overnight to 23 at 21:00; 17 now." style="width: 100%; height: auto; display: block">
+<g transform="translate(36,4)">
+<line x1="0" y1="38" x2="720" y2="38" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="66" x2="720" y2="66" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="94" x2="720" y2="94" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="122" x2="720" y2="122" stroke="#ECEEE9" stroke-width="1"></line>
+<polygon points="0,150 0,71.6 30,66 60,66 90,54.8 120,43.6 150,32.4 180,26.8 210,21.2 240,26.8 270,43.6 300,71.6 330,82.8 360,88.4 390,88.4 420,88.4 450,88.4 480,77.2 510,49.2 540,38 570,60.4 600,71.6 630,71.6 660,66 690,60.4 720,54.8 720,150" fill="#DCEFEC"></polygon>
+<polyline points="0,71.6 30,66 60,66 90,54.8 120,43.6 150,32.4 180,26.8 210,21.2 240,26.8 270,43.6 300,71.6 330,82.8 360,88.4 390,88.4 420,88.4 450,88.4 480,77.2 510,49.2 540,38 570,60.4 600,71.6 630,71.6 660,66 690,60.4 720,54.8" fill="none" stroke="#0F766E" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>
+<line x1="0" y1="150" x2="720" y2="150" stroke="#CDD1CA" stroke-width="1"></line>
+<circle cx="720" cy="54.8" r="4" fill="#0F766E"></circle>
+</g>
+<g font-family="Inter, sans-serif" font-size="11" fill="#5A615C">
+<text x="28" y="46" text-anchor="end">20</text>
+<text x="28" y="74" text-anchor="end">15</text>
+<text x="28" y="102" text-anchor="end">10</text>
+<text x="28" y="130" text-anchor="end">5</text>
+<text x="36" y="174" text-anchor="start">14:00</text>
+<text x="156" y="174" text-anchor="middle">18:00</text>
+<text x="276" y="174" text-anchor="middle">22:00</text>
+<text x="396" y="174" text-anchor="middle">02:00</text>
+<text x="516" y="174" text-anchor="middle">06:00</text>
+<text x="636" y="174" text-anchor="middle">10:00</text>
+<text x="756" y="174" text-anchor="end">now</text>
+</g>
+</svg>
+</section>
+
+<section aria-labelledby="room-h" style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 id="room-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Signal by room</h2>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 5px">
+<div style="display: flex; justify-content: space-between; font-size: 14px"><span>Living room</span><span><strong style="font-weight: 600">−48 dBm</strong> · Excellent</span></div>
+<div role="img" aria-label="Living room signal −48 dBm, excellent" style="height: 8px; background: #ECEEE9; border-radius: 999px; overflow: hidden"><div style="width: 88%; height: 8px; background: #15803D; border-radius: 999px"></div></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 5px">
+<div style="display: flex; justify-content: space-between; font-size: 14px"><span>Hallway (Pi)</span><span><strong style="font-weight: 600">−58 dBm</strong> · Good</span></div>
+<div role="img" aria-label="Hallway signal −58 dBm, good" style="height: 8px; background: #ECEEE9; border-radius: 999px; overflow: hidden"><div style="width: 70%; height: 8px; background: #15803D; border-radius: 999px"></div></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 5px">
+<div style="display: flex; justify-content: space-between; font-size: 14px"><span>Kitchen</span><span><strong style="font-weight: 600">−61 dBm</strong> · Good</span></div>
+<div role="img" aria-label="Kitchen signal −61 dBm, good" style="height: 8px; background: #ECEEE9; border-radius: 999px; overflow: hidden"><div style="width: 64%; height: 8px; background: #15803D; border-radius: 999px"></div></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 5px">
+<div style="display: flex; justify-content: space-between; font-size: 14px"><span>Bedroom</span><span><strong style="font-weight: 600">−72 dBm</strong> · Fair</span></div>
+<div role="img" aria-label="Bedroom signal −72 dBm, fair" style="height: 8px; background: #ECEEE9; border-radius: 999px; overflow: hidden"><div style="width: 42%; height: 8px; background: #B45309; border-radius: 999px"></div></div>
+</div>
+</div>
+<p style="margin: 0; font-size: 12px; color: #5A615C">Measured by each room sensor's own Wi-Fi radio. Excellent ≥ −55 · Good to −67 · Fair to −75 · Poor below</p>
+</section>
+</div>
+
+<!-- Device list -->
+<section aria-labelledby="list-h" style="background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<h2 id="list-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Devices</h2>
+<span style="font-size: 13px; color: #5A615C">Showing 8 of 17 · weakest first</span>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 680px; border-collapse: collapse; font-size: 14px">
+<thead>
+<tr style="text-align: left; color: #5A615C; font-size: 12px">
+<th scope="col" style="padding: 8px 12px 8px 0; font-weight: 500; border-bottom: 1px solid #E1E4DE">Device</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Connection</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Signal</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Link speed</th>
+<th scope="col" style="padding: 8px 0 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Connected since</th>
+</tr>
+</thead>
+<tbody>
+<tr style="background: #FFF8F2"><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600; color: #9A3412">Unknown (Espressif)</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">2.4 GHz</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">−66 dBm · Good</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">39 Mbps</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE">Today 09:12 · new</td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Bedroom TV</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">5 GHz</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #B45309"></span>−74 dBm · Fair</span></td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">87 Mbps</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE">2 Nov</td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Bedroom sensor</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">2.4 GHz</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #B45309"></span>−72 dBm · Fair</span></td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">24 Mbps</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE">17 Oct</td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Kitchen sensor</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">2.4 GHz</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>−61 dBm · Good</span></td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">52 Mbps</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE">17 Oct</td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Nest thermostat</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">2.4 GHz</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>−59 dBm · Good</span></td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">58 Mbps</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE">30 Oct</td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Raspberry Pi</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">5 GHz</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>−58 dBm · Good</span></td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">200 Mbps</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE">14 Oct</td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Laptop</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">5 GHz</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>−51 dBm · Excellent</span></td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">866 Mbps</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE">Today 08:40</td></tr>
+<tr><td style="padding: 10px 12px 10px 0; font-weight: 600">Desktop PC</td><td style="padding: 10px 12px">Wired</td><td style="padding: 10px 12px">—</td><td style="padding: 10px 12px">1 Gbps</td><td style="padding: 10px 0 10px 12px">22 Oct</td></tr>
+</tbody>
+</table>
+</div>
+<a href="#" style="align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; font-weight: 600">Show all 17 devices</a>
+</section>
+
+<!-- Channels + speed -->
+<div style="display: flex; flex-wrap: wrap; gap: 14px">
+<section aria-labelledby="chan-h" style="flex: 1 1 420px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 id="chan-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Channels and neighbours</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<div style="flex: 1 1 180px; background: #F6F7F4; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; color: #5A615C">2.4 GHz · channel 6</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 22px; font-weight: 600">7 neighbours</span>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #7C2D12"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #B45309"></span>Crowded · channel 1 has 2</span>
+</div>
+<div style="flex: 1 1 180px; background: #F6F7F4; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; color: #5A615C">5 GHz · channel 36</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 22px; font-weight: 600">1 neighbour</span>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #3F4A44"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>Clear</span>
+</div>
+</div>
+<p style="margin: 0; font-size: 12px; color: #5A615C">From the Pi's own scan of nearby networks, every 30 min</p>
+</section>
+
+<section aria-labelledby="speed-h" style="flex: 1 1 420px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<h2 id="speed-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Download speed, last 7 days</h2>
+<span style="font-size: 13px; color: #5A615C">Daily at 12:00 · Mbps</span>
+</div>
+<svg viewBox="0 0 720 160" role="img" aria-label="Bar chart of daily download speed: around 70 Mbps every day except Monday at 52 Mbps." style="width: 100%; height: auto; display: block">
+<line x1="0" y1="130" x2="720" y2="130" stroke="#CDD1CA" stroke-width="1"></line>
+<rect x="14" y="23.5" width="74.9" height="106.5" rx="4" fill="#0F766E"></rect>
+<rect x="116.9" y="19" width="74.9" height="111" rx="4" fill="#0F766E"></rect>
+<rect x="219.7" y="28" width="74.9" height="102" rx="4" fill="#0F766E"></rect>
+<rect x="322.6" y="52" width="74.9" height="78" rx="4" fill="#B45309"></rect>
+<rect x="425.4" y="20.5" width="74.9" height="109.5" rx="4" fill="#0F766E"></rect>
+<rect x="528.3" y="22" width="74.9" height="108" rx="4" fill="#0F766E"></rect>
+<rect x="631.1" y="25" width="74.9" height="105" rx="4" fill="#0F766E"></rect>
+<g font-family="Inter, sans-serif" font-size="11" fill="#5A615C" text-anchor="middle">
+<text x="51.5" y="150">Fri</text>
+<text x="154.4" y="150">Sat</text>
+<text x="257.2" y="150">Sun</text>
+<text x="360.1" y="150">Mon</text>
+<text x="462.9" y="150">Tue</text>
+<text x="565.8" y="150">Wed</text>
+<text x="668.6" y="150">Thu</text>
+</g>
+<g font-family="Inter, sans-serif" font-size="11" fill="#1B1F1D" text-anchor="middle" font-weight="600">
+<text x="51.5" y="16">71</text>
+<text x="154.4" y="12">74</text>
+<text x="257.2" y="21">68</text>
+<text x="360.1" y="45">52</text>
+<text x="462.9" y="14">73</text>
+<text x="565.8" y="15">72</text>
+<text x="668.6" y="18">70</text>
+</g>
+</svg>
+</section>
+</div>
+
+<p style="margin: 0; font-size: 12px; color: #5A615C">All figures on this mockup are sample data.</p>
+</div>
+</div>
+</body>
+</html>

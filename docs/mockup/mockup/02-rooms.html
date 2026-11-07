@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Home dashboard – Rooms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F4F1}
+a{color:#0F5F59}a:hover{color:#0A4540}
+</style>
+</head>
+<body>
+<div style="min-height: 100vh; background: #F3F4F1; color: #1B1F1D; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+<div style="max-width: 1360px; margin: 0 auto; padding: 28px 24px 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h1 style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -0.02em">Rooms</h1>
+<p style="margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Whole page live</span>Friday 6 November · updated 13:41 · sample data</p>
+</div>
+<nav aria-label="Sections" style="display: flex; flex-wrap: wrap; gap: 4px; background: #E7E9E4; padding: 4px; border-radius: 12px">
+<a href="01-overview.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Overview</a>
+<a href="02-rooms.html" aria-current="page" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 600 14px Inter, sans-serif; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.08)">Rooms</a>
+<a href="03-energy.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Energy</a>
+<a href="04-heating.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Heating</a>
+<a href="05-water.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Water</a>
+<a href="06-wifi.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Wi-Fi</a>
+<a href="07-system.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">System</a>
+</nav>
+<div role="group" aria-label="Time range" style="display: flex; gap: 6px">
+<button type="button" aria-pressed="true" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #0F766E; border-radius: 9px; background: #0F766E; color: #FFFFFF; font: 600 13px Inter, sans-serif">24h</button>
+<button type="button" aria-pressed="false" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">7d</button>
+<button type="button" aria-pressed="false" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">30d</button>
+</div>
+</header>
+
+<!-- Summary -->
+<section aria-label="Summary" style="display: flex; flex-wrap: wrap; gap: 14px">
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; color: #5A615C">Warmest now</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 26px; font-weight: 600">Kitchen 21.3 °C</span>
+</div>
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; color: #5A615C">Coolest now</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 26px; font-weight: 600">Bedroom 19.1 °C</span>
+</div>
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; color: #5A615C">Highest CO₂ now</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 26px; font-weight: 600; color: #9A3412">Kitchen 1,240 ppm</span>
+</div>
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; color: #5A615C">Air pressure</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 26px; font-weight: 600">1012 hPa</span>
+<span style="font-size: 13px; color: #5A615C">Falling 2 hPa in 3 h · rain likely</span>
+</div>
+</section>
+
+<!-- Room detail cards -->
+<div style="display: flex; flex-wrap: wrap; gap: 14px">
+
+<article aria-labelledby="r-living" style="flex: 1 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px"><h2 id="r-living" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Living room</h2><span style="font-size: 12px; color: #5A615C">Sensor · 30 s ago</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline">
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 36px; font-weight: 600">20.6 °C</span>
+<span style="font-size: 14px"><strong style="font-weight: 600">53 %</strong> RH</span>
+<span style="font-size: 14px"><strong style="font-weight: 600">780</strong> ppm CO₂</span>
+<span style="font-size: 14px">Dew point <strong style="font-weight: 600">10.7 °C</strong></span>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<figure style="flex: 1 1 200px; margin: 0; display: flex; flex-direction: column; gap: 4px"><figcaption style="font-size: 12px; color: #5A615C">Temperature, 24 h · 17.8–20.9 °C</figcaption>
+<svg viewBox="0 0 240 56" preserveAspectRatio="none" aria-hidden="true" style="width: 100%; height: 56px; display: block; background: #F8F9F6; border-radius: 6px"><polyline points="0,23.9 10.4,22.5 20.9,20.5 31.3,19.1 41.7,18.4 52.2,19.1 62.6,19.8 73,21.1 83.5,25.3 93.9,29.4 104.3,32.1 114.8,34.2 125.2,36.2 135.7,37.6 146.1,39 156.5,39.7 167,34.2 177.4,25.9 187.8,21.8 198.3,21.8 208.7,22.5 219.1,21.8 229.6,21.1 240,20.5" fill="none" stroke="#C2410C" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"></polyline></svg>
+</figure>
+<figure style="flex: 1 1 200px; margin: 0; display: flex; flex-direction: column; gap: 4px"><figcaption style="font-size: 12px; color: #5A615C">CO₂, 24 h · dashed line 1,000 ppm</figcaption>
+<svg viewBox="0 0 240 56" preserveAspectRatio="none" aria-hidden="true" style="width: 100%; height: 56px; display: block; background: #F8F9F6; border-radius: 6px"><line x1="0" y1="23.2" x2="240" y2="23.2" stroke="#9AA19C" stroke-width="1" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"></line><polyline points="0,41.4 10.4,40.5 20.9,37.6 31.3,31.8 41.7,25.1 52.2,22.7 62.6,24.2 73,28 83.5,34.7 93.9,40.5 104.3,44.3 114.8,46.2 125.2,47.2 135.7,48.2 146.1,48.6 156.5,49.1 167,46.2 177.4,41.9 187.8,37.6 198.3,36.6 208.7,35.7 219.1,34.7 229.6,34.2 240,33.8" fill="none" stroke="#0F766E" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"></polyline></svg>
+</figure>
+</div>
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 14px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D; flex: none"></span>Comfortable · CO₂ briefly reached 1,010 ppm last evening</p>
+</article>
+
+<article aria-labelledby="r-kitchen" style="flex: 1 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #F5CDAF; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px"><h2 id="r-kitchen" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Kitchen</h2><span style="font-size: 12px; color: #5A615C">Sensor · 30 s ago</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline">
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 36px; font-weight: 600">21.3 °C</span>
+<span style="font-size: 14px"><strong style="font-weight: 600">61 %</strong> RH</span>
+<span style="font-size: 14px; color: #9A3412"><strong style="font-weight: 600">1,240</strong> ppm CO₂</span>
+<span style="font-size: 14px">Dew point <strong style="font-weight: 600">13.5 °C</strong></span>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<figure style="flex: 1 1 200px; margin: 0; display: flex; flex-direction: column; gap: 4px"><figcaption style="font-size: 12px; color: #5A615C">Temperature, 24 h · 18.1–22.6 °C</figcaption>
+<svg viewBox="0 0 240 56" preserveAspectRatio="none" aria-hidden="true" style="width: 100%; height: 56px; display: block; background: #F8F9F6; border-radius: 6px"><polyline points="0,19.1 10.4,17.7 20.9,15 31.3,8.8 41.7,6.7 52.2,11.5 62.6,16.3 73,19.1 83.5,23.9 93.9,27.3 104.3,30.1 114.8,32.1 125.2,34.2 135.7,35.5 146.1,36.9 156.5,37.6 167,31.4 177.4,21.8 187.8,17.7 198.3,20.5 208.7,21.1 219.1,19.8 229.6,13.6 240,15.7" fill="none" stroke="#C2410C" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"></polyline></svg>
+</figure>
+<figure style="flex: 1 1 200px; margin: 0; display: flex; flex-direction: column; gap: 4px"><figcaption style="font-size: 12px; color: #5A615C">CO₂, 24 h · dashed line 1,000 ppm</figcaption>
+<svg viewBox="0 0 240 56" preserveAspectRatio="none" aria-hidden="true" style="width: 100%; height: 56px; display: block; background: #F8F9F6; border-radius: 6px"><line x1="0" y1="23.2" x2="240" y2="23.2" stroke="#9AA19C" stroke-width="1" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"></line><polyline points="0,42.4 10.4,41.4 20.9,38.6 31.3,16 41.7,7.8 52.2,24.2 62.6,31.8 73,37.6 83.5,41.4 93.9,44.3 104.3,46.2 114.8,47.2 125.2,48.2 135.7,48.6 146.1,49.1 156.5,48.6 167,44.3 177.4,29 187.8,26.1 198.3,36.6 208.7,38.6 219.1,36.6 229.6,14.6 240,11.7" fill="none" stroke="#0F766E" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"></polyline></svg>
+</figure>
+</div>
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 14px; color: #7C2D12"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #B45309; flex: none"></span>CO₂ spikes when cooking (17:00 and 12:00) · run the extractor fan</p>
+</article>
+
+<article aria-labelledby="r-bed" style="flex: 1 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px"><h2 id="r-bed" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Bedroom</h2><span style="font-size: 12px; color: #5A615C">Sensor · 30 s ago</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline">
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 36px; font-weight: 600">19.1 °C</span>
+<span style="font-size: 14px"><strong style="font-weight: 600">57 %</strong> RH</span>
+<span style="font-size: 14px"><strong style="font-weight: 600">640</strong> ppm CO₂</span>
+<span style="font-size: 14px">Dew point <strong style="font-weight: 600">10.4 °C</strong></span>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<figure style="flex: 1 1 200px; margin: 0; display: flex; flex-direction: column; gap: 4px"><figcaption style="font-size: 12px; color: #5A615C">Temperature, 24 h · 17.5–19.6 °C</figcaption>
+<svg viewBox="0 0 240 56" preserveAspectRatio="none" aria-hidden="true" style="width: 100%; height: 56px; display: block; background: #F8F9F6; border-radius: 6px"><polyline points="0,32.1 10.4,31.4 20.9,30.1 31.3,28.7 41.7,28 52.2,28 62.6,28.7 73,27.3 83.5,28.7 93.9,31.4 104.3,34.2 114.8,36.2 125.2,38.3 135.7,39.7 146.1,41 156.5,41.7 167,38.3 177.4,32.1 187.8,29.4 198.3,30.7 208.7,31.4 219.1,31.4 229.6,30.7 240,30.7" fill="none" stroke="#C2410C" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"></polyline></svg>
+</figure>
+<figure style="flex: 1 1 200px; margin: 0; display: flex; flex-direction: column; gap: 4px"><figcaption style="font-size: 12px; color: #5A615C">CO₂, 24 h · dashed line 1,000 ppm</figcaption>
+<svg viewBox="0 0 240 56" preserveAspectRatio="none" aria-hidden="true" style="width: 100%; height: 56px; display: block; background: #F8F9F6; border-radius: 6px"><line x1="0" y1="23.2" x2="240" y2="23.2" stroke="#9AA19C" stroke-width="1" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"></line><polyline points="0,46.2 10.4,46.2 20.9,45.8 31.3,45.3 41.7,44.3 52.2,43.4 62.6,41.4 73,37.6 83.5,24.2 93.9,17.4 104.3,14.6 114.8,13.1 125.2,12.6 135.7,12.2 146.1,13.1 156.5,14.1 167,20.8 177.4,34.7 187.8,41.4 198.3,42.4 208.7,41.9 219.1,41.4 229.6,41 240,40.5" fill="none" stroke="#0F766E" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"></polyline></svg>
+</figure>
+</div>
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 14px; color: #7C2D12"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #B45309; flex: none"></span>Above 1,000 ppm for 7 h overnight · leave the door or trickle vent open</p>
+</article>
+
+<article aria-labelledby="r-hall" style="flex: 1 1 520px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px"><h2 id="r-hall" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Hallway</h2><span style="font-size: 12px; color: #5A615C">Nest thermostat · 2 min ago</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline">
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 36px; font-weight: 600">20.4 °C</span>
+<span style="font-size: 14px"><strong style="font-weight: 600">55 %</strong> RH</span>
+<span style="font-size: 14px">Target <strong style="font-weight: 600">20.5 °C</strong></span>
+<span style="font-size: 14px">Dew point <strong style="font-weight: 600">11.0 °C</strong></span>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<figure style="flex: 1 1 200px; margin: 0; display: flex; flex-direction: column; gap: 4px"><figcaption style="font-size: 12px; color: #5A615C">Temperature, 24 h · 17.5–20.6 °C</figcaption>
+<svg viewBox="0 0 240 56" preserveAspectRatio="none" aria-hidden="true" style="width: 100%; height: 56px; display: block; background: #F8F9F6; border-radius: 6px"><polyline points="0,25.9 10.4,24.6 20.9,22.5 31.3,21.1 41.7,20.5 52.2,21.1 62.6,21.8 73,23.2 83.5,27.3 93.9,31.4 104.3,34.2 114.8,36.2 125.2,38.3 135.7,39.7 146.1,41 156.5,41.7 167,35.5 177.4,27.3 187.8,22.5 198.3,23.2 208.7,24.6 219.1,23.9 229.6,22.5 240,21.8" fill="none" stroke="#C2410C" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"></polyline></svg>
+</figure>
+<div style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; color: #5A615C">CO₂</span>
+<div style="height: 56px; display: flex; align-items: center; justify-content: center; background: #F8F9F6; border: 1px dashed #CDD1CA; border-radius: 6px; font-size: 13px; color: #5A615C">No CO₂ sensor in this room</div>
+</div>
+</div>
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 14px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D; flex: none"></span>Comfortable · reads 0.2 °C below the living room</p>
+</article>
+</div>
+
+<!-- Comparison -->
+<section aria-labelledby="cmp-h" style="background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 id="cmp-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Last 24 hours compared</h2>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 680px; border-collapse: collapse; font-size: 14px">
+<thead>
+<tr style="text-align: left; color: #5A615C; font-size: 12px">
+<th scope="col" style="padding: 8px 12px 8px 0; font-weight: 500; border-bottom: 1px solid #E1E4DE">Room</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Temperature range</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Avg humidity</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">CO₂ peak</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Time above 1,000 ppm</th>
+<th scope="col" style="padding: 8px 0 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Mould risk</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Living room</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">17.8–20.9 °C</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">54 %</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">1,010 ppm</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">30 min</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>Low</span></td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Kitchen</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">18.1–22.6 °C</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">60 %</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE; color: #9A3412; font-weight: 600">1,320 ppm</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">1 h 30 min</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>Low</span></td></tr>
+<tr><td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #F0F1EE; font-weight: 600">Bedroom</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">17.5–19.6 °C</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE">58 %</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE; color: #9A3412; font-weight: 600">1,230 ppm</td><td style="padding: 10px 12px; border-bottom: 1px solid #F0F1EE; color: #9A3412; font-weight: 600">7 h</td><td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #B45309"></span>Watch · coolest room</span></td></tr>
+<tr><td style="padding: 10px 12px 10px 0; font-weight: 600">Hallway</td><td style="padding: 10px 12px">17.5–20.6 °C</td><td style="padding: 10px 12px">55 %</td><td style="padding: 10px 12px">—</td><td style="padding: 10px 12px">—</td><td style="padding: 10px 0 10px 12px"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>Low</span></td></tr>
+</tbody>
+</table>
+</div>
+<p style="margin: 0; font-size: 12px; color: #5A615C">Mould risk combines humidity and how cold the room gets: the closer a room's coldest temperature is to its dew point, the higher the risk on cold walls and windows.</p>
+</section>
+
+<p style="margin: 0; font-size: 12px; color: #5A615C">All figures on this mockup are sample data.</p>
+</div>
+</div>
+</body>
+</html>

@@ -32,6 +32,7 @@ interface SeriesMeta {
 interface Freshness {         // see docs/03; type exported by packages/shared
   state: 'live' | 'delayed' | 'late';
   dataTo: string | null;      // null = never reported
+  intervalSeconds: number | null; // interval_total series only; lets clients re-tick exactly
   lagSeconds: number | null;
   daysBehind: number | null;
   label: string;
@@ -51,13 +52,16 @@ Schemas for every request and response are in `packages/shared/src/api.ts` (`*Qu
 ### `GET /api/sources`
 All sources in registry order (disabled ones too, with `enabled: false`), with freshness of their newest series (`forecast_*` excluded), the last collector run, and failed runs in the last 24 h. Cached 30 s.
 ```json
-[{ "id": "smart_meters", "name": "Smart meters", "kind": "api", "poll": "6h", "pushInterval": null,
-   "expectedDelay": "1d", "enabled": true,
+[{ "id": "smart_meters", "name": "Smart meters", "description": "Electricity and gas, half-hourly",
+   "kind": "api", "poll": "6h", "pushInterval": null, "expectedDelay": "1d", "enabled": true,
+   "policy": { "expectedDelaySeconds": 86400, "cadenceSeconds": 21600, "graceSeconds": 43200 },
    "freshness": { "state": "delayed", "dataTo": "2026-11-06T00:00:00Z", "lagSeconds": 50400,
                   "daysBehind": 1, "label": "Data to 5 Nov · 1 day behind", "compactLabel": "1 day behind" },
    "lastRun": { "startedAt": "...", "finishedAt": "...", "ok": true, "rowsWritten": 96, "durationMs": 1900, "error": null },
    "errors24h": 0 }]
 ```
+
+`policy` is what freshness is computed from, so clients can re-tick badges with `retick()` from `packages/shared` without refetching.
 
 ### `GET /api/series?source=&metric=&entity=`
 List of `SeriesMeta`, filterable (all filters combine), ordered by source, metric, entity.

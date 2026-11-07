@@ -206,6 +206,7 @@ describe('GET /api/sources', () => {
     });
     expect(byId.pi_stats).toMatchObject({
       poll: '1m',
+      policy: { expectedDelaySeconds: 0, cadenceSeconds: 60, graceSeconds: null },
       freshness: { state: 'late', label: 'No data yet' },
       lastRun: { ok: false, rowsWritten: 0, durationMs: 1200, error: 'ENOENT /host/proc/meminfo' },
       errors24h: 1,

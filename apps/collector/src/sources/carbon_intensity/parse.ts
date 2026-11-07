@@ -1,8 +1,5 @@
-import { isSnakeCase, type ReadingInput } from '@home/shared';
+import { INTENSITY_INDEX, isSnakeCase, type ReadingInput } from '@home/shared';
 import { z } from 'zod';
-
-/** The API's index bands, stored as a state so tiles can colour by them. */
-export const INTENSITY_INDEX = ['very low', 'low', 'moderate', 'high', 'very high'] as const;
 
 // Timestamps look like "2026-11-07T11:30Z" (no seconds): valid ISO 8601, UTC.
 const Timestamp = z

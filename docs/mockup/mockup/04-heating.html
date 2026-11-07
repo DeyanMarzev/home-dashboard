@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Home dashboard – Heating</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F4F1}
+a{color:#0F5F59}a:hover{color:#0A4540}
+</style>
+</head>
+<body>
+<div style="min-height: 100vh; background: #F3F4F1; color: #1B1F1D; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+<div style="max-width: 1360px; margin: 0 auto; padding: 28px 24px 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h1 style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -0.02em">Heating</h1>
+<p style="margin: 0; font-size: 13px; color: #5A615C">Friday 6 November · updated 13:41 · sample data</p>
+</div>
+<nav aria-label="Sections" style="display: flex; flex-wrap: wrap; gap: 4px; background: #E7E9E4; padding: 4px; border-radius: 12px">
+<a href="01-overview.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Overview</a>
+<a href="02-rooms.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Rooms</a>
+<a href="03-energy.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Energy</a>
+<a href="04-heating.html" aria-current="page" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 600 14px Inter, sans-serif; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.08)">Heating</a>
+<a href="05-water.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Water</a>
+<a href="06-wifi.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Wi-Fi</a>
+<a href="07-system.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">System</a>
+</nav>
+<div role="group" aria-label="Time range" style="display: flex; gap: 6px">
+<button type="button" aria-pressed="true" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #0F766E; border-radius: 9px; background: #0F766E; color: #FFFFFF; font: 600 13px Inter, sans-serif">24h</button>
+<button type="button" aria-pressed="false" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">7d</button>
+<button type="button" aria-pressed="false" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">30d</button>
+</div>
+</header>
+
+<!-- KPIs -->
+<section aria-label="Heating now" style="display: flex; flex-wrap: wrap; gap: 14px">
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>Hallway now</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">20.4<span style="font-size: 18px; color: #5A615C">°C</span></span>
+<span style="font-size: 13px; color: #5A615C">Target 20.5 °C · Heat mode · Eco off</span>
+</div>
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>Boiler</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">Idle</span>
+<span style="font-size: 13px; color: #5A615C">Last fired 11:30–12:30</span>
+</div>
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>Boiler on today</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">2 h 05</span>
+<span style="font-size: 13px; color: #5A615C">3 cycles · today's gas arrives tomorrow</span>
+</div>
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span>Condensing today</span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">71<span style="font-size: 18px; color: #5A615C"> %</span></span>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #5A615C"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #B45309"></span>of firing time with return below 55 °C</span>
+</div>
+</section>
+
+<!-- Schedule -->
+<section aria-labelledby="sched-h" style="background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="sched-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Today's Nest schedule</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></div>
+<span style="font-size: 13px; color: #5A615C">Next change 22:00 → 16 °C</span>
+</div>
+<div style="position: relative; padding-top: 18px">
+<div style="display: flex; height: 40px; border-radius: 8px; overflow: hidden; font-size: 13px; font-weight: 600">
+<div style="width: 25%; background: #DCE6FB; color: #1E3A8A; display: flex; align-items: center; padding: 0 10px">16 °C</div>
+<div style="width: 66.7%; background: #FBE3D3; color: #7C2D12; display: flex; align-items: center; padding: 0 10px">20.5 °C</div>
+<div style="width: 8.3%; background: #DCE6FB; color: #1E3A8A; display: flex; align-items: center; padding: 0 10px">16</div>
+</div>
+<div aria-hidden="true" style="position: absolute; left: 57%; top: 0; bottom: 0; width: 2px; background: #1B1F1D"></div>
+<span style="position: absolute; left: 57%; top: 0; font-size: 11px; font-weight: 600; transform: translateX(-50%)">now</span>
+</div>
+<div style="display: flex; justify-content: space-between; font-size: 11px; color: #5A615C"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+</section>
+
+<!-- Flow / return -->
+<div style="display: flex; flex-wrap: wrap; gap: 14px">
+<section aria-labelledby="flow-h" style="flex: 999 1 620px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="flow-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Boiler pipe temperatures, last 24 hours</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: #3F4A44">
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 3px; border-radius: 2px; background: #C2410C"></span>Flow</span>
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 3px; border-radius: 2px; background: #2563EB"></span>Return</span>
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 0; border-top: 2px dashed #3F4A44"></span>55 °C condensing limit</span>
+</div>
+</div>
+<svg viewBox="0 0 770 232" role="img" aria-label="Line chart: flow reached 66 °C and return 49 °C during the morning heat-up, above the 55 °C condensing limit for flow but below it for return most of the time." style="width: 100%; height: auto; display: block">
+<g transform="translate(36,8)">
+<line x1="0" y1="18.2" x2="720" y2="18.2" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="54.5" x2="720" y2="54.5" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="90.9" x2="720" y2="90.9" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="127.3" x2="720" y2="127.3" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="163.6" x2="720" y2="163.6" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="200" x2="720" y2="200" stroke="#CDD1CA" stroke-width="1"></line>
+<line x1="0" y1="72.7" x2="720" y2="72.7" stroke="#3F4A44" stroke-width="1.5" stroke-dasharray="5 4"></line>
+<polyline points="0,192.7 31.3,98.2 62.6,47.3 93.9,40 125.2,43.6 156.5,127.3 187.8,163.6 219.1,178.2 250.4,185.5 281.7,189.1 313,192.7 344.3,192.7 375.7,192.7 407,192.7 438.3,192.7 469.6,192.7 500.9,54.5 532.2,32.7 563.5,40 594.8,109.1 626.1,156.4 657.4,170.9 688.7,61.8 720,61.8" fill="none" stroke="#C2410C" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>
+<polyline points="0,196.4 31.3,141.8 62.6,105.5 93.9,98.2 125.2,101.8 156.5,149.1 187.8,174.5 219.1,185.5 250.4,189.1 281.7,192.7 313,192.7 344.3,196.4 375.7,196.4 407,196.4 438.3,196.4 469.6,196.4 500.9,112.7 532.2,94.5 563.5,98.2 594.8,134.5 626.1,167.3 657.4,178.2 688.7,116.4 720,112.7" fill="none" stroke="#2563EB" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>
+</g>
+<g font-family="Inter, sans-serif" font-size="11" fill="#5A615C">
+<text x="28" y="30" text-anchor="end">70°</text>
+<text x="28" y="66" text-anchor="end">60°</text>
+<text x="28" y="102" text-anchor="end">50°</text>
+<text x="28" y="139" text-anchor="end">40°</text>
+<text x="28" y="175" text-anchor="end">30°</text>
+<text x="36" y="226" text-anchor="start">14:00</text>
+<text x="161.2" y="226" text-anchor="middle">18:00</text>
+<text x="286.4" y="226" text-anchor="middle">22:00</text>
+<text x="411.7" y="226" text-anchor="middle">02:00</text>
+<text x="536.9" y="226" text-anchor="middle">06:00</text>
+<text x="662.1" y="226" text-anchor="middle">10:00</text>
+<text x="756" y="226" text-anchor="end">now</text>
+</g>
+</svg>
+</section>
+
+<section aria-labelledby="tips-h" style="flex: 1 1 300px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 id="tips-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Worth trying</h2>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<p style="margin: 0; font-size: 14px; font-weight: 600">Lower the boiler flow temperature</p>
+<p style="margin: 0; font-size: 14px; color: #3F4A44">Flow peaked at 66 °C. Around 55 °C would keep the return low enough to condense all the time.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<p style="margin: 0; font-size: 14px; font-weight: 600">Morning warm-up takes 2 h 10 min</p>
+<p style="margin: 0; font-size: 14px; color: #3F4A44">From 16 °C to 20.5 °C at 1.4 °C an hour. A 17 °C night setting would shorten it.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<p style="margin: 0; font-size: 14px; font-weight: 600">Short cycle at 11:30</p>
+<p style="margin: 0; font-size: 14px; color: #3F4A44">One hour to recover 0.4 °C. Frequent short cycles waste gas and wear the boiler.</p>
+</div>
+</section>
+</div>
+
+<!-- Runtime + efficiency -->
+<div style="display: flex; flex-wrap: wrap; gap: 14px">
+<section aria-labelledby="rt-h" style="flex: 1 1 440px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="rt-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Boiler running time, last 7 days</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #E3F2E7; color: #14532D; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #15803D"></span>Live</span></div>
+<span style="font-size: 13px; color: #5A615C">Hours : minutes per day</span>
+</div>
+<svg viewBox="0 0 720 180" role="img" aria-label="Bar chart of boiler running time per day from 30 October to 5 November, between 1 h 58 and 2 h 51, longest on Monday." style="width: 100%; height: auto; display: block">
+<line x1="0" y1="150" x2="720" y2="150" stroke="#CDD1CA" stroke-width="1"></line>
+<rect x="14" y="58.2" width="74.9" height="91.8" rx="4" fill="#C2410C"></rect>
+<rect x="116.9" y="48.1" width="74.9" height="101.9" rx="4" fill="#C2410C"></rect>
+<rect x="219.7" y="31.8" width="74.9" height="118.2" rx="4" fill="#C2410C"></rect>
+<rect x="322.6" y="17" width="74.9" height="133" rx="4" fill="#C2410C"></rect>
+<rect x="425.4" y="41.1" width="74.9" height="108.9" rx="4" fill="#C2410C"></rect>
+<rect x="528.3" y="52" width="74.9" height="98" rx="4" fill="#C2410C"></rect>
+<rect x="631.1" y="45" width="74.9" height="105" rx="4" fill="#C2410C"></rect>
+<g font-family="Inter, sans-serif" font-size="11" fill="#5A615C" text-anchor="middle">
+<text x="51.5" y="170">Fri</text>
+<text x="154.4" y="170">Sat</text>
+<text x="257.2" y="170">Sun</text>
+<text x="360.1" y="170">Mon</text>
+<text x="462.9" y="170">Tue</text>
+<text x="565.8" y="170">Wed</text>
+<text x="668.6" y="170">Thu</text>
+</g>
+<g font-family="Inter, sans-serif" font-size="11" fill="#1B1F1D" text-anchor="middle" font-weight="600">
+<text x="51.5" y="51">1:58</text>
+<text x="154.4" y="41">2:11</text>
+<text x="257.2" y="25">2:32</text>
+<text x="360.1" y="11">2:51</text>
+<text x="462.9" y="34">2:20</text>
+<text x="565.8" y="45">2:06</text>
+<text x="668.6" y="38">2:15</text>
+</g>
+</svg>
+</section>
+
+<section aria-labelledby="eff-h" style="flex: 1 1 440px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px"><h2 id="eff-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Gas vs outdoor temperature</h2><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Data to 5 Nov · 1 day behind</span></div>
+<span style="font-size: 13px; color: #5A615C">23 Oct – 5 Nov · one dot per day</span>
+</div>
+<svg viewBox="0 0 720 240" role="img" aria-label="Scatter chart: daily gas use rises as outdoor temperature falls, about 2.2 kWh more per degree colder." style="width: 100%; height: auto; display: block">
+<line x1="30" y1="168.3" x2="710" y2="168.3" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="30" y1="105" x2="710" y2="105" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="30" y1="41.7" x2="710" y2="41.7" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="30" y1="200" x2="710" y2="200" stroke="#CDD1CA" stroke-width="1"></line>
+<line x1="86.7" y1="38.5" x2="653.3" y2="177" stroke="#3F4A44" stroke-width="1.5" stroke-dasharray="5 4"></line>
+<g fill="#C2410C" fill-opacity="0.85">
+<circle cx="551.3" cy="155.7" r="6"></circle>
+<circle cx="528.7" cy="143" r="6"></circle>
+<circle cx="455" cy="124" r="6"></circle>
+<circle cx="472" cy="130.3" r="6"></circle>
+<circle cx="375.7" cy="105" r="6"></circle>
+<circle cx="404" cy="117.7" r="6"></circle>
+<circle cx="336" cy="98.7" r="6"></circle>
+<circle cx="387" cy="117.7" r="6"></circle>
+<circle cx="313.3" cy="98.7" r="6"></circle>
+<circle cx="234" cy="73.3" r="6"></circle>
+<circle cx="166" cy="54.3" r="6"></circle>
+<circle cx="273.7" cy="86" r="6"></circle>
+<circle cx="347.3" cy="105" r="6"></circle>
+<circle cx="307.7" cy="92.3" r="6"></circle>
+</g>
+<g font-family="Inter, sans-serif" font-size="11" fill="#5A615C">
+<text x="24" y="172" text-anchor="end">20</text>
+<text x="24" y="109" text-anchor="end">30</text>
+<text x="24" y="46" text-anchor="end">40</text>
+<text x="24" y="16" text-anchor="end">kWh</text>
+<text x="143.3" y="218" text-anchor="middle">4 °C</text>
+<text x="256.7" y="218" text-anchor="middle">6 °C</text>
+<text x="370" y="218" text-anchor="middle">8 °C</text>
+<text x="483.3" y="218" text-anchor="middle">10 °C</text>
+<text x="596.7" y="218" text-anchor="middle">12 °C</text>
+<text x="370" y="236" text-anchor="middle">Average outdoor temperature</text>
+</g>
+</svg>
+<p style="margin: 0; font-size: 14px">Each 1 °C colder outside adds about <strong style="font-weight: 600">2.2 kWh</strong> of gas a day. Track this line over the winter: if it gets flatter, the house is losing less heat.</p>
+</section>
+</div>
+
+<p style="margin: 0; font-size: 12px; color: #5A615C">All figures on this mockup are sample data.</p>
+</div>
+</div>
+</body>
+</html>

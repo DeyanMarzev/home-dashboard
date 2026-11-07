@@ -62,7 +62,7 @@ Durations use the format `30s`, `15m`, `6h`, `1d` (`1d` = exactly 24 h). `poll` 
 
 Validation (`packages/shared/src/registry.ts`, every problem reported at once; api and collector refuse to start on an invalid registry):
 
-- Keys allowed per source: `name`, `kind`, `poll`, `push_interval`, `expected_delay` (default `0s`), `grace`, `enabled` (default `true`), `mqtt_topic`, `options`. Unknown keys are errors, so typos are caught.
+- Keys allowed per source: `name`, `description` (shown in the data sources table), `kind`, `poll`, `push_interval`, `expected_delay` (default `0s`), `grace`, `enabled` (default `true`), `mqtt_topic`, `options`. Unknown keys are errors, so typos are caught.
 - `options`: free-form, non-secret settings for the source's collector (secrets go in `.env`).
 - `kind: sensor` (push) needs `push_interval` and no `poll`; every other kind needs `poll`.
 - A live-capable source (`expected_delay` ≤ 15m) can't use a cron `poll`: its Live window comes from the poll interval.
@@ -120,7 +120,7 @@ interface Freshness {
 | late | `No data since {HH:mm}` if today, else `No data since {d MMM}` (same compact) | No data since 13:10 |
 | never reported | `No data yet` (state `late`) | No data yet |
 
-"The last day covered" is the London date of `dataTo` for gauges, and of `dataTo` minus 1 ms for `interval_total` series, so half-hourly data ending at 00:00 on 6 Nov reads "Data to 5 Nov". Month names are fixed English abbreviations (`Sep`, not ICU's `Sept`). The implementation (`freshness(policy, latest, now)`, `combineFreshness`, `freshnessPolicy(source)`) is in `packages/shared/src/freshness.ts` and `registry.ts`.
+"The last day covered" is the London date of `dataTo` for gauges, and of `dataTo` minus 1 ms for `interval_total` series, so half-hourly data ending at 00:00 on 6 Nov reads "Data to 5 Nov". Month names are fixed English abbreviations (`Sep`, not ICU's `Sept`). `retick(freshness, policy, now)` recomputes a freshness for a later moment (the web app's badges use it every 30 s). The implementation (`freshness(policy, latest, now)`, `retick`, `combineFreshness`, `freshnessPolicy(source)`) is in `packages/shared/src/freshness.ts` and `registry.ts`.
 
 ### Combining
 

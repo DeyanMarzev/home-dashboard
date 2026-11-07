@@ -3,7 +3,7 @@
 # the `sources` table. Source ids are stable forever. Removing a source here disables it
 # (its history stays in the database).
 #
-# Fields: name, kind (sensor | api | scrape | local | derived), poll (duration or "cron: <expr>",
+# Fields: name, description (shown in the data sources table), kind (sensor | api | scrape | local | derived), poll (duration or "cron: <expr>",
 # Europe/London) for pull sources, push_interval for push sources (kind: sensor),
 # expected_delay (default 0s), grace (default 12h for delayed sources), enabled (default true),
 # mqtt_topic, options (non-secret settings for the collector; secrets go in .env).
@@ -12,6 +12,7 @@
 sources:
   room_sensors:
     name: Room sensors
+    description: Temp, humidity, CO₂, pressure
     kind: sensor # pushed over MQTT
     expected_delay: 0s
     push_interval: 30s # how often sensors normally report (sets the Live window)
@@ -19,18 +20,21 @@ sources:
 
   pi_stats:
     name: Raspberry Pi
+    description: CPU temperature, throttling, memory, disk
     kind: local
     poll: 1m
     expected_delay: 0s
 
   open_meteo:
     name: Open-Meteo weather
+    description: Outdoor weather, forecast
     kind: api
     poll: 15m
     expected_delay: 0s
 
   carbon_intensity:
     name: Grid carbon intensity
+    description: Grid gCO₂/kWh, 48 h forecast
     kind: api
     poll: 30m
     expected_delay: 0s
@@ -40,6 +44,7 @@ sources:
 
   boiler_probes: # M6
     name: Boiler pipe probes
+    description: Flow and return temperature
     kind: local
     poll: 30s
     expected_delay: 0s
@@ -47,6 +52,7 @@ sources:
 
   nest: # M6
     name: Nest thermostat
+    description: Temp, humidity, target, boiler status
     kind: api
     poll: 2m
     expected_delay: 0s
@@ -54,6 +60,7 @@ sources:
 
   smart_meters: # M7
     name: Smart meters
+    description: Electricity and gas, half-hourly
     kind: api
     poll: 6h
     expected_delay: 1d # readings arrive the next day
@@ -62,6 +69,7 @@ sources:
 
   thames_water: # M8
     name: Thames Water
+    description: Water, hourly
     kind: scrape
     poll: 'cron: 0 6 * * *' # daily 06:00 Europe/London
     expected_delay: 3d

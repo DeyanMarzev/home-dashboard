@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Home dashboard – Water</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F4F1}
+a{color:#0F5F59}a:hover{color:#0A4540}
+</style>
+</head>
+<body>
+<div style="min-height: 100vh; background: #F3F4F1; color: #1B1F1D; font-family: Inter, system-ui, sans-serif; font-size: 15px; line-height: 1.45">
+<div style="max-width: 1360px; margin: 0 auto; padding: 28px 24px 56px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<h1 style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -0.02em">Water</h1>
+<p style="margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: #5A615C"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: #FDF0E1; color: #7C2D12; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; line-height: 1.2; letter-spacing: 0; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Whole page: data to 3 Nov · 3 days behind</span>Thames Water · sample data</p>
+</div>
+<nav aria-label="Sections" style="display: flex; flex-wrap: wrap; gap: 4px; background: #E7E9E4; padding: 4px; border-radius: 12px">
+<a href="01-overview.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Overview</a>
+<a href="02-rooms.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Rooms</a>
+<a href="03-energy.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Energy</a>
+<a href="04-heating.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Heating</a>
+<a href="05-water.html" aria-current="page" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 600 14px Inter, sans-serif; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.08)">Water</a>
+<a href="06-wifi.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">Wi-Fi</a>
+<a href="07-system.html" style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 9px; color: #4A514C; font: 500 14px Inter, sans-serif; text-decoration: none">System</a>
+</nav>
+<div role="group" aria-label="Time range" style="display: flex; gap: 6px">
+<button type="button" aria-pressed="false" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">7d</button>
+<button type="button" aria-pressed="true" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #0F766E; border-radius: 9px; background: #0F766E; color: #FFFFFF; font: 600 13px Inter, sans-serif">28d</button>
+<button type="button" aria-pressed="false" style="min-height: 40px; min-width: 52px; padding: 0 12px; border: 1px solid #CDD1CA; border-radius: 9px; background: #FFFFFF; color: #1B1F1D; font: 500 13px Inter, sans-serif">1y</button>
+</div>
+</header>
+
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 12px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3F4A44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+<p style="margin: 0; font-size: 14px; color: #3F4A44">Thames Water publishes hourly readings about 3 days late, so this page always runs behind the others. Last collected today at 06:02.</p>
+</div>
+
+<!-- KPIs -->
+<section aria-label="Water totals" style="display: flex; flex-wrap: wrap; gap: 14px">
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #5A615C">Latest day · Tue 3 Nov</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">312<span style="font-size: 18px; color: #5A615C"> L</span></span>
+<span style="font-size: 13px; color: #5A615C">Morning peak 52 L at 07:00</span>
+</div>
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #5A615C">7-day average</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">319<span style="font-size: 18px; color: #5A615C"> L/day</span></span>
+<span style="font-size: 13px; color: #5A615C">−2 % on the week before</span>
+</div>
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #5A615C">Last 28 days</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">9.0<span style="font-size: 18px; color: #5A615C"> m³</span></span>
+<span style="font-size: 13px; color: #5A615C">Meter reading 1,284.6 m³</span>
+</div>
+<div style="flex: 1 1 200px; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; color: #5A615C">Leak check</span>
+<span style="font-family: 'Space Grotesk', Inter, sans-serif; font-size: 34px; font-weight: 600; letter-spacing: -0.02em">Passed</span>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #5A615C"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>Zero flow every night for 28 nights</span>
+</div>
+</section>
+
+<!-- Hourly -->
+<section aria-labelledby="hour-h" style="background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<h2 id="hour-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Hour by hour, Tuesday 3 November</h2>
+<span style="font-size: 13px; color: #5A615C">Litres per hour</span>
+</div>
+<svg viewBox="0 0 760 170" role="img" aria-label="Bar chart of hourly water use on 3 November: nothing from midnight to 06:00, a morning peak of 52 litres at 07:00 and an evening peak of 31 litres at 19:00." style="width: 100%; height: auto; display: block">
+<g transform="translate(36,4)">
+<line x1="0" y1="96.7" x2="720" y2="96.7" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="53.3" x2="720" y2="53.3" stroke="#ECEEE9" stroke-width="1"></line>
+<line x1="0" y1="10" x2="720" y2="10" stroke="#ECEEE9" stroke-width="1"></line>
+<rect x="183" y="101" width="24" height="39" rx="3" fill="#0F766E"></rect>
+<rect x="213" y="27.3" width="24" height="112.7" rx="3" fill="#0F766E"></rect>
+<rect x="243" y="51.2" width="24" height="88.8" rx="3" fill="#0F766E"></rect>
+<rect x="273" y="114" width="24" height="26" rx="3" fill="#0F766E"></rect>
+<rect x="303" y="127" width="24" height="13" rx="3" fill="#0F766E"></rect>
+<rect x="333" y="131.3" width="24" height="8.7" rx="3" fill="#0F766E"></rect>
+<rect x="363" y="120.5" width="24" height="19.5" rx="3" fill="#0F766E"></rect>
+<rect x="393" y="124.8" width="24" height="15.2" rx="3" fill="#0F766E"></rect>
+<rect x="423" y="129.2" width="24" height="10.8" rx="3" fill="#0F766E"></rect>
+<rect x="453" y="122.7" width="24" height="17.3" rx="3" fill="#0F766E"></rect>
+<rect x="483" y="127" width="24" height="13" rx="3" fill="#0F766E"></rect>
+<rect x="513" y="109.7" width="24" height="30.3" rx="3" fill="#0F766E"></rect>
+<rect x="543" y="92.3" width="24" height="47.7" rx="3" fill="#0F766E"></rect>
+<rect x="573" y="72.8" width="24" height="67.2" rx="3" fill="#0F766E"></rect>
+<rect x="603" y="83.7" width="24" height="56.3" rx="3" fill="#0F766E"></rect>
+<rect x="633" y="98.8" width="24" height="41.2" rx="3" fill="#0F766E"></rect>
+<rect x="663" y="88" width="24" height="52" rx="3" fill="#0F766E"></rect>
+<rect x="693" y="122.7" width="24" height="17.3" rx="3" fill="#0F766E"></rect>
+<line x1="0" y1="140" x2="720" y2="140" stroke="#CDD1CA" stroke-width="1"></line>
+</g>
+<g font-family="Inter, sans-serif" font-size="11" fill="#5A615C">
+<text x="28" y="105" text-anchor="end">20</text>
+<text x="28" y="61" text-anchor="end">40</text>
+<text x="28" y="18" text-anchor="end">60</text>
+<text x="51" y="162" text-anchor="middle">00:00</text>
+<text x="231" y="162" text-anchor="middle">06:00</text>
+<text x="411" y="162" text-anchor="middle">12:00</text>
+<text x="591" y="162" text-anchor="middle">18:00</text>
+<text x="741" y="162" text-anchor="middle">23:00</text>
+</g>
+</svg>
+</section>
+
+<!-- 28 days + leak table -->
+<div style="display: flex; flex-wrap: wrap; gap: 14px">
+<section aria-labelledby="days-h" style="flex: 999 1 620px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+<h2 id="days-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Daily use, 7 Oct – 3 Nov</h2>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #3F4A44"><span aria-hidden="true" style="width: 14px; height: 0; border-top: 2px dashed #3F4A44"></span>Average 323 L</span>
+</div>
+<svg viewBox="0 0 760 170" role="img" aria-label="Bar chart of daily water use over 28 days, between 276 and 410 litres, averaging 323 litres; weekends are higher." style="width: 100%; height: auto; display: block">
+<g transform="translate(36,4)">
+<rect x="3" y="51.9" width="19.7" height="88.1" rx="3" fill="#0F766E"></rect>
+<rect x="28.7" y="44.4" width="19.7" height="95.6" rx="3" fill="#0F766E"></rect>
+<rect x="54.4" y="56.8" width="19.7" height="83.2" rx="3" fill="#0F766E"></rect>
+<rect x="80.1" y="54.5" width="19.7" height="85.5" rx="3" fill="#0F766E"></rect>
+<rect x="105.9" y="38.3" width="19.7" height="101.7" rx="3" fill="#0F766E"></rect>
+<rect x="131.6" y="21.6" width="19.7" height="118.4" rx="3" fill="#0F766E"></rect>
+<rect x="157.3" y="47" width="19.7" height="93" rx="3" fill="#0F766E"></rect>
+<rect x="183" y="53" width="19.7" height="87" rx="3" fill="#0F766E"></rect>
+<rect x="208.7" y="49" width="19.7" height="91" rx="3" fill="#0F766E"></rect>
+<rect x="234.4" y="59.4" width="19.7" height="80.6" rx="3" fill="#0F766E"></rect>
+<rect x="260.1" y="40.6" width="19.7" height="99.4" rx="3" fill="#0F766E"></rect>
+<rect x="285.9" y="25" width="19.7" height="115" rx="3" fill="#0F766E"></rect>
+<rect x="311.6" y="44.7" width="19.7" height="95.3" rx="3" fill="#0F766E"></rect>
+<rect x="337.3" y="56.2" width="19.7" height="83.8" rx="3" fill="#0F766E"></rect>
+<rect x="363" y="53.3" width="19.7" height="86.7" rx="3" fill="#0F766E"></rect>
+<rect x="388.7" y="44.7" width="19.7" height="95.3" rx="3" fill="#0F766E"></rect>
+<rect x="414.4" y="54.8" width="19.7" height="85.2" rx="3" fill="#0F766E"></rect>
+<rect x="440.1" y="59.1" width="19.7" height="80.9" rx="3" fill="#0F766E"></rect>
+<rect x="465.9" y="36" width="19.7" height="104" rx="3" fill="#0F766E"></rect>
+<rect x="491.6" y="27.9" width="19.7" height="112.1" rx="3" fill="#0F766E"></rect>
+<rect x="517.3" y="53" width="19.7" height="87" rx="3" fill="#0F766E"></rect>
+<rect x="543" y="53.9" width="19.7" height="86.1" rx="3" fill="#0F766E"></rect>
+<rect x="568.7" y="41.5" width="19.7" height="98.5" rx="3" fill="#0F766E"></rect>
+<rect x="594.4" y="60.3" width="19.7" height="79.7" rx="3" fill="#0F766E"></rect>
+<rect x="620.1" y="23.9" width="19.7" height="116.1" rx="3" fill="#0F766E"></rect>
+<rect x="645.9" y="48.1" width="19.7" height="91.9" rx="3" fill="#0F766E"></rect>
+<rect x="671.6" y="56.5" width="19.7" height="83.5" rx="3" fill="#0F766E"></rect>
+<rect x="697.3" y="49.9" width="19.7" height="90.1" rx="3" fill="#0F766E"></rect>
+<line x1="0" y1="46.7" x2="720" y2="46.7" stroke="#3F4A44" stroke-width="1.5" stroke-dasharray="5 4"></line>
+<line x1="0" y1="140" x2="720" y2="140" stroke="#CDD1CA" stroke-width="1"></line>
+</g>
+<g font-family="Inter, sans-serif" font-size="11" fill="#5A615C" text-anchor="middle">
+<text x="48.9" y="162">7 Oct</text>
+<text x="228.9" y="162">14 Oct</text>
+<text x="408.9" y="162">21 Oct</text>
+<text x="588.9" y="162">28 Oct</text>
+<text x="743.2" y="162" text-anchor="end">3 Nov</text>
+</g>
+</svg>
+</section>
+
+<section aria-labelledby="leak-h" style="flex: 1 1 340px; min-width: 0; background: #FFFFFF; border: 1px solid #E1E4DE; border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 id="leak-h" style="margin: 0; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; font-weight: 600">Night-time leak check</h2>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 300px; border-collapse: collapse; font-size: 14px">
+<thead>
+<tr style="text-align: left; color: #5A615C; font-size: 12px">
+<th scope="col" style="padding: 8px 12px 8px 0; font-weight: 500; border-bottom: 1px solid #E1E4DE">Night</th>
+<th scope="col" style="padding: 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Lowest hour</th>
+<th scope="col" style="padding: 8px 0 8px 12px; font-weight: 500; border-bottom: 1px solid #E1E4DE">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding: 9px 12px 9px 0; border-bottom: 1px solid #F0F1EE">2–3 Nov</td><td style="padding: 9px 12px; border-bottom: 1px solid #F0F1EE">0 L</td><td style="padding: 9px 0 9px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>OK</span></td></tr>
+<tr><td style="padding: 9px 12px 9px 0; border-bottom: 1px solid #F0F1EE">1–2 Nov</td><td style="padding: 9px 12px; border-bottom: 1px solid #F0F1EE">0 L</td><td style="padding: 9px 0 9px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>OK</span></td></tr>
+<tr><td style="padding: 9px 12px 9px 0; border-bottom: 1px solid #F0F1EE">31 Oct–1 Nov</td><td style="padding: 9px 12px; border-bottom: 1px solid #F0F1EE">0 L</td><td style="padding: 9px 0 9px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>OK</span></td></tr>
+<tr><td style="padding: 9px 12px 9px 0; border-bottom: 1px solid #F0F1EE">30–31 Oct</td><td style="padding: 9px 12px; border-bottom: 1px solid #F0F1EE">0 L</td><td style="padding: 9px 0 9px 12px; border-bottom: 1px solid #F0F1EE"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>OK</span></td></tr>
+<tr><td style="padding: 9px 12px 9px 0">29–30 Oct</td><td style="padding: 9px 12px">0 L</td><td style="padding: 9px 0 9px 12px"><span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #15803D"></span>OK</span></td></tr>
+</tbody>
+</table>
+</div>
+<p style="margin: 0; font-size: 13px; color: #5A615C">If the lowest hour between midnight and 05:00 is above zero for 3 nights in a row, you get an alert: water is flowing when nobody is using it.</p>
+</section>
+</div>
+
+<p style="margin: 0; font-size: 12px; color: #5A615C">All figures on this mockup are sample data.</p>
+</div>
+</div>
+</body>
+</html>

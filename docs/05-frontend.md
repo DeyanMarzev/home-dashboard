@@ -2,7 +2,7 @@
 
 React + Vite + TypeScript, TanStack Query for data, React Router for pages, Apache ECharts for charts. Served by the API at `https://home.deyan.uk`. Later wrapped by Capacitor for Android, so: no browser-only APIs without a fallback, all URLs relative or from config, layouts must work at phone width (360–412 px).
 
-The approved design is a mockup on claude.ai (the owner has the link: "Home Dashboard Mockup", seven pages). The rules below capture it; ask the owner for screenshots if something isn't clear.
+The approved design is the HTML mockup in `docs/mockup/mockup/` (seven pages: `01-overview.html` … `07-system.html`, all sample data). Open them in a browser; spacing and colours are exact in their inline styles. The rules below capture it.
 
 ## Design tokens
 
@@ -78,3 +78,17 @@ Derived numbers shown in the UI (dew point, mould risk, costs, projections, base
 - One TanStack Query hook per endpoint (`useLatest`, `useReadings`, `useSources`, ...).
 - SSE client updates the query cache for live series; polling fallback every 60 s.
 - Skeleton states while loading; a Late badge (not an empty chart) when a series has no recent data; a clear empty state when a source has never reported.
+
+## Implementation notes (M5)
+
+- **Where things are:** `apps/web/src/styles.css` (tokens and component classes, values from the mockup), `components/` (`FreshnessBadge`, `StatTile`/`Panel`/`ProgressBar` in `Cards.tsx`, `PageHeader`, `AlertStrip`, `Status`, charts in `components/charts/`), `pages/` (Overview, Rooms, System; Energy, Heating, Water and Wi-Fi show which sources they wait for), `api/` (fetch client, one hook per endpoint, SSE provider), `model/` (pure view models, unit-tested).
+- **Fonts:** Inter and Space Grotesk variable fonts are bundled from `@fontsource-variable/*` (no requests to Google; works offline in the Android app).
+- **Freshness on screen:** every badge is `retick(freshness, policy, now)` from `packages/shared`, using the source's `policy` from `/api/sources` and one shared clock that ticks every 30 s (`lib/now.tsx`). A badge therefore turns Late on its own, with no refetch. Panels built from several series combine them (worst wins). Sources disabled in the registry show "Not connected" instead.
+- **Live data:** `api/live.tsx` opens `/api/stream`; `reading` events patch cached `/api/latest` responses, `freshness` events patch `/api/sources`, `event` events refetch events. While the stream is down, latest values poll every 60 s (every 5 min as a safety net otherwise). Charts refetch every 5 minutes.
+- **Expired Cloudflare session:** requests use `redirect: 'manual'`; Access's login redirect shows a banner asking to reload, instead of failing silently.
+- **Derived numbers** (`packages/shared`, tested): `dewPoint` (Magnus), `mouldRisk` (high: avg RH ≥ 70 % or coldest temperature < 3 °C above the dew point; watch: ≥ 60 % or < 5 °C), `co2Level` (< 800 good, < 1,000 fair, < 1,500 high, else very high), `pressureTrend` (±1.5 hPa over 3 h), `roomAdvice`, `decodeThrottle`/`piStatus`, `daysUntilFull`, `lowestWindow` (greenest 4 h), `describeWeather` (WMO codes). Thresholds are rules of thumb; tune them there.
+- **Time range pills** live in the URL (`?range=7d`), so a reload or a shared link keeps them.
+- **Bundle:** about 1 MB of JavaScript (330 KB gzipped), mostly ECharts. Fine for the Pi and the phone; code-split the charts later if first load ever feels slow.
+- **Not shown yet:** the System page's API request statistics (no data source; it shows status, version, database and live-update state instead), Wi-Fi signal on the Pi card (M9; shows the database size instead), boiler-firing bands and the Nest target line (appear once the Nest series exist, M6).
+- **Checking layouts:** headless Edge or Chrome at 1440 px and 390 px. Windows won't size a browser window below about 500 px, so test phone width inside a 390 px iframe.
+
