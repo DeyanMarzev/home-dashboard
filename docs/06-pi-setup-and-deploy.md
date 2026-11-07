@@ -188,6 +188,21 @@ docker compose start fake-sensor    # within ~5 min: that event gets resolved_at
 
 (Room sensors turn Late 5 minutes after the last reading; the checker runs every 5 minutes, so the event appears 5–10 minutes after stopping.) Leave the fake sensor stopped when you're done: `docker compose stop fake-sensor`.
 
+### Check the API (M4)
+
+Every route except `/api/health` needs a Cloudflare Access token, so test through the tunnel with a service token (create one as in §5.5 if you haven't yet):
+
+```bash
+# A service token (docs/06 §5.5) lets curl through Cloudflare Access:
+export CF_ID=<client id> CF_SECRET=<client secret>
+H="-H CF-Access-Client-Id:$CF_ID -H CF-Access-Client-Secret:$CF_SECRET"
+curl -s $H https://home.deyan.uk/api/sources | head -c 600; echo
+curl -s $H "https://home.deyan.uk/api/latest?source=room_sensors" | head -c 600; echo
+curl -sN $H https://home.deyan.uk/api/stream      # with the fake sensor running: "event: reading" lines every 30 s
+```
+
+The stream should show a fake-sensor `reading` within about 2 s of it being published (the collector writes every second). Ctrl+C to stop.
+
 ## 7. Updating
 
 ```bash

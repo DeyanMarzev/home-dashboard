@@ -4,3 +4,4 @@ export * from './ids.js';
 export * from './london.js';
 export * from './readings.js';
 export * from './registry.js';
+export * from './api.js';

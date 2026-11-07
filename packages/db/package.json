@@ -9,6 +9,9 @@
       "development": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./testing": {
+      "development": "./src/test/database.ts"
     }
   },
   "files": [
