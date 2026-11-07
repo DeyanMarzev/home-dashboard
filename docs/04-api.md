@@ -135,6 +135,21 @@ Boiler minutes on, cycles, condensing share (minutes with `boiler_return` < 55 �
 ### `GET /api/summary/water?from=&to=`
 Daily litres, hourly profile for a day, nightly minimum flow (leak check).
 
+`from`/`to` London dates (or `days`, default 28, ending the last day covered). Response (`WaterSummarySchema`):
+
+```json
+{ "from": "2026-10-07", "to": "2026-11-03", "latestDay": "2026-11-03",
+  "days": [{ "date": "2026-11-03", "litres": 312, "costPence": 155, "complete": true }],
+  "hourly": [["2026-11-03T07:00:00Z", 52]],
+  "nights": [{ "night": "2026-11-03", "minLitres": 0, "complete": true }],
+  "leak": { "state": "ok", "consecutive": 0, "nightsChecked": 28 },
+  "meterReadingM3": 1284.6,
+  "freshness": { "...": "thames_water" } }
+```
+
+- `costPence` = litres ÷ 1000 × the `water` tariff's unit rate (p/m³) + its standing charge; null without a water tariff for that date.
+- `complete` = every hour of the London day present (23/24/25). `hourly` is for `latestDay`. `nights` are keyed by the morning's date; `leak.state` is `ok`, `watch` (flow on the latest night or two), `leak` (3+ in a row) or `unknown`. Cached 30 s.
+
 ### `GET /api/events?limit=50&level=`
 Recent events, newest first: `{ "items": [{ "id", "ts", "level", "sourceId", "kind", "message", "data", "resolvedAt" }] }`. `limit` 1–500.
 

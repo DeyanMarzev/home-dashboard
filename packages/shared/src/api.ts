@@ -383,3 +383,42 @@ export const EnergySummarySchema = z.object({
   freshness: FreshnessSchema.nullable(),
 });
 export type EnergySummary = z.infer<typeof EnergySummarySchema>;
+
+// --- GET /api/summary/water --------------------------------------------------------------
+
+export const WaterSummaryQuerySchema = z
+  .strictObject({
+    from: IsoDate.optional(),
+    to: IsoDate.optional(),
+    /** Without `from`: how many days ending `to` (default 28). */
+    days: z.coerce.number().int().min(1).max(400).optional(),
+  })
+  .refine((q) => !q.from || !q.to || q.from <= q.to, 'from must not be after to');
+
+export const WaterSummarySchema = z.object({
+  from: IsoDate,
+  to: IsoDate,
+  /** The newest day with every hour present. */
+  latestDay: IsoDate.nullable(),
+  days: z.array(
+    z.object({
+      date: IsoDate,
+      litres: z.number().nullable(),
+      /** With a `water` tariff: litres priced per m³ plus the standing charge. */
+      costPence: z.number().int().nullable(),
+      complete: z.boolean(),
+    }),
+  ),
+  /** Litres per hour on `latestDay`: [start of hour, litres]. */
+  hourly: z.array(z.tuple([IsoTimestamp, z.number()])),
+  nights: z.array(z.object({ night: IsoDate, minLitres: z.number(), complete: z.boolean() })),
+  leak: z.object({
+    state: z.enum(['ok', 'watch', 'leak', 'unknown']),
+    consecutive: z.number().int(),
+    nightsChecked: z.number().int(),
+  }),
+  /** The meter's own cumulative reading, when the provider reports one. */
+  meterReadingM3: z.number().nullable(),
+  freshness: FreshnessSchema.nullable(),
+});
+export type WaterSummary = z.infer<typeof WaterSummarySchema>;

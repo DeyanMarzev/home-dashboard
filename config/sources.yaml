@@ -67,7 +67,7 @@ sources:
     grace: 12h
     enabled: false
 
-  thames_water: # M8
+  thames_water: # built (M8) with only a `fake` provider (sample data); enable once the real one exists (docs/08 question 13)
     name: Thames Water
     description: Water, hourly
     kind: scrape

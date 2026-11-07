@@ -11,6 +11,7 @@ import { FreshnessService } from './freshness.js';
 import { registerDataRoutes } from './routes/data.js';
 import { registerEnergyRoutes } from './routes/energy.js';
 import { registerHeatingRoutes } from './routes/heating.js';
+import { registerWaterRoutes } from './routes/water.js';
 import { postgresNotifications, StreamHub, type NotificationSource } from './stream.js';
 import { registerWebApp } from './web-app.js';
 
@@ -72,6 +73,7 @@ export async function buildServer(config: Config, deps: ServerDeps = {}): Promis
     registerDataRoutes(app, { db: deps.db, registry: deps.registry, freshness, now });
     registerHeatingRoutes(app, { db: deps.db, registry: deps.registry, freshness, now });
     registerEnergyRoutes(app, { db: deps.db, freshness, now });
+    registerWaterRoutes(app, { db: deps.db, freshness, now });
 
     const hub = new StreamHub({
       db: deps.db,

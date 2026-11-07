@@ -27,6 +27,7 @@ import {
   throttleSummary,
   type LatestResponse,
   type SourceInfo,
+  type WaterSummary,
 } from '@home/shared';
 import {
   useEnergySummary,
@@ -35,6 +36,7 @@ import {
   useLatest,
   useReadings,
   useSources,
+  useWaterSummary,
 } from '../api/hooks.js';
 import { useLive } from '../api/live-context.js';
 import { AlertStrip } from '../components/AlertStrip.js';
@@ -107,14 +109,7 @@ export function OverviewPage() {
         <GridPanel latest={grid.data} source={source('carbon_intensity')} />
       </div>
       <div className="row">
-        <Panel
-          id="water-h"
-          title="Water"
-          flex="1 1 440px"
-          badge={<SourceBadge source={source('thames_water')} />}
-        >
-          <NotConnected source={source('thames_water')} />
-        </Panel>
+        <WaterPanel source={source('thames_water')} />
         <PiPanel latest={pi.data} />
       </div>
       <SourcesTable sources={sources.data} />
@@ -262,12 +257,7 @@ function Tiles({
         }
       />
       <EnergyTile source={source('smart_meters')} />
-      <StatTile
-        label="Water"
-        badge={<SourceBadge source={source('thames_water')} compact />}
-        value="—"
-        context={`${source('thames_water')?.name ?? 'Thames Water'}: not connected yet`}
-      />
+      <WaterTile source={source('thames_water')} />
     </section>
   );
 }
@@ -694,6 +684,110 @@ function GasPanel({ source }: { source: SourceInfo | undefined }) {
           valueLabels={days.map((d) => formatNumber(d.gas!.kwh))}
           ariaLabel={`Bar chart of daily gas use for the last ${days.length} days, ${formatNumber(total)} kWh in total.`}
         />
+      )}
+    </Panel>
+  );
+}
+
+// --- Water -------------------------------------------------------------------------------
+
+const LEAK_TONE = { ok: 'good', watch: 'warn', leak: 'bad', unknown: 'muted' } as const;
+
+function leakLine(leak: WaterSummary['leak'], nights: WaterSummary['nights']): string {
+  const lowest = nights.filter((n) => n.complete).at(-1)?.minLitres ?? 0;
+  if (leak.state === 'ok') return `No leak · night minimum ${formatNumber(lowest)} L/h`;
+  if (leak.state === 'leak')
+    return `Possible leak · water flowing at night for ${leak.consecutive} nights`;
+  if (leak.state === 'watch')
+    return `Watch · water flowing last night (${formatNumber(lowest)} L/h)`;
+  return 'Leak check needs a complete night';
+}
+
+function WaterTile({ source }: { source: SourceInfo | undefined }) {
+  const at = useFreshnessNow();
+  const summary = useWaterSummary(undefined, !!source?.enabled);
+  const s = summary.data;
+  const day = s?.days.find((d) => d.date === s.latestDay);
+  if (!source?.enabled || !s || !day) {
+    return (
+      <StatTile
+        label="Water"
+        badge={<SourceBadge source={source} compact />}
+        value="—"
+        context={
+          source && !source.enabled ? `${source.name}: not connected yet` : 'No complete day yet'
+        }
+      />
+    );
+  }
+  return (
+    <StatTile
+      label={`Water · ${weekdayLabel(day.date)}`}
+      badge={s.freshness && <FreshnessBadge freshness={at(s.freshness, 'thames_water')} compact />}
+      value={day.litres === null ? '—' : formatNumber(day.litres)}
+      unit=" L"
+      context={<Status tone={LEAK_TONE[s.leak.state]}>{leakLine(s.leak, s.nights)}</Status>}
+    />
+  );
+}
+
+/** The last 7 days of water and the night-time leak check. */
+function WaterPanel({ source }: { source: SourceInfo | undefined }) {
+  const at = useFreshnessNow();
+  const summary = useWaterSummary(undefined, !!source?.enabled);
+  const s = summary.data;
+  const days = (s?.days ?? []).slice(-7).filter((d) => d.litres !== null);
+  const complete = days.filter((d) => d.complete);
+  const avg = complete.length
+    ? complete.reduce((t, d) => t + d.litres!, 0) / complete.length
+    : null;
+  return (
+    <Panel
+      id="water-h"
+      title={
+        days.length ? `Water, ${dayLabel(days[0]!.date)} – ${dayLabel(days.at(-1)!.date)}` : 'Water'
+      }
+      flex="1 1 440px"
+      badge={
+        s?.freshness && source?.enabled ? (
+          <FreshnessBadge freshness={at(s.freshness, 'thames_water')} />
+        ) : (
+          <SourceBadge source={source} />
+        )
+      }
+      meta={avg !== null && `avg ${formatNumber(avg)} L/day`}
+    >
+      {!source?.enabled ? (
+        <NotConnected source={source} />
+      ) : days.length === 0 ? (
+        summary.isPending ? (
+          <Skeleton height={180} />
+        ) : (
+          <Empty>No water data yet</Empty>
+        )
+      ) : (
+        <>
+          <BarChart
+            labels={days.map((d) => weekdayLabel(d.date).slice(0, 3))}
+            series={[
+              { name: 'Water', color: token('--accent'), values: days.map((d) => d.litres) },
+            ]}
+            valueLabels={days.map((d) => formatNumber(d.litres!))}
+            ariaLabel={`Bar chart of daily water use for the last ${days.length} days${avg !== null ? `, averaging ${formatNumber(avg)} litres` : ''}.`}
+          />
+          {s && (
+            <p className="line">
+              <span className={`dot dot--${LEAK_TONE[s.leak.state]}`} aria-hidden="true" />
+              {s.leak.state === 'ok'
+                ? `Leak check passed: usage reached 0 L/h between 00:00 and 05:00 every night for ${s.leak.nightsChecked} nights`
+                : leakLine(s.leak, s.nights)}
+            </p>
+          )}
+          <p className="note">
+            {source.name} hourly data arrives about{' '}
+            {Math.round(source.policy.expectedDelaySeconds / 86400)} days late
+          </p>
+        </>
       )}
     </Panel>
   );

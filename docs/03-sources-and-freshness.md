@@ -237,6 +237,8 @@ interface CollectorContext {
 - Daily at 06:00 Europe/London; fetch the last 7 days each run (upsert).
 - Treat as fragile: strict parsing, clear error messages, never retry more than 3× per day (avoid account lockout).
 - Derived: night-time leak check = minimum hourly volume between 00:00 and 05:00 for each night; alert if > 0 for 3 nights in a row.
+- Implemented (`apps/collector/src/sources/thames_water/`): `WATER_PROVIDER` picks `fake` (sample data, 3 days behind, deterministic) or `thames` (placeholder until docs/08 question 13 is answered). Before fetching, the collector counts today's real attempts in `collector_runs` (failed runs, or runs that wrote rows) and skips the run once there have been 3, so backoff retries can never lock the account; this survives restarts. Series: `volume` (L, interval_total 1 h) and `meter_reading` (m³, gauge) on entity `mains`.
+- Leak check (`packages/shared/src/water.ts`): after each fetch, the quietest hour of each complete night (London 00:00–05:00) is checked; 3 nights in a row above 0 L opens one `water_leak` alert event, which resolves when a night is back to zero.
 
 ### Later sources (separate milestones)
 

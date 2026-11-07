@@ -13,7 +13,7 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 | 7 | Smart plugs: brand and which appliances? | Later | Shelly and Tapo have local APIs. |
 | 8 | Boiler probes: fitted yet? 1-Wire IDs for flow and return? | M6 | Collector must run fine with no probes. |
 | 10 | Off-Pi backup destination (Google Drive, OneDrive, Backblaze B2, NAS)? | M10 | Via `rclone`. |
-| 11 | Water: is there a water tariff to show cost, or volume only? | M8 | Mockup shows volume only. |
+| 13 | Thames Water account data: how does the account website load hourly usage (the request it makes and a sample response, personal details removed)? | M8 real data | The `thames` provider is a placeholder until then (`apps/collector/src/sources/thames_water/providers/thames.ts`); everything else runs on the `fake` provider. Easiest: browser dev tools → Network while opening the usage page. |
 | 12 | Build images in CI (GitHub Actions, `linux/arm64`) or keep building on the Pi? | M10 | Building on the Pi works but is slow. |
 
 ## Decided
@@ -22,3 +22,4 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 |---|---|---|
 | 12a | Git hosting | GitHub. A public repo is fine; secrets stay in `.env` (git-ignored) and never enter the repo (2026-11-07). |
 | 9 | Cloudflare Access allowed emails | `deyanmarzev@gmail.com` (2026-11-07). |
+| 11 | Water: tariff or volume only? | Volume, and cost where possible: add a `water` rate (p/m³ + standing p/day) on the Energy page's tariff editor; costs show wherever one applies (2026-11-07). |
