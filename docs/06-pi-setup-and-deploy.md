@@ -164,6 +164,30 @@ To change the source registry: edit `config/sources.yaml` (it is bind-mounted in
 
 Check: `https://home.deyan.uk` asks for login, then shows the dashboard.
 
+### Check the collectors (M3)
+
+Put `HOME_LAT`, `HOME_LON` and `HOME_POSTCODE_OUTCODE` in `.env` first (`docker compose up -d collector` after changing it).
+
+```bash
+docker compose --profile fake up -d fake-sensor     # three fake rooms over MQTT
+docker compose logs -f collector                    # "collector started", "MQTT connected"
+docker compose exec postgres psql -U home -d home -c \
+  "select s.source_id, count(*) from readings r join series s on s.id = r.series_id group by 1"
+docker compose exec postgres psql -U home -d home -c \
+  "select source_id, started_at, ok, rows_written, error from collector_runs order by id desc limit 10"
+```
+
+Expect rows for `room_sensors`, `pi_stats`, `open_meteo` and `carbon_intensity`, and runs with `ok = t`. Then the Late test:
+
+```bash
+docker compose stop fake-sensor     # within ~10 min: one open source_late event for room_sensors
+docker compose exec postgres psql -U home -d home -c \
+  "select id, ts, source_id, message, resolved_at from events order by id desc limit 5"
+docker compose start fake-sensor    # within ~5 min: that event gets resolved_at
+```
+
+(Room sensors turn Late 5 minutes after the last reading; the checker runs every 5 minutes, so the event appears 5–10 minutes after stopping.) Leave the fake sensor stopped when you're done: `docker compose stop fake-sensor`.
+
 ## 7. Updating
 
 ```bash

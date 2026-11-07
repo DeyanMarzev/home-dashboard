@@ -11,11 +11,15 @@
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "fake-sensor": "tsx --env-file-if-exists=../../.env --conditions=development src/tools/fake-sensor.ts"
   },
   "dependencies": {
     "@home/db": "workspace:*",
     "@home/shared": "workspace:*",
-    "pino": "^10.4.0"
+    "croner": "^11.0.0",
+    "mqtt": "^5.16.1",
+    "pino": "^10.4.0",
+    "zod": "^4.6.7"
   }
 }

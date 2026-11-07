@@ -4,9 +4,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { Sql } from 'postgres';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { openEvent, resolveEvent } from './events.js';
+import { latestBySource } from './latest.js';
 import { migrate, MigrationError } from './migrate.js';
 import { createReadingWriter, lastDataTo, READINGS_CHANNEL } from './readings.js';
 import { loadRegistryFile } from './registry-file.js';
+import { finishRun, pruneRuns, recordRun, startRun } from './runs.js';
 import { syncSources } from './sources.js';
 import { SOURCES_FILE, testBackends, type TestDatabase } from './test/database.js';
 
@@ -311,6 +314,110 @@ describe.each(testBackends)('database ($name)', ({ start }) => {
       } finally {
         await unlisten();
       }
+    });
+  });
+  describe('latestBySource', () => {
+    it('takes each source from the series that reaches furthest, ignoring forecasts', async () => {
+      const writer = createReadingWriter(sql);
+      await writer.write('open_meteo', [
+        {
+          metric: 'temperature',
+          entity: 'outdoor',
+          unit: '°C',
+          valueType: 'gauge',
+          ts: '2026-11-06T13:00:00Z',
+          value: 9,
+        },
+        {
+          metric: 'forecast_temperature',
+          entity: 'outdoor',
+          unit: '°C',
+          valueType: 'gauge',
+          ts: '2026-11-07T12:00:00Z',
+          value: 11,
+        },
+      ]);
+      const latest = await latestBySource(sql);
+      expect(latest.get('open_meteo')).toEqual({
+        ts: new Date('2026-11-06T13:00:00Z'),
+        intervalSeconds: null,
+      });
+      // smart_meters: last half-hour starts 23:30 on the 5th and keeps its interval.
+      expect(latest.get('smart_meters')).toEqual({
+        ts: new Date('2026-11-05T23:30:00Z'),
+        intervalSeconds: 1800,
+      });
+      expect(latest.has('thames_water')).toBe(false);
+    });
+  });
+
+  describe('collector runs', () => {
+    it('records a run from start to finish', async () => {
+      const id = await startRun(sql, 'pi_stats', new Date('2026-11-06T13:00:00Z'));
+      await finishRun(
+        sql,
+        id,
+        { ok: false, rowsWritten: 0, error: 'x'.repeat(2000) },
+        new Date('2026-11-06T13:00:02Z'),
+      );
+      const [run] = await sql<{ ok: boolean; rows_written: number; error: string; ms: number }[]>`
+        select ok, rows_written, error, extract(epoch from finished_at - started_at) * 1000 as ms
+        from collector_runs where id = ${id}`;
+      expect(run).toMatchObject({ ok: false, rows_written: 0 });
+      expect(Number(run?.ms)).toBe(2000);
+      expect(run?.error.length).toBe(500); // truncated
+    });
+
+    it('records a summarised run in one go and prunes old history', async () => {
+      await recordRun(
+        sql,
+        'room_sensors',
+        new Date('2020-01-01T00:00:00Z'),
+        new Date('2020-01-01T00:01:00Z'),
+        { ok: true, rowsWritten: 12 },
+      );
+      await recordRun(sql, 'room_sensors', new Date(Date.now() - 60_000), new Date(), {
+        ok: true,
+        rowsWritten: 12,
+      });
+      expect(await pruneRuns(sql, 30)).toBeGreaterThanOrEqual(1);
+      const [row] = await sql<
+        { n: string }[]
+      >`select count(*) as n from collector_runs where started_at < '2021-01-01'`;
+      expect(Number(row?.n)).toBe(0);
+    });
+  });
+
+  describe('events', () => {
+    const late = {
+      level: 'warning' as const,
+      sourceId: 'room_sensors',
+      kind: 'source_late',
+      message: 'Room sensors: no data since 13:10',
+    };
+    const openCount = async () =>
+      Number(
+        (
+          await sql<
+            { n: string }[]
+          >`select count(*) as n from events where kind = 'source_late' and resolved_at is null`
+        )[0]?.n,
+      );
+
+    it('opens at most one event per source and kind', async () => {
+      const id = await openEvent(sql, { ...late, data: { state: 'late' } });
+      expect(id).toEqual(expect.any(Number));
+      expect(await openEvent(sql, late)).toBeNull();
+      expect(await openCount()).toBe(1);
+    });
+
+    it('resolves the open event, after which a new one can open', async () => {
+      expect(await resolveEvent(sql, 'room_sensors', 'source_late')).toEqual(expect.any(Number));
+      expect(await resolveEvent(sql, 'room_sensors', 'source_late')).toBeNull();
+      expect(await openCount()).toBe(0);
+      expect(await openEvent(sql, late)).toEqual(expect.any(Number));
+      expect(await openCount()).toBe(1);
+      await resolveEvent(sql, 'room_sensors', 'source_late');
     });
   });
 });

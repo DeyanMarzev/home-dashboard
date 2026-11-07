@@ -6,3 +6,6 @@ export * from './readings.js';
 export * from './registry-file.js';
 export * from './sources.js';
 export * from './startup.js';
+export * from './events.js';
+export * from './latest.js';
+export * from './runs.js';

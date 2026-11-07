@@ -156,6 +156,30 @@ services:
     networks: [home]
     logging: *logging
 
+  # Publishes realistic readings for three rooms, as real sensors would (M3 pipeline test).
+  # Off by default:  docker compose --profile fake up -d fake-sensor  ·  docker compose stop fake-sensor
+  fake-sensor:
+    profiles: [fake]
+    build:
+      context: .
+      target: collector
+    image: home-dashboard/collector
+    restart: unless-stopped
+    command: ['node', 'dist/tools/fake-sensor.js']
+    environment:
+      MQTT_URL: mqtt://mosquitto:1883
+      MQTT_SENSOR_USERNAME: ${MQTT_SENSOR_USERNAME}
+      MQTT_SENSOR_PASSWORD: ${MQTT_SENSOR_PASSWORD}
+      TZ: Europe/London
+    depends_on:
+      mosquitto: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    networks: [home]
+    logging: *logging
+
   cloudflared:
     image: cloudflare/cloudflared:2026.10.7
     restart: unless-stopped
