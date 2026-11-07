@@ -103,7 +103,7 @@ BACKUP_RCLONE_REMOTE=      # e.g. gdrive:home-dashboard-backups (optional)
 
 1. Zero Trust → Networks → Tunnels → Create tunnel (cloudflared). Copy the token into `CLOUDFLARE_TUNNEL_TOKEN`.
 2. In the tunnel, add a public hostname: `home.deyan.uk` → service `http://api:3000`.
-3. Zero Trust → Access → Applications → Add self-hosted app for `home.deyan.uk`. Policy: allow the owner's email(s). Copy the **Application Audience (AUD) tag** into `CF_ACCESS_AUD` and the team name into `CF_ACCESS_TEAM`.
+3. Zero Trust → Access → Applications → Add self-hosted app for `home.deyan.uk`. Policy: Allow, Include → Emails → `deyanmarzev@gmail.com` (add more people here later). Copy the **Application Audience (AUD) tag** into `CF_ACCESS_AUD` and the team name into `CF_ACCESS_TEAM`.
 4. For the Android app later: Access → Service credentials → create a service token, and add a policy rule allowing it (Service Auth).
 
 ## 6. Start
