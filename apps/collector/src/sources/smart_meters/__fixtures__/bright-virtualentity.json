@@ -1,16 +1,37 @@
 [
   {
-    "veId": "REDACTED-ve-1",
-    "name": "DCC Sourced",
+    "clone": false,
     "active": true,
-    "applicationId": "b0f1b774-a586-4f72-9edd-27ead8aa7a8d",
-    "postalCode": "REDACTED",
+    "applicationId": "REDACTED-applicationId-1",
+    "veTypeId": "REDACTED-veTypeId-2",
+    "attributes": "REDACTED",
     "resources": [
       {
-        "resourceId": "REDACTED-resource-electricity",
-        "resourceTypeId": "REDACTED",
+        "resourceId": "REDACTED-resourceId-3",
+        "resourceTypeId": "REDACTED-resourceTypeId-4",
+        "name": "gas cost"
+      },
+      {
+        "resourceId": "REDACTED-resourceId-5",
+        "resourceTypeId": "REDACTED-resourceTypeId-6",
+        "name": "gas consumption"
+      },
+      {
+        "resourceId": "REDACTED-resourceId-7",
+        "resourceTypeId": "REDACTED-resourceTypeId-8",
         "name": "electricity consumption"
+      },
+      {
+        "resourceId": "REDACTED-resourceId-9",
+        "resourceTypeId": "REDACTED-resourceTypeId-10",
+        "name": "electricity cost"
       }
-    ]
+    ],
+    "ownerId": "REDACTED-ownerId-11",
+    "name": "DCC Sourced",
+    "veId": "REDACTED-veId-12",
+    "updatedAt": "2026-11-04T08:30:22.861Z",
+    "createdAt": "2026-11-04T08:29:11.508Z",
+    "veChildren": []
   }
 ]

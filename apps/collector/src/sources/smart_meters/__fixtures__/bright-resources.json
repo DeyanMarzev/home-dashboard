@@ -1,38 +1,102 @@
 {
-  "veId": "REDACTED-ve-1",
-  "name": "DCC Sourced",
+  "clone": false,
+  "active": true,
+  "_id": "REDACTED-_id-13",
+  "applicationId": "REDACTED-applicationId-1",
+  "veTypeId": "REDACTED-veTypeId-2",
+  "attributes": "REDACTED",
   "resources": [
     {
-      "resourceId": "REDACTED-resource-electricity",
-      "resourceTypeId": "REDACTED",
-      "name": "electricity consumption",
-      "classifier": "electricity.consumption",
-      "baseUnit": "kWh",
-      "active": true
-    },
-    {
-      "resourceId": "REDACTED-resource-electricity-cost",
-      "resourceTypeId": "REDACTED",
-      "name": "electricity cost",
-      "classifier": "electricity.consumption.cost",
-      "baseUnit": "pence",
-      "active": true
-    },
-    {
-      "resourceId": "REDACTED-resource-gas",
-      "resourceTypeId": "REDACTED",
-      "name": "gas consumption",
-      "classifier": "gas.consumption",
-      "baseUnit": "kWh",
-      "active": true
-    },
-    {
-      "resourceId": "REDACTED-resource-gas-cost",
-      "resourceTypeId": "REDACTED",
+      "active": true,
+      "resourceTypeId": "REDACTED-resourceTypeId-4",
+      "ownerId": "REDACTED-ownerId-11",
       "name": "gas cost",
+      "description": "gas cost DCC SM profile reads",
+      "label": "gas cost DCC SM profile reads",
+      "dataSourceResourceTypeInfo": {
+        "unit": "pence",
+        "type": "GAS"
+      },
+      "dataSourceType": "AMRAPI",
       "classifier": "gas.consumption.cost",
       "baseUnit": "pence",
-      "active": true
+      "resourceId": "REDACTED-resourceId-3",
+      "updatedAt": "2026-11-04T08:30:03.876Z",
+      "createdAt": "2026-11-04T08:30:03.765Z",
+      "dataSourceUnitInfo": {
+        "shid": "REDACTED-shid-14"
+      }
+    },
+    {
+      "active": true,
+      "resourceTypeId": "REDACTED-resourceTypeId-6",
+      "ownerId": "REDACTED-ownerId-11",
+      "name": "gas consumption",
+      "description": "gas consumption DCC SM profile reads",
+      "label": "gas consumption DCC SM profile reads",
+      "dataSourceResourceTypeInfo": {
+        "unit": "kWh",
+        "type": "GAS"
+      },
+      "dataSourceType": "AMRAPI",
+      "classifier": "gas.consumption",
+      "baseUnit": "kWh",
+      "resourceId": "REDACTED-resourceId-5",
+      "updatedAt": "2026-11-04T08:30:03.875Z",
+      "createdAt": "2026-11-04T08:30:03.743Z",
+      "dataSourceUnitInfo": {
+        "shid": "REDACTED-shid-14"
+      }
+    },
+    {
+      "active": true,
+      "resourceTypeId": "REDACTED-resourceTypeId-8",
+      "ownerId": "REDACTED-ownerId-11",
+      "name": "electricity consumption",
+      "description": "electicity consumption DCC SM profile reads",
+      "label": "electicity consumption DCC SM profile reads",
+      "dataSourceResourceTypeInfo": {
+        "unit": "kWh",
+        "type": "ELEC"
+      },
+      "dataSourceType": "AMRAPI",
+      "classifier": "electricity.consumption",
+      "baseUnit": "kWh",
+      "resourceId": "REDACTED-resourceId-7",
+      "updatedAt": "2026-11-04T08:30:22.835Z",
+      "createdAt": "2026-11-04T08:30:22.683Z",
+      "dataSourceUnitInfo": {
+        "shid": "REDACTED-shid-14"
+      }
+    },
+    {
+      "active": true,
+      "resourceTypeId": "REDACTED-resourceTypeId-10",
+      "ownerId": "REDACTED-ownerId-11",
+      "name": "electricity cost",
+      "description": "electicity cost DCC SM profile reads",
+      "label": "electicity cost DCC SM profile reads",
+      "dataSourceResourceTypeInfo": {
+        "unit": "pence",
+        "type": "ELEC"
+      },
+      "dataSourceType": "AMRAPI",
+      "classifier": "electricity.consumption.cost",
+      "baseUnit": "pence",
+      "resourceId": "REDACTED-resourceId-9",
+      "updatedAt": "2026-11-04T08:30:22.836Z",
+      "createdAt": "2026-11-04T08:30:22.732Z",
+      "dataSourceUnitInfo": {
+        "shid": "REDACTED-shid-14"
+      }
     }
-  ]
+  ],
+  "ownerId": "REDACTED-ownerId-11",
+  "name": "DCC Sourced",
+  "timestamp": "2026-11-04T08:29:11.507Z",
+  "veId": "REDACTED-veId-12",
+  "updatedAt": "2026-11-04T08:30:22.861Z",
+  "createdAt": "2026-11-04T08:29:11.508Z",
+  "id": "REDACTED-_id-13",
+  "veChildren": []
 }
