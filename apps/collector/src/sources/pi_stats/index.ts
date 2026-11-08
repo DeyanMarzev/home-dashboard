@@ -1,6 +1,6 @@
 import type { PullCollector } from '../../collector.js';
 import { parsePiStats } from './parse.js';
-import { readPiStats, THERMAL_PATH, THROTTLED_PATH } from './read.js';
+import { HWMON_DIR, readPiStats, THERMAL_PATH, THROTTLED_PATH } from './read.js';
 
 let warnedMissing = false;
 
@@ -10,13 +10,14 @@ export const piStats: PullCollector = {
   kind: 'pull',
   async run(ctx) {
     const raw = await readPiStats(ctx.env, ctx.db);
-    if (!warnedMissing && (raw.thermal === null || raw.throttled === null)) {
+    const power = raw.throttled ?? raw.underVoltage ?? null;
+    if (!warnedMissing && (raw.thermal === null || power === null)) {
       // Expected off the Pi (e.g. in development); on the Pi, check the /sys mount.
       ctx.log.warn(
         {
           thermal: raw.thermal !== null,
-          throttled: raw.throttled !== null,
-          paths: [THERMAL_PATH, THROTTLED_PATH],
+          power: power !== null,
+          paths: [THERMAL_PATH, THROTTLED_PATH, `${HWMON_DIR}/*/in0_lcrit_alarm (rpi_volt)`],
         },
         'some Pi sensor files are missing; skipping those metrics',
       );

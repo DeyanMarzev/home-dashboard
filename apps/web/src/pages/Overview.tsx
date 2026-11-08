@@ -9,7 +9,6 @@ import {
   co2Level,
   CO2_LABELS,
   CO2_THRESHOLD_PPM,
-  decodeThrottle,
   describeWeather,
   dewPoint,
   formatAgo,
@@ -23,8 +22,8 @@ import {
   mouldRisk,
   MOULD_LABELS,
   piStatus,
+  powerState,
   stats,
-  throttleSummary,
   type LatestResponse,
   type SourceInfo,
   type WaterSummary,
@@ -883,7 +882,7 @@ function PiPanel({ latest }: { latest: LatestResponse | undefined }) {
   const wifi = useLatest({ source: 'wifi' });
   const piSignal = valueOf(wifi.data, 'wifi_rssi', 'pi');
   const cpu = pick(latest, 'cpu_temperature');
-  const mask = valueOf(latest, 'throttle_flags');
+  const power = powerState(valueOf(latest, 'throttle_flags'), valueOf(latest, 'under_voltage'));
   const memTotal = valueOf(latest, 'memory_total');
   const memUsed = valueOf(latest, 'memory_used');
   const sdUsed = valueOf(latest, 'disk_used', 'sd_card');
@@ -893,7 +892,7 @@ function PiPanel({ latest }: { latest: LatestResponse | undefined }) {
   const sdPercent = sdUsed !== null && sdFree !== null ? (sdUsed / (sdUsed + sdFree)) * 100 : null;
   const status = piStatus({
     cpuC: cpu?.value ?? null,
-    throttleMask: mask,
+    power,
     diskUsedPercents: sdPercent === null ? [] : [sdPercent],
   });
   const reported = (latest?.items ?? []).filter((i) => i.ts !== null);
@@ -921,15 +920,7 @@ function PiPanel({ latest }: { latest: LatestResponse | undefined }) {
             </div>
             <div>
               <dt>Throttling</dt>
-              <dd>
-                {mask === null
-                  ? '—'
-                  : decodeThrottle(mask).some((f) => f.now)
-                    ? 'Now'
-                    : throttleSummary(mask) === 'None'
-                      ? 'None'
-                      : 'Earlier'}
-              </dd>
+              <dd>{power?.word ?? '—'}</dd>
             </div>
             <div>
               <dt>Uptime</dt>

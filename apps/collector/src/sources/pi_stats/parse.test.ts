@@ -54,6 +54,27 @@ describe('parsePiStats', () => {
     ).toBe(0);
   });
 
+  it('falls back to the rpi_volt under-voltage alarm when get_throttled is missing (kernel 6.12+)', () => {
+    const newer = parsePiStats({ ...fixture, throttled: null, underVoltage: '1\n' }, ts);
+    expect(valueOf(newer, 'under_voltage')).toBe(1);
+    expect(valueOf(newer, 'throttle_flags')).toBeUndefined();
+    const ok = parsePiStats({ ...fixture, throttled: null, underVoltage: '0\n' }, ts);
+    expect(ok.find((r) => r.metric === 'under_voltage')).toMatchObject({
+      unit: 'flag',
+      valueType: 'state',
+      value: 0,
+    });
+    // get_throttled wins when both exist; neither → no power reading at all.
+    expect(
+      valueOf(parsePiStats({ ...fixture, underVoltage: '1' }, ts), 'under_voltage'),
+    ).toBeUndefined();
+    const none = parsePiStats({ ...fixture, throttled: null, underVoltage: null }, ts);
+    expect(none.some((r) => ['throttle_flags', 'under_voltage'].includes(r.metric))).toBe(false);
+    expect(() => parsePiStats({ ...fixture, throttled: null, underVoltage: 'x' }, ts)).toThrow(
+      /under-voltage alarm/,
+    );
+  });
+
   it('stamps everything with the given time and passes validation', () => {
     for (const r of readings) {
       expect(r.ts).toBe(ts);
