@@ -97,13 +97,16 @@ MQTT_SENSOR_USERNAME=sensors
 MQTT_SENSOR_PASSWORD=
 
 CLOUDFLARE_TUNNEL_TOKEN=
-CF_ACCESS_TEAM=            # <team>.cloudflareaccess.com
-CF_ACCESS_AUD=             # Access application audience tag
+# <team>.cloudflareaccess.com
+CF_ACCESS_TEAM=
+# Access application audience tag
+CF_ACCESS_AUD=
 AUTH_DISABLED=false
 
 HOME_LAT=
 HOME_LON=
-HOME_POSTCODE_OUTCODE=     # e.g. the first half of the postcode, for Carbon Intensity
+# e.g. the first half of the postcode, for Carbon Intensity
+HOME_POSTCODE_OUTCODE=
 
 NEST_PROJECT_ID=
 NEST_CLIENT_ID=
@@ -121,7 +124,8 @@ THAMES_METER_ID=
 BOILER_FLOW_W1_ID=
 BOILER_RETURN_W1_ID=
 
-BACKUP_RCLONE_REMOTE=      # e.g. gdrive:home-dashboard-backups (optional)
+# e.g. gdrive:home-dashboard-backups (optional)
+BACKUP_RCLONE_REMOTE=
 ```
 
 ## 5. Cloudflare (DNS is already on Cloudflare)
