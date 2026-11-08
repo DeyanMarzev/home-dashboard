@@ -18,6 +18,31 @@ sudo mkdir -p /mnt/ssd/home-dashboard/{postgres,mosquitto,backups}
 
 Use a blue USB 3 port. If the SSD disconnects under load, it's usually the USB-SATA adapter (UAS quirk) or power. Note it as a known issue rather than working around it silently.
 
+### 1.1 No SSD yet: start on the SD card
+
+Everything works with the data on the SD card; the cost is SD card wear (the database writes all the time), so treat it as temporary and keep the Google Drive backups on (§8). Put the data outside the repo:
+
+```bash
+sudo mkdir -p /opt/home-dashboard-data/{postgres,mosquitto,backups}
+sudo chown $USER /opt/home-dashboard-data /opt/home-dashboard-data/backups
+```
+
+and in `.env`: `DATA_DIR=/opt/home-dashboard-data`. The System page then shows only the SD card (no SSD bar).
+
+### 1.2 Moving to the SSD later
+
+Prepare the SSD as above (mounted at `/mnt/ssd`), then:
+
+```bash
+cd /opt/home-dashboard
+docker compose down                                  # stops everything; the FastAPI project is untouched
+sudo rsync -aHAX /opt/home-dashboard-data/ /mnt/ssd/home-dashboard/
+# .env: DATA_DIR=/mnt/ssd/home-dashboard
+docker compose up -d
+```
+
+Check the dashboard (and the SSD bar on the System page), then `sudo rm -rf /opt/home-dashboard-data`. If `scripts/install-backup-cron.sh` was run, run it again so the backup log moves too.
+
 ## 2. Docker
 
 ```bash

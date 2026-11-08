@@ -1,5 +1,5 @@
 import type { Sql } from '@home/db';
-import { readFile, statfs } from 'node:fs/promises';
+import { readFile, stat, statfs } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { CollectorEnv } from '../../env.js';
 import type { RawPiStats } from './parse.js';
@@ -16,11 +16,22 @@ async function readOptional(path: string): Promise<string | null> {
   }
 }
 
+/** Whether two paths are on the same filesystem (bind mounts keep the device id). */
+export async function sameFilesystem(a: string, b: string): Promise<boolean> {
+  const [sa, sb] = await Promise.all([stat(a), stat(b)]);
+  return sa.dev === sb.dev;
+}
+
 /** Reads everything pi_stats reports from the (read-only mounted) host paths. */
 export async function readPiStats(env: CollectorEnv, db: Sql): Promise<RawPiStats> {
+  // Without an SSD the data directory lives on the SD card: don't report it twice as "ssd".
+  const dataDir =
+    env.HOST_DATA_DIR && !(await sameFilesystem(env.HOST_DATA_DIR, env.HOST_ROOTFS))
+      ? env.HOST_DATA_DIR
+      : null;
   const filesystems = [
     { entity: 'sd_card', path: env.HOST_ROOTFS },
-    ...(env.HOST_DATA_DIR ? [{ entity: 'ssd', path: env.HOST_DATA_DIR }] : []),
+    ...(dataDir ? [{ entity: 'ssd', path: dataDir }] : []),
   ];
   const [thermal, throttled, meminfo, loadavg, uptime, disks, [size]] = await Promise.all([
     readOptional(join(env.HOST_SYS, THERMAL_PATH)),
