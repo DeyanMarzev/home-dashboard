@@ -183,7 +183,7 @@ interface CollectorContext {
 - CPU temperature (`/host/sys/class/thermal/thermal_zone0/temp`, millidegrees).
 - Throttle flags (`get_throttled` bitmask): store as `state` series `throttle_flags`; the API decodes bits: 0 under-voltage now, 1 frequency capped now, 2 throttled now, 3 soft temp limit now, 16–19 the same "has occurred since boot".
 - Memory (`/host/proc/meminfo`), load (`/host/proc/loadavg`), uptime, disk usage for `/` and `/mnt/ssd` (`statfs`), database size (`pg_database_size`).
-- Series (entity `pi` unless noted): `cpu_temperature` °C · `throttle_flags` (state, `flags`) · `memory_total`, `memory_used` MB (used = total − available) · `load_1m`, `load_5m`, `load_15m` · `uptime` s · `disk_used`, `disk_free` GB for entities `sd_card` and `ssd` (free = available to non-root, as `df` shows) · `database_size` MB.
+- Series (entity `pi` unless noted): `cpu_temperature` °C · `throttle_flags` (state, `flags`) · `memory_total`, `memory_used` MB (used = total − available) · `load_1m`, `load_5m`, `load_15m` · `uptime` s · `disk_used`, `disk_free` GB for entities `sd_card` and `ssd` (free = available to non-root, as `df` shows; `ssd` is skipped while the data directory is on the SD card itself) · `database_size` MB.
 - The thermal and throttle files only exist on a Pi; if missing, those two metrics are skipped with one warning. The fixture in `__fixtures__/` is representative; replace it with a capture from the Pi.
 
 ### boiler_probes (local): live
