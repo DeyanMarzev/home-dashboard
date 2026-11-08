@@ -33,9 +33,10 @@ afterEach(() => {
 
 describe('parseResources', () => {
   it('finds the electricity and gas consumption resources, not the cost ones', () => {
+    // Recorded from the owner's account (2026-11-08): gas cost, gas, electricity, electricity cost.
     expect(parseResources([fixture('bright-resources.json')])).toEqual([
-      { fuel: 'electricity', resourceId: 'REDACTED-resource-electricity' },
-      { fuel: 'gas', resourceId: 'REDACTED-resource-gas' },
+      { fuel: 'gas', resourceId: 'REDACTED-resourceId-5' },
+      { fuel: 'electricity', resourceId: 'REDACTED-resourceId-7' },
     ]);
   });
 
@@ -57,18 +58,25 @@ describe('parseReadings', () => {
       unit: 'kWh',
       valueType: 'interval_total',
       interval: '30m',
-      ts: new Date('2026-11-05T00:00:00Z'),
-      value: 0.085,
+      ts: new Date('2026-11-06T19:30:00Z'),
+      value: 0.464,
     });
     for (const r of readings) expect(ReadingInputSchema.safeParse(r).success).toBe(true);
-    const day = readings.filter((r) => ts(r).startsWith('2026-11-05'));
-    expect(day.reduce((sum, r) => sum + r.value, 0)).toBeCloseTo(8.579, 3);
+    const day = readings.filter((r) => ts(r).startsWith('2026-11-07'));
+    expect(day).toHaveLength(48);
+    expect(day.reduce((sum, r) => sum + r.value, 0)).toBeCloseTo(9.858, 3);
   });
 
   it('skips null half-hours', () => {
-    const readings = parseReadings(fixture('bright-readings-gas.json'), 'gas');
-    expect(readings).toHaveLength(95);
-    expect(readings.some((r) => ts(r) === '2026-11-05T15:00:00.000Z')).toBe(false);
+    const body = {
+      units: 'kWh',
+      data: [
+        [1793993400, 1.2],
+        [1793995200, null],
+        [1793997000, 0],
+      ],
+    };
+    expect(parseReadings(body, 'gas').map((r) => r.value)).toEqual([1.2, 0]);
   });
 
   it('converts gas reported in m³ to kWh', () => {
@@ -94,10 +102,12 @@ describe('dropUnreceived', () => {
         .map(ts)
         .sort()
         .at(-1);
-    expect(last('electricity')).toBe('2026-11-06T09:30:00.000Z');
-    expect(last('gas')).toBe('2026-11-06T09:30:00.000Z');
-    // Overnight gas zeros before that are real and stay.
-    expect(kept.filter((r) => r.entity === 'gas' && r.value === 0).length).toBeGreaterThan(40);
+    // Captured at 19:30 on 8 Nov: Bright had data to 01:00 and padded the rest with 0.
+    expect(last('electricity')).toBe('2026-11-08T01:00:00.000Z');
+    expect(last('gas')).toBe('2026-11-08T01:00:00.000Z');
+    expect(kept).toHaveLength(120);
+    // Gas zeros before that (no heating) are real and stay.
+    expect(kept.filter((r) => r.entity === 'gas' && r.value === 0).length).toBeGreaterThan(20);
   });
 
   it('keeps gas-only data as it is', () => {
@@ -122,7 +132,7 @@ describe('brightProvider.fetch', () => {
       if (path.endsWith('/resources')) return json(200, fixture('bright-resources.json'));
       if (path.endsWith('/catchup')) return json(200, { status: 'OK' });
       if (path.endsWith('/readings')) {
-        const fuel = path.includes('electricity') ? 'electricity' : 'gas';
+        const fuel = path.includes('REDACTED-resourceId-7') ? 'electricity' : 'gas'; // see bright-resources.json
         return json(200, fixture(`bright-readings-${fuel}.json`));
       }
       return json(404, {});
@@ -131,15 +141,15 @@ describe('brightProvider.fetch', () => {
   }
 
   it('logs in once, finds the resources and returns received half-hours for both fuels', async () => {
-    vi.useFakeTimers({ now: new Date('2026-11-07T08:00:00Z'), toFake: ['Date'] });
+    vi.useFakeTimers({ now: new Date('2026-11-08T19:30:00Z'), toFake: ['Date'] });
     const calls = stubBright();
     const readings = await brightProvider.fetch(
-      new Date('2026-11-05T00:00:00Z'),
-      new Date('2026-11-07T08:00:00Z'),
+      new Date('2026-11-06T19:30:00Z'),
+      new Date('2026-11-08T19:30:00Z'),
       ctx,
     );
-    expect(readings.filter((r) => r.entity === 'electricity')).toHaveLength(68);
-    expect(readings.filter((r) => r.entity === 'gas')).toHaveLength(67);
+    expect(readings.filter((r) => r.entity === 'electricity')).toHaveLength(60);
+    expect(readings.filter((r) => r.entity === 'gas')).toHaveLength(60);
 
     const auth = calls.filter((c) => c.url.pathname.endsWith('/auth'));
     expect(auth).toHaveLength(1);
@@ -153,8 +163,8 @@ describe('brightProvider.fetch', () => {
       applicationId: 'b0f1b774-a586-4f72-9edd-27ead8aa7a8d',
     });
     expect(Object.fromEntries(readingCall.url.searchParams)).toEqual({
-      from: '2026-11-05T00:00:00',
-      to: '2026-11-07T07:59:59',
+      from: '2026-11-06T19:30:00',
+      to: '2026-11-08T19:29:59',
       period: 'PT30M',
       offset: '0',
       function: 'sum',
@@ -164,8 +174,8 @@ describe('brightProvider.fetch', () => {
 
     // A second run reuses the token and the resource ids.
     await brightProvider.fetch(
-      new Date('2026-11-05T00:00:00Z'),
-      new Date('2026-11-07T08:00:00Z'),
+      new Date('2026-11-06T19:30:00Z'),
+      new Date('2026-11-08T19:30:00Z'),
       ctx,
     );
     expect(calls.filter((c) => c.url.pathname.endsWith('/auth'))).toHaveLength(1);
@@ -181,7 +191,7 @@ describe('brightProvider.fetch', () => {
       ctx,
     );
     const ranges = calls
-      .filter((c) => c.url.pathname.includes('electricity/readings'))
+      .filter((c) => c.url.pathname.includes('REDACTED-resourceId-7/readings'))
       .map((c) => `${c.url.searchParams.get('from')} → ${c.url.searchParams.get('to')}`);
     expect(ranges).toEqual([
       '2026-10-08T08:00:00 → 2026-10-18T07:59:59',

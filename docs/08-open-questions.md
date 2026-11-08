@@ -6,7 +6,6 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 |---|---|---|---|
 | 1 | What are the existing room sensors (model/firmware), and how do they send data today? Can they publish MQTT? | M3 real data | The MQTT topic contract is in `docs/03`. If they can't publish MQTT, add a bridge collector for whatever they do support. |
 | 2 | Which rooms have which sensors? Does any room have more than temperature/humidity? | M3, M5 | Mockup assumes living room, kitchen, bedroom with temp/humidity/CO₂/pressure, plus the Nest in the hallway. |
-| 3b | Bright: a real capture (`docker compose exec collector node dist/tools/bright-capture.js > bright.json`, ids and personal details redacted) | Confirms the format | The `bright` provider follows community clients; the capture confirms the resource list and how not-yet-received half-hours look. |
 | 4 | Energy tariff: unit rates and standing charges for electricity and gas; fixed or time-of-use? | M7 costs | Fixed rates can already be entered on the Energy page (Tariff → Edit rates). If time-of-use, `tariffs` needs time bands. |
 | 5 | Home location for weather and carbon intensity (`HOME_LAT`, `HOME_LON`, postcode outcode). | M3 | Ask the owner to fill `.env`; don't hardcode. |
 | 6b | Linksys MX4200: a capture of its device list (`docker compose exec netprobe node dist/netprobe/router-capture.js`, names and addresses are redacted) | M9 device list | Counts work already via JNAP `devicelist/GetDevices3` (or ARP without `ROUTER_PASSWORD`); the per-device table (name, band, signal) waits for the real format. |
@@ -23,5 +22,6 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 | 9 | Cloudflare Access allowed emails | `deyanmarzev@gmail.com` (2026-11-07). |
 | 11 | Water: tariff or volume only? | Volume, and cost where possible: add a `water` rate (p/m³ + standing p/day) on the Energy page's tariff editor; costs show wherever one applies (2026-11-07). |
 | 6 | Router make/model | Linksys MX4200 (Velop mesh). Local JNAP API (`POST http://<router>/JNAP/`, admin password): used for device counts (2026-11-07). |
+| 3b | Bright data format | Confirmed with a capture from the owner's account: classifiers, kWh units and the zero padding for half-hours not yet received are as the provider assumes (2026-11-08). |
 | 3 | Smart meter data source | Bright (Hildebrand Glowmarkt API) for electricity and gas. No solar export, no Glow in-home display (so no live feed) (2026-11-07). |
 | 10 | Off-Pi backup destination | Google Drive, via `rclone` with the `drive.file` scope (it only sees the files it uploads). Setup in `docs/06` § 8 (2026-11-07). |

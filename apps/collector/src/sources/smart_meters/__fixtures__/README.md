@@ -1,8 +1,12 @@
-Bright (Hildebrand Glowmarkt) responses in the format used by community clients (the
-`glowmarkt` Rust crate, `pyglowmarkt`), ids redacted. The readings cover 5–6 Nov 2026 (UTC):
-the 5th is complete; on the 6th only the first 20 half-hours have arrived and the rest are 0,
-as Glowmarkt reports half-hours it hasn't received yet. Gas has one `null` half-hour.
+Recorded from the owner's Bright account on 2026-11-08 at 19:30 London with
+`dist/tools/bright-capture.js`, then passed through `src/tools/redact.ts` (ids replaced
+with placeholders, the address and other personal fields removed).
 
-Replace them with real captures once the Pi has Bright credentials:
-`docker compose exec collector node dist/tools/bright-capture.js` prints the account's
-resources and two days of readings with ids redacted.
+Everything about the format is as Bright sent it: fields, resource classifiers and units,
+timestamps (start of each half-hour, UTC), number precision, and the padding. Bright had
+data up to 01:00 on 8 Nov and returned integer `0` for every half-hour after that, up to the
+request's `to`.
+
+The usage values themselves are invented (same precision, plausible shape): the repo is
+public, and real half-hourly usage shows when the house is occupied. Gas zeros before 01:00
+are invented "no heating" half-hours, as happen in real data.
