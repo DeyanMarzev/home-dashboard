@@ -6,6 +6,11 @@ export interface RawPiStats {
   thermal: string | null;
   /** /sys/devices/platform/soc/soc:firmware/get_throttled: hex bitmask. */
   throttled: string | null;
+  /**
+   * Only read when get_throttled is missing (kernel 6.12+): the `rpi_volt` hwmon's
+   * in0_lcrit_alarm, "1" while the supply is under-voltage. Optional in older fixtures.
+   */
+  underVoltage?: string | null;
   /** /proc/meminfo */
   meminfo: string;
   /** /proc/loadavg */
@@ -61,6 +66,11 @@ export function parsePiStats(raw: RawPiStats, ts: Date): ReadingInput[] {
     if (!/^[0-9a-f]+$/i.test(text))
       throw new Error(`throttle flags "${raw.throttled.trim()}" are not hex`);
     readings.push(pi('throttle_flags', 'flags', parseInt(text, 16), 'state'));
+  } else if (raw.underVoltage != null) {
+    const alarm = raw.underVoltage.trim();
+    if (alarm !== '0' && alarm !== '1')
+      throw new Error(`under-voltage alarm "${alarm}" is not 0 or 1`);
+    readings.push(pi('under_voltage', 'flag', Number(alarm), 'state'));
   }
 
   const totalKb = meminfoKb(raw.meminfo, 'MemTotal');

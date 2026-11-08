@@ -4,6 +4,7 @@ import {
   decodeThrottle,
   describeDays,
   piStatus,
+  powerState,
   throttleSummary,
 } from './pi-health.js';
 
@@ -77,21 +78,53 @@ describe('describeDays', () => {
 });
 
 describe('piStatus', () => {
-  const ok = { cpuC: 52, throttleMask: 0, diskUsedPercents: [41, 12] };
+  const ok = { cpuC: 52, power: powerState(0, null), diskUsedPercents: [41, 12] };
   it('is healthy in normal conditions', () => {
     expect(piStatus(ok)).toBe('healthy');
   });
   it('warns on heat, past throttling or a filling disk', () => {
     expect(piStatus({ ...ok, cpuC: 72 })).toBe('warning');
-    expect(piStatus({ ...ok, throttleMask: 0x10000 })).toBe('warning');
+    expect(piStatus({ ...ok, power: powerState(0x10000, null) })).toBe('warning');
     expect(piStatus({ ...ok, diskUsedPercents: [86] })).toBe('warning');
   });
   it('is a problem when throttling now, at 80 °C or a nearly full disk', () => {
-    expect(piStatus({ ...ok, throttleMask: 0x1 })).toBe('problem');
+    expect(piStatus({ ...ok, power: powerState(0x1, null) })).toBe('problem');
+    expect(piStatus({ ...ok, power: powerState(null, 1) })).toBe('problem');
     expect(piStatus({ ...ok, cpuC: 80 })).toBe('problem');
     expect(piStatus({ ...ok, diskUsedPercents: [96] })).toBe('problem');
   });
   it('copes with missing readings (not a Pi)', () => {
-    expect(piStatus({ cpuC: null, throttleMask: null, diskUsedPercents: [] })).toBe('healthy');
+    expect(piStatus({ cpuC: null, power: null, diskUsedPercents: [] })).toBe('healthy');
+  });
+});
+
+describe('powerState', () => {
+  it('uses get_throttled when the kernel has it', () => {
+    expect(powerState(0, 1)).toMatchObject({ source: 'get_throttled', word: 'None', tone: 'good' });
+    expect(powerState(0x10000, null)).toMatchObject({
+      word: 'Earlier',
+      tone: 'warn',
+      summary: 'Since boot: under-voltage',
+    });
+    expect(powerState(0x50005, null)?.flags).toHaveLength(4);
+  });
+
+  it('falls back to the rpi_volt alarm, which only knows "now"', () => {
+    expect(powerState(null, 0)).toEqual({
+      source: 'rpi_volt',
+      word: 'None',
+      tone: 'good',
+      summary: 'None',
+      flags: [{ key: 'under_voltage', label: 'Under-voltage', now: false, sinceBoot: null }],
+    });
+    expect(powerState(null, 1)).toMatchObject({
+      word: 'Now',
+      tone: 'bad',
+      summary: 'Under-voltage now',
+    });
+  });
+
+  it('is null off a Pi', () => {
+    expect(powerState(null, null)).toBeNull();
   });
 });

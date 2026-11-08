@@ -1,6 +1,5 @@
 import {
   daysUntilFull,
-  decodeThrottle,
   describeDays,
   formatLondonTime,
   formatLongDate,
@@ -8,10 +7,11 @@ import {
   formatNumber,
   formatUptime,
   formatWhen,
+  powerState,
   stats,
-  throttleSummary,
   type EventItem,
   type LatestResponse,
+  type PowerState,
   type SourceInfo,
 } from '@home/shared';
 import { useEvents, useHealth, useLatest, useReadings, useSources } from '../api/hooks.js';
@@ -82,7 +82,7 @@ export function SystemPage() {
   const dbGrowth = growth.data?.series.find((s) => s.meta.metric === 'database_size')?.points ?? [];
 
   const cpuNow = valueOf(pi.data, 'cpu_temperature');
-  const mask = valueOf(pi.data, 'throttle_flags');
+  const power = powerState(valueOf(pi.data, 'throttle_flags'), valueOf(pi.data, 'under_voltage'));
   const uptime = valueOf(pi.data, 'uptime');
   const memTotal = valueOf(pi.data, 'memory_total');
   const memUsed = valueOf(pi.data, 'memory_used');
@@ -132,31 +132,19 @@ export function SystemPage() {
             <StatTile
               flex="1 1 180px"
               label="Throttling"
-              value={
-                mask === null
-                  ? '—'
-                  : decodeThrottle(mask).some((f) => f.now)
-                    ? 'Now'
-                    : throttleSummary(mask) === 'None'
-                      ? 'None'
-                      : 'Earlier'
-              }
+              value={power?.word ?? '—'}
               context={
-                mask === null ? (
+                power === null ? (
                   'Not available (not a Pi?)'
                 ) : (
-                  <Status
-                    tone={
-                      decodeThrottle(mask).some((f) => f.now)
-                        ? 'bad'
-                        : throttleSummary(mask) === 'None'
-                          ? 'good'
-                          : 'warn'
-                    }
-                  >
-                    {throttleSummary(mask) === 'None' && uptime !== null
-                      ? `Since boot ${formatUptime(uptime)} ago`
-                      : throttleSummary(mask)}
+                  <Status tone={power.tone}>
+                    {power.summary !== 'None'
+                      ? power.summary
+                      : power.source === 'rpi_volt'
+                        ? 'Power supply OK now'
+                        : uptime !== null
+                          ? `Since boot ${formatUptime(uptime)} ago`
+                          : 'None'}
                   </Status>
                 )
               }
@@ -231,7 +219,7 @@ export function SystemPage() {
             />
           )}
         </Panel>
-        <ThrottlePanel mask={mask} />
+        <ThrottlePanel power={power} mask={valueOf(pi.data, 'throttle_flags')} />
       </div>
 
       <CollectorsTable sources={sources.data} />
@@ -250,22 +238,38 @@ export function SystemPage() {
   );
 }
 
-function ThrottlePanel({ mask }: { mask: number | null }) {
+function ThrottlePanel({ power, mask }: { power: PowerState | null; mask: number | null }) {
   return (
     <Panel id="flags-h" title="Power and throttling" flex="1 1 300px">
-      {mask === null ? (
+      {power === null ? (
         <Empty>Throttle flags are only available on a Raspberry Pi</Empty>
       ) : (
         <>
           <p className="meta">
-            From <code className="code">get_throttled</code> · 0x{mask.toString(16)}
+            {power.source === 'get_throttled' && mask !== null ? (
+              <>
+                From <code className="code">get_throttled</code> · 0x{mask.toString(16)}
+              </>
+            ) : (
+              <>
+                From the kernel&apos;s <code className="code">rpi_volt</code> sensor: this kernel
+                only reports under-voltage as it happens, not throttling or history. The CPU
+                temperature above shows how close it is to thermal throttling.
+              </>
+            )}
           </p>
           <ul className="list">
-            {decodeThrottle(mask).map((f) => (
+            {power.flags.map((f) => (
               <li key={f.key}>
                 <span>{f.label}</span>
                 <Status tone={f.now ? 'bad' : f.sinceBoot ? 'warn' : 'good'}>
-                  {f.now ? 'Now' : f.sinceBoot ? 'Since boot' : 'Never'}
+                  {f.now
+                    ? 'Now'
+                    : f.sinceBoot
+                      ? 'Since boot'
+                      : f.sinceBoot === null
+                        ? 'Not now'
+                        : 'Never'}
                 </Status>
               </li>
             ))}

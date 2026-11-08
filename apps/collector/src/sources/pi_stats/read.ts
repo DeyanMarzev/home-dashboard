@@ -1,11 +1,13 @@
 import type { Sql } from '@home/db';
-import { readFile, stat, statfs } from 'node:fs/promises';
+import { readdir, readFile, stat, statfs } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { CollectorEnv } from '../../env.js';
 import type { RawPiStats } from './parse.js';
 
 export const THERMAL_PATH = 'class/thermal/thermal_zone0/temp';
 export const THROTTLED_PATH = 'devices/platform/soc/soc:firmware/get_throttled';
+/** Newer kernels (6.12+) drop get_throttled; the rpi_volt hwmon still reports under-voltage now. */
+export const HWMON_DIR = 'class/hwmon';
 
 async function readOptional(path: string): Promise<string | null> {
   try {
@@ -14,6 +16,23 @@ async function readOptional(path: string): Promise<string | null> {
     if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null;
     throw err;
   }
+}
+
+/** `in0_lcrit_alarm` of the hwmon device named `rpi_volt` ("0"/"1"), or null without one. */
+export async function readUnderVoltageAlarm(sys: string): Promise<string | null> {
+  let devices: string[];
+  try {
+    devices = await readdir(join(sys, HWMON_DIR));
+  } catch {
+    return null;
+  }
+  for (const device of devices) {
+    const name = await readOptional(join(sys, HWMON_DIR, device, 'name'));
+    if (name?.trim() === 'rpi_volt') {
+      return readOptional(join(sys, HWMON_DIR, device, 'in0_lcrit_alarm'));
+    }
+  }
+  return null;
 }
 
 /** Whether two paths are on the same filesystem (bind mounts keep the device id). */
@@ -45,6 +64,7 @@ export async function readPiStats(env: CollectorEnv, db: Sql): Promise<RawPiStat
   return {
     thermal,
     throttled,
+    underVoltage: throttled === null ? await readUnderVoltageAlarm(env.HOST_SYS) : null,
     meminfo,
     loadavg,
     uptime,

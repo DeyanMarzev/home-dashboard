@@ -66,7 +66,7 @@ Disable `timescaledb-tune` auto-tuning in the image (`NO_TS_TUNE=true`) so these
 
 | Need | How |
 |---|---|
-| Pi CPU temperature, throttling, memory, disk | Mount `/sys` and `/proc` read-only into `collector` (`/host/sys`, `/host/proc`) and the SSD + root fs for `statfs`. Throttle flags: `/sys/devices/platform/soc/soc:firmware/get_throttled` (verify on the Pi; fallback: a host cron running `vcgencmd get_throttled` that publishes to MQTT). |
+| Pi CPU temperature, throttling, memory, disk | Mount `/sys` and `/proc` read-only into `collector` (`/host/sys`, `/host/proc`) and the SSD + root fs for `statfs`. Throttle flags: `/sys/devices/platform/soc/soc:firmware/get_throttled`; on kernel 6.12+ (no `get_throttled`) the `rpi_volt` hwmon's under-voltage alarm instead (docs/03 § pi_stats). |
 | DS18B20 boiler pipe probes (1-Wire on GPIO4) | Mount `/sys/bus/w1/devices` read-only. Requires `dtoverlay=w1-gpio` on the host. |
 | Wi-Fi scans, ARP scans, ping | A separate small container `netprobe` with `network_mode: host` and `cap_add: [NET_ADMIN, NET_RAW]`, publishing results to MQTT (`home/net/wifi`, `home/net/speed_test`) as its own MQTT user. Runs as root inside the container (the capabilities apply to root). Code: `apps/collector/src/netprobe/`. |
 

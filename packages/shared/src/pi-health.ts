@@ -34,6 +34,50 @@ export function throttleSummary(mask: number): string {
   return 'None';
 }
 
+/** What the Pi reports about its power supply and throttling, from either source. */
+export interface PowerState {
+  /** `get_throttled` (all four flags, now and since boot) or `rpi_volt` (under-voltage now only). */
+  source: 'get_throttled' | 'rpi_volt';
+  /** For tiles: "None", "Now" or "Earlier". */
+  word: 'None' | 'Now' | 'Earlier';
+  tone: 'good' | 'warn' | 'bad';
+  /** throttleSummary(), or for rpi_volt "Under-voltage now" / "None". */
+  summary: string;
+  /** Panel rows. `sinceBoot` is null where the source can't tell (rpi_volt). */
+  flags: (Omit<ThrottleFlag, 'sinceBoot'> & { sinceBoot: boolean | null })[];
+}
+
+/**
+ * The `throttle_flags` bitmask if the kernel has get_throttled, otherwise the `under_voltage`
+ * alarm (0/1) from the rpi_volt hwmon (kernel 6.12+). Null when neither is reported (not a Pi).
+ */
+export function powerState(mask: number | null, underVoltage: number | null): PowerState | null {
+  if (mask !== null) {
+    const flags = decodeThrottle(mask);
+    const word = flags.some((f) => f.now)
+      ? 'Now'
+      : flags.some((f) => f.sinceBoot)
+        ? 'Earlier'
+        : 'None';
+    return {
+      source: 'get_throttled',
+      word,
+      tone: word === 'Now' ? 'bad' : word === 'Earlier' ? 'warn' : 'good',
+      summary: throttleSummary(mask),
+      flags,
+    };
+  }
+  if (underVoltage === null) return null;
+  const now = underVoltage === 1;
+  return {
+    source: 'rpi_volt',
+    word: now ? 'Now' : 'None',
+    tone: now ? 'bad' : 'good',
+    summary: now ? 'Under-voltage now' : 'None',
+    flags: [{ key: 'under_voltage', label: 'Under-voltage', now, sinceBoot: null }],
+  };
+}
+
 /**
  * How long until a disk fills at its recent growth rate. `null` if it isn't growing.
  * Points are [ISO time, GB used], oldest first.
@@ -64,12 +108,11 @@ export type PiStatus = 'healthy' | 'warning' | 'problem';
  */
 export function piStatus(i: {
   cpuC: number | null;
-  throttleMask: number | null;
+  power: PowerState | null;
   diskUsedPercents: number[];
 }): PiStatus {
-  const flags = i.throttleMask === null ? [] : decodeThrottle(i.throttleMask);
   const maxDisk = Math.max(0, ...i.diskUsedPercents);
-  if (flags.some((f) => f.now) || (i.cpuC ?? 0) >= 80 || maxDisk >= 95) return 'problem';
-  if (flags.some((f) => f.sinceBoot) || (i.cpuC ?? 0) >= 70 || maxDisk >= 85) return 'warning';
+  if (i.power?.word === 'Now' || (i.cpuC ?? 0) >= 80 || maxDisk >= 95) return 'problem';
+  if (i.power?.word === 'Earlier' || (i.cpuC ?? 0) >= 70 || maxDisk >= 85) return 'warning';
   return 'healthy';
 }
