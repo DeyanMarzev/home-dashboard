@@ -53,7 +53,7 @@ describe('redactor', () => {
       h: '0.123',
     });
     expect(out).toEqual({
-      a: '00:00:00:00:00:01',
+      a: '02:00:00:00:00:01',
       b: '192.168.1.x',
       c: 'fd00::x',
       d: 'fd00::x',
@@ -61,6 +61,19 @@ describe('redactor', () => {
       f: 'REDACTED',
       g: 'electricity consumption',
       h: '0.123',
+    });
+  });
+
+  it('keeps MACs consistent across the output (any case or separator), even under address keys', () => {
+    const out = redact({
+      knownInterfaces: [{ macAddress: 'AA:BB:CC:DD:EE:01' }, { macAddress: 'AA:BB:CC:DD:EE:02' }],
+      connections: [{ macAddress: 'aa-bb-cc-dd-ee-02', ipAddress: '192.168.1.40' }],
+      wireless: { bssid: 'AA:BB:CC:DD:EE:01' },
+    });
+    expect(out).toEqual({
+      knownInterfaces: [{ macAddress: '02:00:00:00:00:01' }, { macAddress: '02:00:00:00:00:02' }],
+      connections: [{ macAddress: '02:00:00:00:00:02', ipAddress: '192.168.1.x' }],
+      wireless: { bssid: '02:00:00:00:00:01' },
     });
   });
 

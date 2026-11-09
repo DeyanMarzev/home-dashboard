@@ -1,9 +1,9 @@
 /**
  * Redaction for the capture tools (bright-capture, router-capture), whose output becomes
  * parser fixtures in a public repo. Errs on the side of removing too much: personal fields
- * go whatever their value (a nested `address` object included), ids become stable
- * placeholders (so which id is which survives), and personal-looking values are caught
- * wherever they appear.
+ * go whatever their value (a nested `address` object included), ids and MAC addresses become
+ * stable placeholders (so which device is which survives), and personal-looking values are
+ * caught wherever they appear.
  */
 
 /** Keys whose whole value is personal, at any depth and of any type. */
@@ -29,8 +29,23 @@ export interface RedactOptions {
 export function redactor(options: RedactOptions = {}): (key: string, value: unknown) => unknown {
   const ids = new Map<string, string>();
   const names = new Map<string, string>();
-  let macs = 0;
+  const macs = new Map<string, string>();
   return (key, value) => {
+    // Addresses first, under any key (macAddress, bssid…): MACs keep a stable placeholder so
+    // a connection can still be matched to its device's interface.
+    if (typeof value === 'string') {
+      if (MAC.test(value)) {
+        const mac = value.toLowerCase().replace(/-/g, ':');
+        if (!macs.has(mac)) {
+          const n = macs.size + 1;
+          const hex = (b: number) => b.toString(16).padStart(2, '0');
+          macs.set(mac, `02:00:00:00:${hex(n >> 8)}:${hex(n & 0xff)}`);
+        }
+        return macs.get(mac);
+      }
+      if (IPV4.test(value)) return '192.168.1.x';
+      if (IPV6.test(value) && value.includes(':')) return 'fd00::x';
+    }
     if (key !== '' && PERSONAL_KEY.test(key)) return 'REDACTED';
     if (typeof value !== 'string') return value;
     if (isIdKey(key)) {
@@ -41,9 +56,6 @@ export function redactor(options: RedactOptions = {}): (key: string, value: unkn
       if (!names.has(value)) names.set(value, `${options.nameLabel ?? 'name'} ${names.size + 1}`);
       return names.get(value);
     }
-    if (MAC.test(value)) return `00:00:00:00:00:${(++macs % 256).toString(16).padStart(2, '0')}`;
-    if (IPV4.test(value)) return '192.168.1.x';
-    if (IPV6.test(value) && value.includes(':')) return 'fd00::x';
     if (EMAIL.test(value) || UK_POSTCODE.test(value)) return 'REDACTED';
     return value;
   };
