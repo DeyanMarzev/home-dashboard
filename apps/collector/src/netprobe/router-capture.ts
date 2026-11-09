@@ -21,6 +21,9 @@ const ACTIONS = [
   'networkconnections/GetNetworkConnections',
   'nodes/networkconnections/GetNodesWirelessNetworkConnections2',
   'nodes/diagnostics/GetBackhaulInfo2',
+  // The MX4200 answered _ErrorUnknownAction to the two above (2026-11-09); older names:
+  'nodes/networkconnections/GetNodesWirelessNetworkConnections',
+  'nodes/diagnostics/GetBackhaulInfo',
 ];
 const captured: Record<string, unknown> = {};
 for (const action of ACTIONS) {

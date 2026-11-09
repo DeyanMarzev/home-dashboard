@@ -9,7 +9,7 @@ import {
   parsePing,
   summariseScan,
 } from './parse.js';
-import { jnap, parseDevices } from './router.js';
+import { jnap, parseRouterSnapshot, type Band, type RouterSnapshot } from './router.js';
 import { speedTest } from './speedtest.js';
 
 const exec = promisify(execFile);
@@ -34,6 +34,38 @@ async function run(cmd: string, args: string[], timeoutMs = 20_000): Promise<str
 
 const message = (err: unknown) =>
   err instanceof Error ? err.message.split('\n')[0]! : String(err);
+
+/** Band as a number for a `state` series: 2.4, 5 or 6 GHz; 0 for wired. */
+const BAND_VALUE: Record<Band, number> = { '2.4': 2.4, '5': 5, '6': 6, wired: 0 };
+
+/**
+ * Per-device readings (docs/03 § wifi): entity `device_<router id>` labelled with the device's
+ * name; satellites' own links as `backhaul_*` on `node_<router id>`.
+ */
+export function routerReadings(snapshot: RouterSnapshot, ts: Date): ReadingInput[] {
+  const readings: ReadingInput[] = [];
+  const links = [
+    ...snapshot.clients.map((c) => ({ ...c, prefix: 'device' })),
+    ...snapshot.satellites.map((s) => ({ ...s, prefix: 'backhaul', viaSatellite: undefined })),
+  ];
+  for (const l of links) {
+    const add = (metric: string, unit: string, value: number, valueType: 'gauge' | 'state') =>
+      readings.push({
+        metric: `${l.prefix}_${metric}`,
+        entity: l.key,
+        unit,
+        valueType,
+        ts,
+        value,
+        label: l.name,
+      });
+    if (l.band !== null) add('band', 'GHz', BAND_VALUE[l.band], 'state');
+    if (l.signalDbm !== null) add('signal', 'dBm', l.signalDbm, 'gauge');
+    if (l.linkMbps !== null) add('link_speed', 'Mbit/s', l.linkMbps, 'gauge');
+    if (l.viaSatellite !== undefined) add('via_satellite', 'flag', l.viaSatellite ? 1 : 0, 'state');
+  }
+  return readings;
+}
 
 /** Every 5 minutes: the Pi's own link, latency/loss to the router and the internet, devices. */
 export async function probeNetwork(env: ProbeEnv, signal: AbortSignal): Promise<ProbeResult> {
@@ -87,12 +119,22 @@ export async function probeNetwork(env: ProbeEnv, signal: AbortSignal): Promise<
     if (env.ROUTER_PASSWORD) {
       const base = env.ROUTER_URL ?? (gateway ? `http://${gateway}` : null);
       if (!base) throw new Error('no router address (set ROUTER_URL)');
-      const d = parseDevices(
-        await jnap(base, env.ROUTER_PASSWORD, 'devicelist/GetDevices3', signal),
-      );
-      add('devices_connected', 'network', 'devices', d.total);
-      add('devices_wifi', 'network', 'devices', d.wifi);
-      add('devices_wired', 'network', 'devices', d.wired);
+      const devices = await jnap(base, env.ROUTER_PASSWORD, 'devicelist/GetDevices3', signal);
+      // Band, signal and link speed: without them the devices are still listed.
+      let connections: unknown = null;
+      await attempt('router connections', async () => {
+        connections = await jnap(
+          base,
+          env.ROUTER_PASSWORD!,
+          'networkconnections/GetNetworkConnections2',
+          signal,
+        );
+      });
+      const snapshot = parseRouterSnapshot(devices, connections);
+      add('devices_connected', 'network', 'devices', snapshot.counts.total);
+      add('devices_wifi', 'network', 'devices', snapshot.counts.wifi);
+      add('devices_wired', 'network', 'devices', snapshot.counts.wired);
+      readings.push(...routerReadings(snapshot, ts));
     } else {
       // Without the router's API: whoever answers ARP on the local network.
       add(

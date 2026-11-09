@@ -7,6 +7,7 @@ import {
   type LatestResponse,
   type SourceInfo,
 } from '@home/shared';
+import { useState } from 'react';
 import { useLatest, useReadings, useSources } from '../api/hooks.js';
 import { AlertStrip } from '../components/AlertStrip.js';
 import { Empty, Panel, Skeleton, StatTile } from '../components/Cards.js';
@@ -22,7 +23,15 @@ import { useNow } from '../lib/now-context.js';
 import { RANGE_LABEL, RANGE_SECONDS, useRange, type Range } from '../lib/range.js';
 import { weekdayLabel } from '../model/energy.js';
 import { pick, valueOf } from '../model/latest.js';
-import { qualitySummary, radioSignals, type RadioSignal } from '../model/wifi.js';
+import {
+  bandLabel,
+  connectedDevices,
+  connectedSince,
+  meshLinks,
+  qualitySummary,
+  radioSignals,
+  type RadioSignal,
+} from '../model/wifi.js';
 
 const QUALITY_TONE = { excellent: 'good', good: 'good', fair: 'warn', poor: 'bad' } as const;
 const BANDS = [
@@ -72,13 +81,7 @@ export function WifiPage() {
         <DevicesChart net={net.data} source={source('wifi')} range={range} />
         <SignalByRoom signals={signals} />
       </div>
-      <Panel id="list-h" title="Devices" badge={<SourceBadge source={source('wifi')} />}>
-        <Empty>
-          The device list (names, band, signal) comes from the Linksys router once its device data
-          has been confirmed with a capture from your router (docs/08 question 6). Counts above
-          already work.
-        </Empty>
-      </Panel>
+      <DevicesTable net={net.data} source={source('wifi')} loading={net.isPending} />
       <div className="row">
         <Channels net={net.data} source={source('wifi')} />
         <SpeedHistory speed={speed.data} source={source('speed_test')} />
@@ -237,6 +240,130 @@ function DevicesChart({
           spanSeconds={RANGE_SECONDS[range]}
           ariaLabel={`Line chart of connected devices over the ${RANGE_LABEL[range]}${values.length ? `, between ${Math.min(...values)} and ${Math.max(...values)}` : ''}.`}
         />
+      )}
+    </Panel>
+  );
+}
+
+const DEVICES_SHOWN = 8;
+/** How far back "connected since" looks (15-minute buckets). */
+const SINCE_WINDOW_SECONDS = 2 * 86_400;
+
+function DevicesTable({
+  net,
+  source,
+  loading,
+}: {
+  net: LatestResponse | undefined;
+  source: SourceInfo | undefined;
+  loading: boolean;
+}) {
+  const now = useNow();
+  const at = useFreshnessNow();
+  const [showAll, setShowAll] = useState(false);
+  const items = net?.items ?? [];
+  const rows = connectedDevices(items);
+  const mesh = meshLinks(items);
+  const round = pick(net, 'devices_connected', 'network');
+  const history = useReadings(
+    rows.flatMap((r) => (r.bandSeriesId === null ? [] : [r.bandSeriesId])).slice(0, 50),
+    '24h',
+    {
+      bucket: '15m',
+      agg: 'max',
+      window: { fromOffsetSeconds: -SINCE_WINDOW_SECONDS, toOffsetSeconds: 0, key: 'since-48h' },
+    },
+  );
+  const windowStart = new Date(now.getTime() - SINCE_WINDOW_SECONDS * 1000);
+  const since = (seriesId: number | null): string => {
+    const points = history.data?.series.find((s) => s.meta.id === seriesId)?.points;
+    if (!points) return '—';
+    const start = connectedSince(points, windowStart);
+    return start === null ? 'Over 2 days' : formatWhen(start, now);
+  };
+  const shown = showAll ? rows : rows.slice(0, DEVICES_SHOWN);
+
+  return (
+    <Panel
+      id="list-h"
+      title="Devices"
+      badge={
+        round ? (
+          <FreshnessBadge freshness={at(round.freshness, 'wifi')} compact />
+        ) : (
+          <SourceBadge source={source} />
+        )
+      }
+      meta={rows.length > 0 && `Showing ${shown.length} of ${rows.length} · weakest first`}
+    >
+      {loading ? (
+        <Skeleton height={160} />
+      ) : rows.length === 0 ? (
+        <Empty>
+          The device list comes from the Linksys router: set ROUTER_PASSWORD on the Pi (docs/06 §
+          5d). Without it, devices are only counted.
+        </Empty>
+      ) : (
+        <>
+          {mesh.map((m) => (
+            <p key={m.entity} className="meta">
+              Mesh: {m.name} ↔ main router · {bandLabel(m.band)}
+              {m.signalDbm !== null && m.quality !== null && (
+                <>
+                  {' · '}
+                  <Status tone={QUALITY_TONE[m.quality]}>
+                    {formatNumber(m.signalDbm)} dBm · {SIGNAL_LABELS[m.quality]}
+                  </Status>
+                </>
+              )}
+              {m.linkMbps !== null && ` · ${formatNumber(m.linkMbps)} Mbps`}
+            </p>
+          ))}
+          <div className="table-wrap">
+            <table className="data" style={{ minWidth: 640 }}>
+              <thead>
+                <tr>
+                  <th scope="col">Device</th>
+                  <th scope="col">Connection</th>
+                  <th scope="col">Signal</th>
+                  <th scope="col">Link speed</th>
+                  <th scope="col">Connected since</th>
+                </tr>
+              </thead>
+              <tbody>
+                {shown.map((r) => (
+                  <tr key={r.entity}>
+                    <td>{r.name}</td>
+                    <td>
+                      {bandLabel(r.band)}
+                      {r.viaSatellite && ' · via satellite'}
+                    </td>
+                    <td>
+                      {r.signalDbm === null || r.quality === null ? (
+                        '—'
+                      ) : (
+                        <Status tone={QUALITY_TONE[r.quality]}>
+                          {formatNumber(r.signalDbm)} dBm · {SIGNAL_LABELS[r.quality]}
+                        </Status>
+                      )}
+                    </td>
+                    <td>{r.linkMbps === null ? '—' : `${formatNumber(r.linkMbps)} Mbps`}</td>
+                    <td>{since(r.bandSeriesId)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {rows.length > DEVICES_SHOWN && (
+            <button type="button" className="pill" onClick={() => setShowAll(!showAll)}>
+              {showAll ? 'Show fewer' : `Show all ${rows.length} devices`}
+            </button>
+          )}
+          <p className="note">
+            From the Linksys router every 5 minutes. Signal and link speed are as the main router
+            hears each device; devices on the satellite show their band only.
+          </p>
+        </>
       )}
     </Panel>
   );
