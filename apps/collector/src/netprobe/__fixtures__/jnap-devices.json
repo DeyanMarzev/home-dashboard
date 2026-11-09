@@ -1,5 +1,5 @@
 {
-  "note": "Shaped like a Velop devicelist/GetDevices3 output as described by community clients; replace with a capture (router-capture.ts).",
+  "note": "Synthetic, in the GetDevices3 format confirmed by jnap-mx4200.json: kept because it has a wired client, which the owner's capture doesn't.",
   "revision": 1234,
   "devices": [
     {

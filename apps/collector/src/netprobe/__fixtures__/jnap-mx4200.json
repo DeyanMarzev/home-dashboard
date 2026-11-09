@@ -1,0 +1,1673 @@
+{
+  "note": "Owner's Linksys MX4200 (one satellite), captured 2026-11-09 with router-capture.js and redacted: MACs, ids and names are placeholders; makers, models and OS replaced. Signal and link speeds as recorded.",
+  "devices": {
+    "revision": 119422,
+    "devices": [
+      {
+        "deviceID": "REDACTED-deviceID-1",
+        "lastChangeRevision": 118944,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "friendlyName": "device 1",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:01",
+            "interfaceType": "Wireless",
+            "band": "2.4GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:01",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-parentDeviceID-2"
+          }
+        ],
+        "properties": [
+          {
+            "name": "userDeviceName",
+            "value": "device 1"
+          },
+          {
+            "name": "userDeviceType",
+            "value": "device 2"
+          }
+        ],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-3",
+        "lastChangeRevision": 118947,
+        "model": {
+          "deviceType": "MediaPlayer",
+          "manufacturer": "Maker A",
+          "modelNumber": "Model 1",
+          "description": "Description"
+        },
+        "unit": {
+          "serialNumber": "REDACTED"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 3",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:02",
+            "interfaceType": "Wireless",
+            "band": "5GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:02",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-parentDeviceID-2"
+          }
+        ],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-4",
+        "lastChangeRevision": 119053,
+        "model": {
+          "deviceType": "Infrastructure",
+          "manufacturer": "Maker B",
+          "modelNumber": "Model 2",
+          "hardwareVersion": "1",
+          "description": "Description"
+        },
+        "unit": {
+          "serialNumber": "REDACTED",
+          "firmwareVersion": "1.0.0",
+          "firmwareDate": "2026-01-01T00:00:00Z"
+        },
+        "isAuthority": false,
+        "nodeType": "Slave",
+        "isHomeKitSupported": false,
+        "friendlyName": "device 4",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:03",
+            "interfaceType": "Unknown"
+          },
+          {
+            "macAddress": "02:00:00:00:00:04",
+            "interfaceType": "Wireless",
+            "band": "5GHz"
+          },
+          {
+            "macAddress": "02:00:00:00:00:05",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:05",
+            "ipAddress": "192.168.1.x"
+          }
+        ],
+        "properties": [
+          {
+            "name": "userDeviceLocation",
+            "value": "REDACTED"
+          },
+          {
+            "name": "userDeviceName",
+            "value": "device 5"
+          }
+        ],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-5",
+        "lastChangeRevision": 118943,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "friendlyName": "device 6",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:06",
+            "interfaceType": "Wireless",
+            "band": "2.4GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:06",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-parentDeviceID-2"
+          }
+        ],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-6",
+        "lastChangeRevision": 118946,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "friendlyName": "device 7",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:07",
+            "interfaceType": "Wireless",
+            "band": "2.4GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:07",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-parentDeviceID-2"
+          }
+        ],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-7",
+        "lastChangeRevision": 119415,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "friendlyName": "device 8",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:08",
+            "interfaceType": "Wireless",
+            "band": "5GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:08",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-deviceID-4"
+          }
+        ],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-8",
+        "lastChangeRevision": 118949,
+        "model": {
+          "deviceType": "Computer"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 9",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:09",
+            "interfaceType": "Wireless",
+            "band": "2.4GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:09",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-parentDeviceID-2"
+          }
+        ],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-9",
+        "lastChangeRevision": 119422,
+        "model": {
+          "deviceType": "Computer"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 10",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:0a",
+            "interfaceType": "Wireless",
+            "band": "5GHz"
+          }
+        ],
+        "connections": [],
+        "properties": [
+          {
+            "name": "showInPCList",
+            "value": "device 11"
+          },
+          {
+            "name": "blockAllManually",
+            "value": "device 12"
+          }
+        ],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-10",
+        "lastChangeRevision": 119409,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "friendlyName": "device 13",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:0b",
+            "interfaceType": "Wireless",
+            "band": "2.4GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:0b",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-parentDeviceID-2"
+          }
+        ],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-11",
+        "lastChangeRevision": 119387,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 14",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:0c",
+            "interfaceType": "Wireless",
+            "band": "5GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:0c",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-parentDeviceID-2"
+          }
+        ],
+        "properties": [
+          {
+            "name": "userDeviceOS",
+            "value": "REDACTED"
+          },
+          {
+            "name": "userDeviceManufacturer",
+            "value": "REDACTED"
+          },
+          {
+            "name": "userDeviceModelNumber",
+            "value": "REDACTED"
+          }
+        ],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-12",
+        "lastChangeRevision": 119379,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 18",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:0d",
+            "interfaceType": "Wireless",
+            "band": "2.4GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:0d",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-deviceID-4"
+          }
+        ],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-13",
+        "lastChangeRevision": 119101,
+        "model": {
+          "deviceType": "",
+          "manufacturer": "Maker C"
+        },
+        "unit": {},
+        "isAuthority": false,
+        "friendlyName": "device 19",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:0e",
+            "interfaceType": "Wireless",
+            "band": "5GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:0e",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-parentDeviceID-2"
+          }
+        ],
+        "properties": [
+          {
+            "name": "userDeviceName",
+            "value": "device 20"
+          },
+          {
+            "name": "userDeviceType",
+            "value": "device 21"
+          }
+        ],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-14",
+        "lastChangeRevision": 119413,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "friendlyName": "device 22",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:0f",
+            "interfaceType": "Wireless",
+            "band": "2.4GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:0f",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-parentDeviceID-2"
+          }
+        ],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-15",
+        "lastChangeRevision": 118951,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "friendlyName": "device 23",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:10",
+            "interfaceType": "Wireless",
+            "band": "5GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:10",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-parentDeviceID-2"
+          }
+        ],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-16",
+        "lastChangeRevision": 119348,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:11",
+            "interfaceType": "Wireless",
+            "band": "2.4GHz"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:11",
+            "ipAddress": "192.168.1.x",
+            "parentDeviceID": "REDACTED-parentDeviceID-2"
+          }
+        ],
+        "properties": [
+          {
+            "name": "actualWanSchedule",
+            "value": "device 25"
+          },
+          {
+            "name": "showInPCList",
+            "value": "device 11"
+          },
+          {
+            "name": "disabledManually",
+            "value": "device 11"
+          }
+        ],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-17",
+        "lastChangeRevision": 119417,
+        "model": {
+          "deviceType": "Computer",
+          "manufacturer": "Maker D",
+          "modelNumber": "Model 3",
+          "description": "Description"
+        },
+        "unit": {
+          "serialNumber": "REDACTED",
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 26",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:12",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [
+          {
+            "name": "userDeviceName",
+            "value": "device 27"
+          },
+          {
+            "name": "disabledManually",
+            "value": "device 12"
+          },
+          {
+            "name": "showInPCList",
+            "value": "device 11"
+          },
+          {
+            "name": "userDeviceType",
+            "value": "device 28"
+          }
+        ],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-18",
+        "lastChangeRevision": 119285,
+        "model": {
+          "deviceType": "Computer"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 29",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:13",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-19",
+        "lastChangeRevision": 119021,
+        "model": {
+          "deviceType": "Phone",
+          "manufacturer": "Maker E",
+          "modelNumber": "Model 4"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 30",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:14",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-parentDeviceID-2",
+        "lastChangeRevision": 118928,
+        "model": {
+          "deviceType": "Infrastructure",
+          "manufacturer": "Maker B",
+          "modelNumber": "Model 5",
+          "hardwareVersion": "1",
+          "description": "Description"
+        },
+        "unit": {
+          "serialNumber": "REDACTED",
+          "firmwareVersion": "1.0.0",
+          "firmwareDate": "2026-01-01T00:00:00Z"
+        },
+        "isAuthority": true,
+        "nodeType": "Master",
+        "isHomeKitSupported": false,
+        "friendlyName": "device 31",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:15",
+            "interfaceType": "Wired"
+          },
+          {
+            "macAddress": "02:00:00:00:00:16",
+            "interfaceType": "Wired"
+          }
+        ],
+        "connections": [
+          {
+            "macAddress": "02:00:00:00:00:15",
+            "ipAddress": "192.168.1.x"
+          }
+        ],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-20",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:17",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-21",
+        "lastChangeRevision": 27176,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:18",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [
+          {
+            "name": "userDeviceOS",
+            "value": "REDACTED"
+          },
+          {
+            "name": "userDeviceManufacturer",
+            "value": "REDACTED"
+          },
+          {
+            "name": "userDeviceModelNumber",
+            "value": "REDACTED"
+          }
+        ],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-22",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "",
+          "manufacturer": "Maker F",
+          "modelNumber": "Model 6",
+          "description": "Description"
+        },
+        "unit": {
+          "serialNumber": "REDACTED"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 34",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:19",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-23",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:1a",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-24",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "friendlyName": "device 35",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:1b",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-25",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:1c",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-26",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Computer"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 36",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:1d",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [
+          {
+            "name": "userDeviceName",
+            "value": "device 37"
+          },
+          {
+            "name": "blockAllManually",
+            "value": "device 12"
+          },
+          {
+            "name": "userDeviceType",
+            "value": "device 38"
+          }
+        ],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-27",
+        "lastChangeRevision": 65488,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:1e",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-28",
+        "lastChangeRevision": 5309,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:1f",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-29",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Computer"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 39",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:20",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-30",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:21",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-31",
+        "lastChangeRevision": 10355,
+        "model": {
+          "deviceType": "Printer",
+          "manufacturer": "Maker A",
+          "modelNumber": "Model 7",
+          "description": "Description"
+        },
+        "unit": {
+          "serialNumber": "REDACTED"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 40",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:22",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-32",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Computer",
+          "manufacturer": "Maker D",
+          "modelNumber": "Model 3",
+          "description": "Description"
+        },
+        "unit": {
+          "serialNumber": "REDACTED",
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 41",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:23",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-33",
+        "lastChangeRevision": 21081,
+        "model": {
+          "deviceType": "Computer"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 42",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:24",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-34",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Computer"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 43",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:25",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-35",
+        "lastChangeRevision": 118835,
+        "model": {
+          "deviceType": "Tablet",
+          "manufacturer": "Maker G",
+          "modelNumber": "Model 8"
+        },
+        "unit": {},
+        "isAuthority": false,
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:26",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-36",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:27",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [
+          {
+            "name": "userDeviceOS",
+            "value": "REDACTED"
+          },
+          {
+            "name": "userDeviceManufacturer",
+            "value": "REDACTED"
+          },
+          {
+            "name": "userDeviceModelNumber",
+            "value": "REDACTED"
+          }
+        ],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-37",
+        "lastChangeRevision": 56237,
+        "model": {
+          "deviceType": "Mobile",
+          "manufacturer": "Maker H"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:28",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-38",
+        "lastChangeRevision": 45075,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:29",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-39",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:2a",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-40",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 44",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:2b",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-41",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Mobile",
+          "manufacturer": "Maker H"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 45",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:2c",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-42",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Mobile",
+          "manufacturer": "Maker A",
+          "modelNumber": "Model 9"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:2d",
+            "interfaceType": "Wireless"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-43",
+        "lastChangeRevision": 118882,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:2e",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-44",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:2f",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-45",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:30",
+            "interfaceType": "Wireless"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-46",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 46",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:31",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-47",
+        "lastChangeRevision": 116303,
+        "model": {
+          "deviceType": "Computer"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 47",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:32",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-48",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "friendlyName": "device 48",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:33",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-49",
+        "lastChangeRevision": 60412,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "friendlyName": "device 49",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:34",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-50",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:35",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-51",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Mobile",
+          "manufacturer": "Maker H"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:36",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-52",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Phone",
+          "manufacturer": "Maker E",
+          "modelNumber": "Model 4"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 30",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:37",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-53",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 50",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:38",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-54",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:39",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-55",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Computer",
+          "manufacturer": "Maker D",
+          "modelNumber": "Model 3",
+          "description": "Description"
+        },
+        "unit": {
+          "serialNumber": "REDACTED",
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 51",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:3a",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-56",
+        "lastChangeRevision": 0,
+        "model": {
+          "deviceType": "Phone",
+          "manufacturer": "Maker E",
+          "modelNumber": "Model 4"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 30",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:3b",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-57",
+        "lastChangeRevision": 3651,
+        "model": {
+          "deviceType": "Mobile"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:3c",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-58",
+        "lastChangeRevision": 65654,
+        "model": {
+          "deviceType": "Phone",
+          "manufacturer": "Maker A",
+          "modelNumber": "Model 10"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 24",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:3d",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-59",
+        "lastChangeRevision": 61058,
+        "model": {
+          "deviceType": "Computer"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 52",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:3e",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-60",
+        "lastChangeRevision": 65492,
+        "model": {
+          "deviceType": ""
+        },
+        "unit": {},
+        "isAuthority": false,
+        "friendlyName": "device 53",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:3f",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      },
+      {
+        "deviceID": "REDACTED-deviceID-61",
+        "lastChangeRevision": 95186,
+        "model": {
+          "deviceType": "Phone",
+          "manufacturer": "Maker E",
+          "modelNumber": "Model 11"
+        },
+        "unit": {
+          "operatingSystem": "OS"
+        },
+        "isAuthority": false,
+        "friendlyName": "device 30",
+        "knownInterfaces": [
+          {
+            "macAddress": "02:00:00:00:00:40",
+            "interfaceType": "Unknown"
+          }
+        ],
+        "connections": [],
+        "properties": [],
+        "maxAllowedProperties": 16
+      }
+    ]
+  },
+  "connections": {
+    "connections": [
+      {
+        "macAddress": "02:00:00:00:00:11",
+        "negotiatedMbps": 39,
+        "wireless": {
+          "bssid": "02:00:00:00:00:41",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-62",
+          "band": "2.4GHz",
+          "signalDecibels": -71
+        }
+      },
+      {
+        "macAddress": "02:00:00:00:00:0b",
+        "negotiatedMbps": 1,
+        "wireless": {
+          "bssid": "02:00:00:00:00:41",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-62",
+          "band": "2.4GHz",
+          "signalDecibels": -87
+        }
+      },
+      {
+        "macAddress": "02:00:00:00:00:09",
+        "negotiatedMbps": 114,
+        "wireless": {
+          "bssid": "02:00:00:00:00:41",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-62",
+          "band": "2.4GHz",
+          "signalDecibels": -43
+        }
+      },
+      {
+        "macAddress": "02:00:00:00:00:0e",
+        "negotiatedMbps": 72,
+        "wireless": {
+          "bssid": "02:00:00:00:00:42",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-63",
+          "band": "5GHz",
+          "signalDecibels": -73
+        }
+      },
+      {
+        "macAddress": "02:00:00:00:00:0a",
+        "negotiatedMbps": 175,
+        "wireless": {
+          "bssid": "02:00:00:00:00:42",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-63",
+          "band": "5GHz",
+          "signalDecibels": -77
+        }
+      },
+      {
+        "macAddress": "02:00:00:00:00:01",
+        "negotiatedMbps": 1,
+        "wireless": {
+          "bssid": "02:00:00:00:00:41",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-62",
+          "band": "2.4GHz",
+          "signalDecibels": -36
+        }
+      },
+      {
+        "macAddress": "02:00:00:00:00:0f",
+        "negotiatedMbps": 26,
+        "wireless": {
+          "bssid": "02:00:00:00:00:41",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-62",
+          "band": "2.4GHz",
+          "signalDecibels": -65
+        }
+      },
+      {
+        "macAddress": "02:00:00:00:00:0c",
+        "negotiatedMbps": 6,
+        "wireless": {
+          "bssid": "02:00:00:00:00:42",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-63",
+          "band": "5GHz",
+          "signalDecibels": -76
+        }
+      },
+      {
+        "macAddress": "02:00:00:00:00:06",
+        "negotiatedMbps": 1,
+        "wireless": {
+          "bssid": "02:00:00:00:00:41",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-62",
+          "band": "2.4GHz",
+          "signalDecibels": -62
+        }
+      },
+      {
+        "macAddress": "02:00:00:00:00:07",
+        "negotiatedMbps": 72,
+        "wireless": {
+          "bssid": "02:00:00:00:00:41",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-62",
+          "band": "2.4GHz",
+          "signalDecibels": -66
+        }
+      },
+      {
+        "macAddress": "02:00:00:00:00:10",
+        "negotiatedMbps": 234,
+        "wireless": {
+          "bssid": "02:00:00:00:00:42",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-63",
+          "band": "5GHz",
+          "signalDecibels": -77
+        }
+      },
+      {
+        "macAddress": "02:00:00:00:00:02",
+        "negotiatedMbps": 351,
+        "wireless": {
+          "bssid": "02:00:00:00:00:42",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-63",
+          "band": "5GHz",
+          "signalDecibels": -73
+        }
+      },
+      {
+        "macAddress": "02:00:00:00:00:04",
+        "negotiatedMbps": 960,
+        "wireless": {
+          "bssid": "02:00:00:00:00:42",
+          "isGuest": false,
+          "radioID": "REDACTED-radioID-63",
+          "band": "5GHz",
+          "signalDecibels": -62
+        }
+      }
+    ]
+  }
+}
