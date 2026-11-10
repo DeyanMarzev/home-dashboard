@@ -3,6 +3,7 @@ import { ReadingInputSchema } from '@home/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { loadCollectorEnv } from '../../../env.js';
 import { silentLog } from '../../../test-helpers.js';
+import { parseThamesTariff } from '../tariff.js';
 import { consumptionToReadings, londonHourStart } from './thames-parse.js';
 import { CookieJar, thamesProvider, ThamesAuthError } from './thames.js';
 
@@ -256,5 +257,33 @@ describe('thamesProvider (the site replayed)', () => {
     expect(err).toBeInstanceOf(ThamesAuthError);
     expect(String(err)).toMatch(/Check THAMES_EMAIL and THAMES_PASSWORD/);
     expect(String(err)).not.toMatch(/owner@example|pa\$\$/);
+  });
+});
+
+describe('parseThamesTariff (page fetched 2026-11-10)', () => {
+  const page = readFileSync(
+    new URL('../__fixtures__/thames-tariff-page.html', import.meta.url),
+    'utf8',
+  );
+
+  it('reads the 2026-27 metered rates as pence per m³ and a daily standing charge', () => {
+    // £2.7346 + £1.4721 per m³; (£66.87 + £128.13) a year.
+    expect(parseThamesTariff(page)).toEqual({
+      fuel: 'water',
+      unitRatePence: 420.67,
+      standingPence: 53.425,
+      validFrom: '2026-04-01',
+    });
+  });
+
+  it('uses the lower wastewater fixed charge with the surface water drainage rebate', () => {
+    // (£66.87 + £80.43) a year.
+    expect(parseThamesTariff(page, { surfaceWaterRebate: true }).standingPence).toBe(40.356);
+  });
+
+  it('fails loudly when the page changes', () => {
+    expect(() => parseThamesTariff('<p>New prices coming soon</p>')).toThrow(
+      /rates page changed: couldn't find the clean water rate/,
+    );
   });
 });

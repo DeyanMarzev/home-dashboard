@@ -1,4 +1,4 @@
-import { attemptsSince, openEvent, resolveEvent } from '@home/db';
+import { addPublishedTariff, attemptsSince, openEvent, resolveEvent, type Sql } from '@home/db';
 import {
   addLondonDays,
   leakStatus,
@@ -10,7 +10,8 @@ import {
 import type { PullCollector } from '../../collector.js';
 import { refuseFakeInProduction } from '../../env.js';
 import { fakeWaterProvider } from './providers/fake.js';
-import { thamesProvider } from './providers/thames.js';
+import { thamesProvider, USER_AGENT } from './providers/thames.js';
+import { parseThamesTariff, TARIFF_URL } from './tariff.js';
 import type { WaterProvider } from './providers/types.js';
 
 export const PROVIDERS: Record<string, WaterProvider> = {
@@ -50,6 +51,14 @@ export const thamesWater: PullCollector = {
       signal: ctx.signal,
       log: ctx.log,
     });
+    if (provider.id === 'thames') {
+      // Best effort: the readings matter more than the rates.
+      await updateTariff(
+        ctx.db,
+        ctx.signal,
+        ctx.source.options.surface_water_rebate === true,
+      ).catch((err: unknown) => ctx.log.warn({ error: String(err) }, 'water rates not updated'));
+    }
     if (readings.length === 0) return;
     await ctx.writeReadings(readings);
 
@@ -79,3 +88,15 @@ export const thamesWater: PullCollector = {
     }
   },
 };
+
+/**
+ * Thames Water's published metered rates (public page, no login) into `tariffs`, so water
+ * costs need no typing. Skipped when the rates are already there, or the owner has entered a
+ * water tariff starting later.
+ */
+async function updateTariff(db: Sql, signal: AbortSignal, surfaceWaterRebate: boolean) {
+  const res = await fetch(TARIFF_URL, { signal, headers: { 'user-agent': USER_AGENT } });
+  if (!res.ok) throw new Error(`Thames Water's rates page answered HTTP ${res.status}`);
+  const tariff = parseThamesTariff(await res.text(), { surfaceWaterRebate });
+  await addPublishedTariff(db, { ...tariff, publisher: 'Thames Water' });
+}

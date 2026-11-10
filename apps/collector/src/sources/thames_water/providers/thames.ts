@@ -30,7 +30,7 @@ const REDIRECT_URI = 'https://www.thameswater.co.uk/login';
 /** The Thames Water website's own (public) client id. */
 const CLIENT_ID = 'cedfde2d-79a7-44fd-9833-cae769640d3d';
 /** The site answers browsers; the client this is ported from sends the same. */
-const USER_AGENT =
+export const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36';
 const AJAX = { referer: METER_PAGE, 'x-requested-with': 'XMLHttpRequest' };
 const FORM = { 'content-type': 'application/x-www-form-urlencoded' };

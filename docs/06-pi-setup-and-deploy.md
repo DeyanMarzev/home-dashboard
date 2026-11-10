@@ -272,7 +272,7 @@ docker compose up -d collector
 docker compose exec collector node dist/tools/thames-capture.js > thames.json
 ```
 
-The Water page fills in after the next 06:00 run. If Thames changes its site, the System page shows Thames Water as failing with the step that broke.
+The Water page fills in after the next 06:00 run. The same run adds Thames Water's published metered rates (public page) to the tariffs, so water costs need no typing; set `surface_water_rebate: true` under `thames_water` → `options` in `config/sources.yaml` if your roof water doesn't drain to the public sewer. If Thames changes its site, the System page shows Thames Water as failing with the step that broke.
 
 ## 6. Start
 
