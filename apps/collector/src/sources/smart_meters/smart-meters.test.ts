@@ -93,6 +93,12 @@ describe('smart_meters collector', () => {
     expect(new Date(first).toISOString()).toBe('2026-11-02T00:00:00.000Z');
   });
 
+  it('refuses the fake provider in production', async () => {
+    await expect(
+      run({}, { NODE_ENV: 'production', METER_PROVIDER: 'fake' }).promise,
+    ).rejects.toThrow(/set METER_PROVIDER=bright in \.env/);
+  });
+
   it('refuses an unknown provider, pointing at the open question', async () => {
     await expect(run({}, { METER_PROVIDER: 'octopus' }).promise).rejects.toThrow(
       /METER_PROVIDER "octopus" isn't supported/,

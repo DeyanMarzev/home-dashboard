@@ -7,6 +7,8 @@ const optionalNumber = (min: number, max: number) =>
   z.preprocess(blankToUndefined, z.coerce.number().min(min).max(max).optional());
 
 const EnvSchema = z.object({
+  // `production` on the Pi (docker-compose.yml): sample-data providers refuse to run there.
+  NODE_ENV: z.preprocess(blankToUndefined, z.string().trim().default('development')),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 
   MQTT_URL: z.preprocess(blankToUndefined, z.string().url().default('mqtt://localhost:1883')),
@@ -69,6 +71,20 @@ export function loadCollectorEnv(env: Record<string, string | undefined>): Colle
     throw new EnvError(`Invalid environment:\n  - ${problems.join('\n  - ')}`);
   }
   return parsed.data;
+}
+
+/** Sample-data providers must never write invented numbers into the real database. */
+export function refuseFakeInProduction(
+  env: CollectorEnv,
+  provider: string,
+  setting: string,
+  real: string,
+): void {
+  if (provider === 'fake' && env.NODE_ENV === 'production') {
+    throw new Error(
+      `${setting}=fake gives invented sample data (development only): set ${setting}=${real} in .env on the Pi`,
+    );
+  }
 }
 
 /** For collectors: a required setting, with a message saying where to set it. */
