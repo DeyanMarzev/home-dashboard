@@ -5,3 +5,5 @@ pnpm-lock.yaml
 *.md
 # The mockup is the owner's reference; never reformat it.
 docs/mockup/
+# Recorded responses stay exactly as served (some are fragments)
+**/__fixtures__/*.html

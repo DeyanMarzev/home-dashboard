@@ -90,3 +90,7 @@ sources:
     poll: 'cron: 0 6 * * *' # daily 06:00 Europe/London
     expected_delay: 3d
     grace: 1d
+    options:
+      # Water rates are fetched from Thames Water's public page. true = the lower wastewater
+      # fixed charge for homes whose roof water doesn't drain to the public sewer.
+      surface_water_rebate: false

@@ -11,6 +11,7 @@ import { createReadingWriter, lastDataTo, READINGS_CHANNEL } from './readings.js
 import { loadRegistryFile } from './registry-file.js';
 import { attemptsSince, finishRun, pruneRuns, recordRun, startRun } from './runs.js';
 import { syncSources } from './sources.js';
+import { addPublishedTariff } from './tariffs.js';
 import { SOURCES_FILE, testBackends, type TestDatabase } from './test/database.js';
 
 const kitchenTemps: ReadingInput[] = [
@@ -398,6 +399,54 @@ describe.each(testBackends)('database ($name)', ({ start }) => {
         { n: string }[]
       >`select count(*) as n from collector_runs where started_at < '2021-01-01'`;
       expect(Number(row?.n)).toBe(0);
+    });
+  });
+
+  describe('addPublishedTariff', () => {
+    const rows = () =>
+      sql<{ fuel: string; unit: number; standing: number; from: string; to: string | null }[]>`
+        select fuel, unit_rate_pence::float8 as unit, standing_pence::float8 as standing,
+               valid_from::text as from, valid_to::text as to
+        from tariffs where fuel = 'water' order by valid_from`;
+    const thames = (validFrom: string, unitRatePence = 420.67) => ({
+      fuel: 'water' as const,
+      unitRatePence,
+      standingPence: 53.425,
+      validFrom,
+      publisher: 'Thames Water',
+    });
+
+    it('adds published rates, ends the previous row the day before, and is idempotent', async () => {
+      await sql`delete from tariffs where fuel = 'water'`;
+      await sql`insert into tariffs (fuel, unit_rate_pence, standing_pence, valid_from)
+                values ('water', 380, 50, '2025-04-01')`;
+      expect(await addPublishedTariff(sql, thames('2026-04-01'))).toBe(true);
+      expect(await rows()).toEqual([
+        { fuel: 'water', unit: 380, standing: 50, from: '2025-04-01', to: '2026-03-31' },
+        { fuel: 'water', unit: 420.67, standing: 53.425, from: '2026-04-01', to: null },
+      ]);
+      expect(await addPublishedTariff(sql, thames('2026-04-01'))).toBe(false);
+      expect(await rows()).toHaveLength(2);
+      const [event] = await sql<
+        { level: string; kind: string; message: string; resolved: boolean }[]
+      >`
+        select level, kind, message, resolved_at is not null as resolved
+        from events where kind = 'tariff_updated' order by id desc limit 1`;
+      expect(event).toEqual({
+        level: 'info',
+        kind: 'tariff_updated',
+        message:
+          'Water rates from Thames Water added: 420.67 p per m³, 53.425 p a day, from 2026-04-01',
+        resolved: true,
+      });
+    });
+
+    it('leaves rates the owner entered for a later date alone', async () => {
+      await sql`delete from tariffs where fuel = 'water'`;
+      await sql`insert into tariffs (fuel, unit_rate_pence, standing_pence, valid_from)
+                values ('water', 999, 1, '2026-05-01')`;
+      expect(await addPublishedTariff(sql, thames('2026-04-01'))).toBe(false);
+      expect((await rows()).map((r) => r.unit)).toEqual([999]);
     });
   });
 
