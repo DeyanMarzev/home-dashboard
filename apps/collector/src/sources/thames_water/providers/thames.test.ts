@@ -47,6 +47,24 @@ describe('consumptionToReadings', () => {
     for (const r of readings) expect(ReadingInputSchema.safeParse(r).success).toBe(true);
   });
 
+  it('reads the format recorded from the owner’s account (2026-11-10)', () => {
+    // Asked for 4–9 Nov on the 10th: whole days 4–7 Nov came back (about 3 days behind).
+    const readings = consumptionToReadings('2026-11-04', fixture('thames-hourly-recorded.json'));
+    const volumes = readings.filter((r) => r.metric === 'volume');
+    expect(volumes).toHaveLength(96);
+    expect(iso(volumes[0]!.ts)).toBe('2026-11-04T00:00:00.000Z');
+    expect(iso(volumes.at(-1)!.ts)).toBe('2026-11-07T23:00:00.000Z');
+    expect(
+      readings.filter((r) => r.metric === 'meter_reading').map((r) => [iso(r.ts), r.value]),
+    ).toEqual([
+      ['2026-11-05T00:00:00.000Z', 1500.234],
+      ['2026-11-06T00:00:00.000Z', 1500.478],
+      ['2026-11-07T00:00:00.000Z', 1500.712],
+      ['2026-11-08T00:00:00.000Z', 1500.956],
+    ]);
+    for (const r of readings) expect(ReadingInputSchema.safeParse(r).success).toBe(true);
+  });
+
   it('places the repeated 01:00 of the autumn clock change an hour later', () => {
     const autumn = consumptionToReadings(
       '2026-10-25',
