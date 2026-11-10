@@ -255,6 +255,25 @@ To confirm the data format (docs/08 3b), capture it once and send the file (ids 
 docker compose exec collector node dist/tools/bright-capture.js > bright.json
 ```
 
+## 5f. Water (Thames Water)
+
+Hourly water use from your Thames Water account (myaccount.thameswater.co.uk → My water use), about 3 days behind. There's no official API: the collector signs in to the account site once a day at 06:00 (never more than 3 attempts a day, so it can't lock the account). In `.env`:
+
+```bash
+WATER_PROVIDER=thames
+THAMES_EMAIL=you@example.com     # your Thames Water account login
+THAMES_PASSWORD=...
+```
+
+`THAMES_ACCOUNT_NUMBER` / `THAMES_METER_ID` only if the login has several accounts or meters. To check the sign-in now (and confirm the data format, docs/08 13), capture once; meter serials and personal details are redacted:
+
+```bash
+docker compose up -d collector
+docker compose exec collector node dist/tools/thames-capture.js > thames.json
+```
+
+The Water page fills in after the next 06:00 run. If Thames changes its site, the System page shows Thames Water as failing with the step that broke.
+
 ## 6. Start
 
 ```bash

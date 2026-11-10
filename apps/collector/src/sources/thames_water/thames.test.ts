@@ -1,7 +1,8 @@
 import { londonDayBounds, ReadingInputSchema, type ReadingInput } from '@home/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { loadCollectorEnv } from '../../env.js';
-import { silentLog } from '../../test-helpers.js';
+import { fakeContext, silentLog, source } from '../../test-helpers.js';
+import { thamesWater } from './index.js';
 import { fakeHourLitres, fakeWaterProvider } from './providers/fake.js';
 import { thamesProvider } from './providers/thames.js';
 
@@ -44,10 +45,24 @@ describe('fake water provider', () => {
   });
 });
 
-describe('thames provider', () => {
-  it('says plainly that it is not built yet', async () => {
+describe('thames_water collector', () => {
+  it('refuses the fake provider in production, so sample data never reaches the real database', async () => {
+    const env = loadCollectorEnv({ NODE_ENV: 'production', WATER_PROVIDER: 'fake' });
+    const src = source('thames_water', {
+      kind: 'scrape',
+      poll: 'cron: 0 6 * * *',
+      expected_delay: '3d',
+    });
+    const run = thamesWater.run({
+      ...fakeContext(src, new AbortController().signal, () => undefined),
+      env,
+    });
+    await expect(run).rejects.toThrow(/set WATER_PROVIDER=thames in \.env/);
+  });
+
+  it('asks for the Thames Water login when it is missing', async () => {
     await expect(thamesProvider.fetch(new Date(), new Date(), ctx)).rejects.toThrow(
-      /isn’t built yet/,
+      /THAMES_EMAIL is not set/,
     );
   });
 });

@@ -1,4 +1,5 @@
 import type { PullCollector } from '../../collector.js';
+import { refuseFakeInProduction } from '../../env.js';
 import { brightProvider } from './providers/bright.js';
 import { fakeProvider } from './providers/fake.js';
 import type { MeterProvider } from './providers/types.js';
@@ -25,6 +26,7 @@ export const smartMeters: PullCollector = {
         `METER_PROVIDER "${ctx.env.METER_PROVIDER}" isn't supported (use bright, or fake for sample data)`,
       );
     }
+    refuseFakeInProduction(ctx.env, provider.id, 'METER_PROVIDER', 'bright');
     const [electricity, gas] = await Promise.all([
       ctx.lastDataTo('energy_import', 'electricity'),
       ctx.lastDataTo('energy_import', 'gas'),

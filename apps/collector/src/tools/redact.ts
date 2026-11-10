@@ -8,7 +8,7 @@
 
 /** Keys whose whole value is personal, at any depth and of any type. */
 const PERSONAL_KEY =
-  /address|postcode|postal|email|phone|mpan|mprn|serial|attributes|latitude|longitude/i;
+  /address|postcode|postal|email|phone|mpan|mprn|serial|attributes|latitude|longitude|^meters$/i;
 const MAC = /^([0-9a-f]{2}[:-]){5}[0-9a-f]{2}$/i;
 const IPV4 = /^\d{1,3}(\.\d{1,3}){3}$/;
 const IPV6 = /^[0-9a-f]{0,4}(:[0-9a-f]{0,4}){2,7}$/i;

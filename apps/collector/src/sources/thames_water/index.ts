@@ -8,6 +8,7 @@ import {
   nightMinimums,
 } from '@home/shared';
 import type { PullCollector } from '../../collector.js';
+import { refuseFakeInProduction } from '../../env.js';
 import { fakeWaterProvider } from './providers/fake.js';
 import { thamesProvider } from './providers/thames.js';
 import type { WaterProvider } from './providers/types.js';
@@ -30,7 +31,8 @@ export const thamesWater: PullCollector = {
   async run(ctx) {
     const provider = PROVIDERS[ctx.env.WATER_PROVIDER];
     if (!provider)
-      throw new Error(`WATER_PROVIDER "${ctx.env.WATER_PROVIDER}" isn't known (fake | thames)`);
+      throw new Error(`WATER_PROVIDER "${ctx.env.WATER_PROVIDER}" isn't known (thames | fake)`);
+    refuseFakeInProduction(ctx.env, provider.id, 'WATER_PROVIDER', 'thames');
 
     const today = londonDateString(new Date());
     const attempts = await attemptsSince(ctx.db, 'thames_water', londonMidnight(today));

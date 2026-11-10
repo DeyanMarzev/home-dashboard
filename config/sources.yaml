@@ -83,11 +83,10 @@ sources:
     expected_delay: 1d # readings arrive the next day
     grace: 12h
 
-  thames_water: # built (M8) with only a `fake` provider (sample data); enable once the real one exists (docs/08 question 13)
+  thames_water: # Thames Water account site (unofficial); needs THAMES_EMAIL/PASSWORD in .env (docs/06 § 5f)
     name: Thames Water
     description: Water, hourly
     kind: scrape
     poll: 'cron: 0 6 * * *' # daily 06:00 Europe/London
     expected_delay: 3d
     grace: 1d
-    enabled: false

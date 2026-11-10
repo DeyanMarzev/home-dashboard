@@ -1,0 +1,38 @@
+{
+  "IsError": false,
+  "IsDataAvailable": true,
+  "IsConsumptionAvailable": true,
+  "TargetUsage": 5.68,
+  "AverageUsage": 103.65,
+  "ActualUsage": 3213.15,
+  "MyUsage": "NA",
+  "AverageUsagePerPerson": 3213.15,
+  "IsMO365Customer": false,
+  "IsMOPartialCustomer": false,
+  "IsMOCompleteCustomer": false,
+  "IsExtraMonthConsumptionMessage": false,
+  "Lines": [
+    {
+      "Label": "1-November",
+      "Usage": 310.0,
+      "Read": 25125.0,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "2-November",
+      "Usage": 295.0,
+      "Read": 25420.0,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    }
+  ],
+  "AlertsValues": null,
+  "Meters": ["REDACTED-meter-1"],
+  "Yearly": [],
+  "HalfYearly": [],
+  "Monthly": [],
+  "Daily": [],
+  "IsRecentCustomer": false,
+  "IsPremiseAddressSameAsMailingAddress": true
+}
