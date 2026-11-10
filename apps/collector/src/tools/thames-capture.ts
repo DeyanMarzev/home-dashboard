@@ -26,7 +26,8 @@ try {
   const hourly = meter
     ? await getHourlyUsage(session, meter, start, addLondonDays(today, -1))
     : null;
-  console.log(JSON.stringify({ start, meters, hourly }, redactor(), 2));
+  // Not `meters`: that key is redacted as a list of meter serials.
+  console.log(JSON.stringify({ start, meterList: meters, hourly }, redactor(), 2));
 } finally {
   await signOut(session);
 }

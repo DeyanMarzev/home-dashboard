@@ -1,0 +1,689 @@
+{
+  "IsError": false,
+  "IsDataAvailable": true,
+  "Lines": [
+    {
+      "Label": "0:00",
+      "Usage": 0,
+      "Read": 1500000,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "1:00",
+      "Usage": 0,
+      "Read": 1500000,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "2:00",
+      "Usage": 0,
+      "Read": 1500000,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "3:00",
+      "Usage": 0,
+      "Read": 1500000,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "4:00",
+      "Usage": 0,
+      "Read": 1500000,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "5:00",
+      "Usage": 0,
+      "Read": 1500000,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "6:00",
+      "Usage": 9,
+      "Read": 1500009,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "7:00",
+      "Usage": 40,
+      "Read": 1500049,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "8:00",
+      "Usage": 28,
+      "Read": 1500077,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "9:00",
+      "Usage": 6,
+      "Read": 1500083,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "10:00",
+      "Usage": 4,
+      "Read": 1500087,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "11:00",
+      "Usage": 8,
+      "Read": 1500095,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "12:00",
+      "Usage": 12,
+      "Read": 1500107,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "13:00",
+      "Usage": 5,
+      "Read": 1500112,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "14:00",
+      "Usage": 3,
+      "Read": 1500115,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "15:00",
+      "Usage": 4,
+      "Read": 1500119,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "16:00",
+      "Usage": 7,
+      "Read": 1500126,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "17:00",
+      "Usage": 20,
+      "Read": 1500146,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "18:00",
+      "Usage": 31,
+      "Read": 1500177,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "19:00",
+      "Usage": 24,
+      "Read": 1500201,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "20:00",
+      "Usage": 16,
+      "Read": 1500217,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "21:00",
+      "Usage": 12,
+      "Read": 1500229,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "22:00",
+      "Usage": 5,
+      "Read": 1500234,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "23:00",
+      "Usage": 0,
+      "Read": 1500234,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "0:00",
+      "Usage": 0,
+      "Read": 1500234,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "1:00",
+      "Usage": 0,
+      "Read": 1500234,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "2:00",
+      "Usage": 0,
+      "Read": 1500234,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "3:00",
+      "Usage": 0,
+      "Read": 1500234,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "4:00",
+      "Usage": 0,
+      "Read": 1500234,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "5:00",
+      "Usage": 0,
+      "Read": 1500234,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "6:00",
+      "Usage": 9,
+      "Read": 1500243,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "7:00",
+      "Usage": 45,
+      "Read": 1500288,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "8:00",
+      "Usage": 28,
+      "Read": 1500316,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "9:00",
+      "Usage": 6,
+      "Read": 1500322,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "10:00",
+      "Usage": 4,
+      "Read": 1500326,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "11:00",
+      "Usage": 8,
+      "Read": 1500334,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "12:00",
+      "Usage": 12,
+      "Read": 1500346,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "13:00",
+      "Usage": 5,
+      "Read": 1500351,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "14:00",
+      "Usage": 3,
+      "Read": 1500354,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "15:00",
+      "Usage": 4,
+      "Read": 1500358,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "16:00",
+      "Usage": 7,
+      "Read": 1500365,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "17:00",
+      "Usage": 20,
+      "Read": 1500385,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "18:00",
+      "Usage": 36,
+      "Read": 1500421,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "19:00",
+      "Usage": 24,
+      "Read": 1500445,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "20:00",
+      "Usage": 16,
+      "Read": 1500461,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "21:00",
+      "Usage": 12,
+      "Read": 1500473,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "22:00",
+      "Usage": 5,
+      "Read": 1500478,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "23:00",
+      "Usage": 0,
+      "Read": 1500478,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "0:00",
+      "Usage": 0,
+      "Read": 1500478,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "1:00",
+      "Usage": 0,
+      "Read": 1500478,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "2:00",
+      "Usage": 0,
+      "Read": 1500478,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "3:00",
+      "Usage": 0,
+      "Read": 1500478,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "4:00",
+      "Usage": 0,
+      "Read": 1500478,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "5:00",
+      "Usage": 0,
+      "Read": 1500478,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "6:00",
+      "Usage": 9,
+      "Read": 1500487,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "7:00",
+      "Usage": 40,
+      "Read": 1500527,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "8:00",
+      "Usage": 28,
+      "Read": 1500555,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "9:00",
+      "Usage": 6,
+      "Read": 1500561,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "10:00",
+      "Usage": 4,
+      "Read": 1500565,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "11:00",
+      "Usage": 8,
+      "Read": 1500573,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "12:00",
+      "Usage": 12,
+      "Read": 1500585,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "13:00",
+      "Usage": 5,
+      "Read": 1500590,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "14:00",
+      "Usage": 3,
+      "Read": 1500593,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "15:00",
+      "Usage": 4,
+      "Read": 1500597,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "16:00",
+      "Usage": 7,
+      "Read": 1500604,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "17:00",
+      "Usage": 20,
+      "Read": 1500624,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "18:00",
+      "Usage": 31,
+      "Read": 1500655,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "19:00",
+      "Usage": 24,
+      "Read": 1500679,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "20:00",
+      "Usage": 16,
+      "Read": 1500695,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "21:00",
+      "Usage": 12,
+      "Read": 1500707,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "22:00",
+      "Usage": 5,
+      "Read": 1500712,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "23:00",
+      "Usage": 0,
+      "Read": 1500712,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "0:00",
+      "Usage": 0,
+      "Read": 1500712,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "1:00",
+      "Usage": 0,
+      "Read": 1500712,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "2:00",
+      "Usage": 0,
+      "Read": 1500712,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "3:00",
+      "Usage": 0,
+      "Read": 1500712,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "4:00",
+      "Usage": 0,
+      "Read": 1500712,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "5:00",
+      "Usage": 0,
+      "Read": 1500712,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "6:00",
+      "Usage": 9,
+      "Read": 1500721,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "7:00",
+      "Usage": 45,
+      "Read": 1500766,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "8:00",
+      "Usage": 28,
+      "Read": 1500794,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "9:00",
+      "Usage": 6,
+      "Read": 1500800,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "10:00",
+      "Usage": 4,
+      "Read": 1500804,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "11:00",
+      "Usage": 8,
+      "Read": 1500812,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "12:00",
+      "Usage": 12,
+      "Read": 1500824,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "13:00",
+      "Usage": 5,
+      "Read": 1500829,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "14:00",
+      "Usage": 3,
+      "Read": 1500832,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "15:00",
+      "Usage": 4,
+      "Read": 1500836,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "16:00",
+      "Usage": 7,
+      "Read": 1500843,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "17:00",
+      "Usage": 20,
+      "Read": 1500863,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "18:00",
+      "Usage": 36,
+      "Read": 1500899,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "19:00",
+      "Usage": 24,
+      "Read": 1500923,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "20:00",
+      "Usage": 16,
+      "Read": 1500939,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "21:00",
+      "Usage": 12,
+      "Read": 1500951,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "22:00",
+      "Usage": 5,
+      "Read": 1500956,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    },
+    {
+      "Label": "23:00",
+      "Usage": 0,
+      "Read": 1500956,
+      "IsEstimated": false,
+      "MeterSerialNumberHis": "REDACTED"
+    }
+  ],
+  "IsConsumptionAvailable": false,
+  "AlertsValues": null,
+  "TargetUsage": 0,
+  "AverageUsage": 60.5,
+  "ActualUsage": 40000.0,
+  "MyUsage": "NA",
+  "AverageUsagePerPerson": 20000.0,
+  "IsMO365Customer": false,
+  "IsMOPartialCustomer": false,
+  "IsMOCompleteCustomer": false,
+  "IsExtraMonthConsumptionMessage": false
+}
