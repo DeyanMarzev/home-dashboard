@@ -189,6 +189,7 @@ describe('GET /api/sources', () => {
       'room_sensors',
       'pi_stats',
       'open_meteo',
+      'air_quality',
       'carbon_intensity',
       'wifi',
       'speed_test',

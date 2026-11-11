@@ -6,6 +6,7 @@ import { OverviewPage } from './pages/Overview.js';
 import { RoomsPage } from './pages/Rooms.js';
 import { SystemPage } from './pages/System.js';
 import { WaterPage } from './pages/Water.js';
+import { WeatherPage } from './pages/Weather.js';
 import { WifiPage } from './pages/Wifi.js';
 
 export const router = createBrowserRouter([
@@ -14,6 +15,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <OverviewPage /> },
       { path: '/rooms', element: <RoomsPage /> },
+      { path: '/weather', element: <WeatherPage /> },
       { path: '/energy', element: <EnergyPage /> },
       { path: '/heating', element: <HeatingPage /> },
       { path: '/water', element: <WaterPage /> },

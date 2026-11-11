@@ -32,6 +32,13 @@ sources:
     poll: 15m
     expected_delay: 0s
 
+  air_quality:
+    name: Air quality
+    description: UK Daily Air Quality Index, from Open-Meteo (CAMS model)
+    kind: api
+    poll: 1h
+    expected_delay: 0s
+
   carbon_intensity:
     name: Grid carbon intensity
     description: Grid gCO₂/kWh, 48 h forecast

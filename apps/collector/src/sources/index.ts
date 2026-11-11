@@ -1,4 +1,5 @@
 import type { Collector } from '../collector.js';
+import { airQuality } from './air_quality/index.js';
 import { boilerProbes } from './boiler_probes/index.js';
 import { carbonIntensity } from './carbon_intensity/index.js';
 import { nest } from './nest/index.js';
@@ -15,6 +16,7 @@ export const collectors: readonly Collector[] = [
   roomSensors,
   piStats,
   openMeteo,
+  airQuality,
   carbonIntensity,
   nest,
   boilerProbes,
