@@ -6,6 +6,8 @@ The approved design is the HTML mockup in `docs/mockup/mockup/` (seven pages: `0
 
 ## Design tokens
 
+Dark mode follows the system setting (`prefers-color-scheme`); there's no switch in the app. `styles.css` redefines the same tokens for dark (green-tinted neutrals, accents lightened to keep contrast; `--on-accent` is the text on accent fills). Charts read the tokens when drawn, so `Layout` remounts the page when the system switches (`lib/color-scheme.ts`), and chart tooltips use `tooltipStyle()`. Never hard-code a colour outside the tokens. `index.html` has a `theme-color` for each scheme. To screenshot in a given scheme with headless Edge: `--blink-settings=preferredColorScheme=0` (dark) or `=1` (light); otherwise it follows Windows.
+
 ```css
 :root {
   --bg: #F3F4F1;          /* page */

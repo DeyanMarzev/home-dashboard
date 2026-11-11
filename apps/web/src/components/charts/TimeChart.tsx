@@ -1,7 +1,7 @@
 import { formatLondonDayMonth, formatLondonTime, formatNumber, formatWhen } from '@home/shared';
 import { useMemo } from 'react';
 import { EChart, type ChartOption } from './EChart.js';
-import { token } from './theme.js';
+import { token, tooltipStyle } from './theme.js';
 
 export interface LineSeries {
   name: string;
@@ -71,7 +71,7 @@ export function TimeChart({
       },
       tooltip: {
         trigger: 'axis',
-        textStyle: { fontFamily: 'inherit', fontSize: 12 },
+        ...tooltipStyle(),
         formatter: (
           params: {
             axisValue: number;
