@@ -65,9 +65,27 @@ const timers = [
   ),
   every(30 * 60_000, 'channels', async () => publish('wifi', await probeChannels(env))),
 ];
-const speed = new Cron('0 12 * * *', { timezone: HOME_TIME_ZONE }, async () => {
-  await publish('speed_test', await probeSpeed(AbortSignal.timeout(180_000)));
-});
+const speed = new Cron(
+  '0 12 * * *',
+  {
+    timezone: HOME_TIME_ZONE,
+    protect: true, // never two at once
+    // A throw must not become an unhandled rejection: that would exit netprobe.
+    catch: (err) => log.error({ job: 'speed test', error: String(err) }, 'probe failed'),
+  },
+  async () => {
+    log.info('speed test started');
+    const result = await probeSpeed();
+    log.info(
+      {
+        readings: result.readings.map((r) => `${r.metric} ${r.value} ${r.unit}`),
+        errors: result.errors.length,
+      },
+      'speed test finished',
+    );
+    await publish('speed_test', result);
+  },
+);
 log.info(
   {
     interface: env.WIFI_INTERFACE,
