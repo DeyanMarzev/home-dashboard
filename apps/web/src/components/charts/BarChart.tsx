@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { EChart, type ChartOption } from './EChart.js';
-import { token } from './theme.js';
+import { token, tooltipStyle } from './theme.js';
 
 export interface BarSeries {
   name: string;
@@ -56,7 +56,7 @@ export function BarChart({
           : {}),
       },
       tooltip: stacked
-        ? { trigger: 'axis', axisPointer: { type: 'shadow' }, textStyle: { fontSize: 12 } }
+        ? { trigger: 'axis', axisPointer: { type: 'shadow' }, ...tooltipStyle() }
         : undefined,
       series: series.map((s, i) => {
         const top = i === series.length - 1;

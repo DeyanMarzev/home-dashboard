@@ -1,6 +1,7 @@
 /* Design tokens and components from the approved mockup (docs/05-frontend.md, docs/mockup/). */
 
 :root {
+  color-scheme: light dark;
   --bg: #f3f4f1;
   --surface: #ffffff;
   --surface-muted: #f6f7f4;
@@ -37,6 +38,10 @@
   --late-text: #991b1b;
   --late-dot: #dc2626;
   --neutral-bg: #eceee9;
+  --on-accent: #ffffff;
+  --cool-bg: #dce6fb;
+  --cool-text: #1e3a8a;
+  --shadow: rgb(0 0 0 / 8%);
 
   --radius-card: 14px;
   --radius-control: 9px;
@@ -44,6 +49,53 @@
   --font-body: 'Inter Variable', Inter, system-ui, sans-serif;
   --font-display: 'Space Grotesk Variable', 'Space Grotesk', 'Inter Variable', Inter, sans-serif;
   --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+}
+
+/* Dark mode follows the system setting. Same roles as above: green-tinted neutrals, accents
+   lightened to keep their contrast on dark surfaces. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101311;
+    --surface: #181c1a;
+    --surface-muted: #1f2421;
+    --surface-sunken: #151917;
+    --border: #2b312d;
+    --border-strong: #3a413c;
+    --row-border: #222724;
+    --grid: #252b27;
+    --nav-bg: #1f2421;
+    --text: #e7ebe8;
+    --text-secondary: #c3cac5;
+    --text-nav: #aab3ad;
+    --text-muted: #98a29b;
+    --chart-muted: #6c756f;
+
+    --accent: #2dd4bf;
+    --link: #5eead4;
+    --heat: #fb923c;
+    --heat-band: #3b2416;
+    --cool: #60a5fa;
+    --good: #4ade80;
+    --warn: #fbbf24;
+    --warn-text: #fdba74;
+    --warn-bg: #2b1e12;
+    --warn-border: #5a3a1c;
+    --bad: #f87171;
+
+    --live-bg: #13301f;
+    --live-text: #86efac;
+    --live-dot: #4ade80;
+    --delayed-bg: #33230f;
+    --delayed-text: #fdba74;
+    --late-bg: #3a1717;
+    --late-text: #fca5a5;
+    --late-dot: #f87171;
+    --neutral-bg: #262c28;
+    --on-accent: #0b201d;
+    --cool-bg: #1b2a44;
+    --cool-text: #bfdbfe;
+    --shadow: rgb(0 0 0 / 40%);
+  }
 }
 
 *,
@@ -161,7 +213,7 @@ figure {
   background: var(--surface);
   color: var(--text);
   font-weight: 600;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+  box-shadow: 0 1px 2px var(--shadow);
 }
 
 .pills {
@@ -184,7 +236,7 @@ figure {
 .pill[aria-pressed='true'] {
   border-color: var(--accent);
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font-weight: 600;
 }
 
@@ -777,8 +829,8 @@ table.data tr:last-child td {
 }
 
 .schedule-cool {
-  background: #dce6fb;
-  color: #1e3a8a;
+  background: var(--cool-bg);
+  color: var(--cool-text);
 }
 
 .schedule-warm {
