@@ -10,7 +10,7 @@ import {
   summariseScan,
 } from './parse.js';
 import { jnap, parseRouterSnapshot, type Band, type RouterSnapshot } from './router.js';
-import { speedTest } from './speedtest.js';
+import { speedTest, type CurlRunner } from './speedtest.js';
 
 const exec = promisify(execFile);
 
@@ -194,10 +194,20 @@ export async function probeChannels(env: ProbeEnv): Promise<ProbeResult> {
 }
 
 /** Daily: broadband download, upload and latency. */
-export async function probeSpeed(signal: AbortSignal): Promise<ProbeResult> {
+/** curl for the speed test; a failure reports curl's own message (e.g. "curl: (28) …"). */
+const curl: CurlRunner = async (args) => {
+  try {
+    return await run('curl', args, 90_000);
+  } catch (err) {
+    const stderr = (err as { stderr?: string }).stderr?.trim();
+    throw new Error(stderr ? stderr.split('\n')[0] : message(err), { cause: err });
+  }
+};
+
+export async function probeSpeed(): Promise<ProbeResult> {
   const ts = new Date();
   try {
-    const s = await speedTest(signal);
+    const s = await speedTest(curl);
     const round = (n: number) => Math.round(n * 10) / 10;
     return {
       readings: [
