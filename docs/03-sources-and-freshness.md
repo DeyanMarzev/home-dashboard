@@ -209,10 +209,16 @@ interface CollectorContext {
 
 ### open_meteo: live
 
-- `https://api.open-meteo.com/v1/forecast` with `latitude`, `longitude` from env (`HOME_LAT`, `HOME_LON`), `current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m`, `hourly=temperature_2m` for the next 24 h.
-- No API key. Entity `outdoor`.
-- Store forecast separately (metric `forecast_temperature`) so it's never confused with measurements.
-- Requested with `timeformat=unixtime` (no time zone ambiguity) and `wind_speed_unit=kmh`. Series: `temperature` °C, `humidity` %, `precipitation` mm, `weather_code` (state, `wmo`), `wind_speed` km/h, `forecast_temperature` °C (24 hourly points). The parser fails if Open-Meteo answers in other units.
+- `https://api.open-meteo.com/v1/forecast` with `latitude`, `longitude` from env (`HOME_LAT`, `HOME_LON`): current conditions, the next 24 hours hourly and 7 days daily (`OPEN_METEO_QUERY` in `open_meteo/parse.ts`).
+- No API key. Entity `outdoor`. Requested with `timeformat=unixtime` (no time zone ambiguity), `timezone=Europe/London` (only sets the daily forecast's day boundaries) and `wind_speed_unit=kmh`. The parser fails if Open-Meteo answers any field in other units.
+- Current: `temperature`, `apparent_temperature` °C, `humidity`, `cloud_cover` %, `precipitation` mm, `weather_code` (state, `wmo`), `pressure` hPa (mean sea level), `wind_speed`, `wind_gust` km/h, `wind_direction` ° (where it blows from), `is_day` (state).
+- Forecasts are separate `forecast_*` metrics, so they're never confused with measurements (freshness ignores them). Hourly, next 24 h: `forecast_temperature`, `forecast_precipitation_probability`, `forecast_weather_code`, `forecast_wind_speed`, `forecast_wind_gust`, `forecast_is_day`. Daily, 7 London days, each stamped at its London midnight: `forecast_day_weather_code`, `forecast_day_temperature_max` / `_min`, `forecast_day_precipitation` (mm), `forecast_day_precipitation_probability`, `forecast_day_wind_speed_max`, `forecast_day_wind_gust_max`, and `forecast_day_sunrise` / `_sunset` as seconds after that midnight (so the instant is exact even on clock-change days).
+
+### air_quality: live
+
+- `https://air-quality-api.open-meteo.com/v1/air-quality` (CAMS European model, about 10 km grid; no API key), same `HOME_LAT` / `HOME_LON`, hourly `pm2_5`, `pm10`, `nitrogen_dioxide`, `ozone`, `sulphur_dioxide` from a day back to two days ahead. Poll 1 h. Units must be µg/m³ (Open-Meteo writes the Greek μ).
+- Series (entity `outdoor`): the five concentrations hourly up to now (`pm2_5`, `pm10`, `no2`, `o3`, `so2`, µg/m³); `daqi` (state 1–10) and `daqi_pollutant` (state: 1 ozone, 2 NO₂, 3 SO₂, 4 PM2.5, 5 PM10) for each hour up to now; `forecast_daqi` for the hours after.
+- The UK Daily Air Quality Index as DEFRA defines it (`packages/shared/src/air-quality.ts`, bands checked against uk-air.defra.gov.uk 2026-11-11): each pollutant's mean over its own period (ozone a running 8 h, NO₂ hourly, SO₂ 15 min (hourly is the finest available), PM2.5 and PM10 a running 24 h) falls in a band 1–10; the index is the worst band. 1–3 Low, 4–6 Moderate, 7–9 High, 10 Very high. An hour needs a full 24 h of particle history.
 
 ### carbon_intensity (NESO Carbon Intensity API): live
 

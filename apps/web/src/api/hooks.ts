@@ -5,6 +5,7 @@ import {
   HeatingSummarySchema,
   LatestResponseSchema,
   ReadingsResponseSchema,
+  SeriesResponseSchema,
   SourcesResponseSchema,
   TariffsResponseSchema,
   WaterSummarySchema,
@@ -15,6 +16,7 @@ import {
   type HeatingSummary,
   type LatestResponse,
   type ReadingsResponse,
+  type SeriesMeta,
   type SourceInfo,
   type Tariff,
   type TariffInput,
@@ -50,6 +52,15 @@ export function usePolicies(): Map<string, FreshnessPolicy> {
 
 export function useSource(id: string): SourceInfo | undefined {
   return useSources().data?.find((s) => s.id === id);
+}
+
+/** Every series of a source, including `forecast_*` ones (which /api/latest leaves out). */
+export function useSeriesList(source: string) {
+  return useQuery({
+    queryKey: ['series', source],
+    queryFn: () => getJson<SeriesMeta[]>(`/api/series?source=${source}`, SeriesResponseSchema),
+    staleTime: 10 * MINUTE,
+  });
 }
 
 export interface LatestParams {

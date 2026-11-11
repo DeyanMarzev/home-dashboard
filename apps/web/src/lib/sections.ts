@@ -2,6 +2,7 @@
 export const SECTIONS = [
   { to: '/', label: 'Overview' },
   { to: '/rooms', label: 'Rooms' },
+  { to: '/weather', label: 'Weather' },
   { to: '/energy', label: 'Energy' },
   { to: '/heating', label: 'Heating' },
   { to: '/water', label: 'Water' },

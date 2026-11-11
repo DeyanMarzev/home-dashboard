@@ -866,3 +866,148 @@ table.data tr:last-child td {
   opacity: 0.6;
   cursor: default;
 }
+
+/* ---- Weather ----------------------------------------------------------------------- */
+
+.facts--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.facts--4 dd {
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+
+@media (max-width: 600px) {
+  .facts--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.now {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.now > svg {
+  flex: none;
+}
+
+.hours {
+  margin: 0;
+  padding: 0 0 4px;
+  list-style: none;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.hour {
+  flex: 1 0 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hour:first-child {
+  background: var(--surface-muted);
+}
+
+.hours--compact .hour:first-child {
+  background: none;
+}
+
+.days {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.days li {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1.6fr) 110px 130px minmax(160px, 1.2fr);
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--row-border);
+  font-size: 14px;
+}
+
+.days li:last-child {
+  border-bottom: none;
+}
+
+.days-sky {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.days-temps {
+  display: grid;
+  grid-template-columns: 32px 1fr 32px;
+  align-items: center;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.days-temps > :last-child {
+  text-align: right;
+}
+
+.temp-range {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-muted);
+}
+
+.temp-range > span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--cool), var(--heat));
+}
+
+@media (max-width: 760px) {
+  .days li {
+    grid-template-columns: 84px minmax(0, 1fr) 132px;
+    row-gap: 2px;
+  }
+  .days-wind {
+    display: none;
+  }
+  .days li > :nth-child(3) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .days-temps {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+}
+
+.weather-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 28px;
+}
+
+.weather-summary .hours {
+  flex: 1 1 260px;
+}
+
+.weather-summary-facts {
+  flex: 1 1 220px;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}

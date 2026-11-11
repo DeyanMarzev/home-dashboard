@@ -33,3 +33,43 @@ const WMO: Record<number, string> = {
 export function describeWeather(code: number): string {
   return WMO[code] ?? `Weather code ${code}`;
 }
+
+export type WeatherKind =
+  'clear' | 'partly_cloudy' | 'cloudy' | 'fog' | 'drizzle' | 'rain' | 'snow' | 'thunder';
+
+/** WMO code → the kind of weather an icon shows. Unknown codes count as cloudy. */
+export function weatherKind(code: number): WeatherKind {
+  if (code <= 1) return 'clear';
+  if (code === 2) return 'partly_cloudy';
+  if (code === 45 || code === 48) return 'fog';
+  if (code >= 51 && code <= 57) return 'drizzle';
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return 'rain';
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow';
+  if (code >= 95 && code <= 99) return 'thunder';
+  return 'cloudy';
+}
+
+const COMPASS = [
+  'N',
+  'NNE',
+  'NE',
+  'ENE',
+  'E',
+  'ESE',
+  'SE',
+  'SSE',
+  'S',
+  'SSW',
+  'SW',
+  'WSW',
+  'W',
+  'WNW',
+  'NW',
+  'NNW',
+];
+
+/** Wind direction (degrees, where it blows FROM) → one of 16 compass points. */
+export function compassPoint(degrees: number): string {
+  const i = Math.round((((degrees % 360) + 360) % 360) / 22.5) % 16;
+  return COMPASS[i]!;
+}
