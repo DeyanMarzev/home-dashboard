@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { clearAccessToken, getAccessToken, NestAuthError } from './auth.js';
+import {
+  clearAccessToken,
+  codeFromRedirect,
+  exchangeAuthorizationCode,
+  getAccessToken,
+  NestAuthError,
+} from './auth.js';
 
 const creds = {
   clientId: 'client-id-x1',
@@ -49,5 +55,61 @@ describe('getAccessToken', () => {
     const err = await getAccessToken(creds, signal).catch((e: unknown) => e);
     expect(err).not.toBeInstanceOf(NestAuthError);
     expect((err as Error).message).toMatch(/HTTP 503/);
+  });
+});
+
+describe('codeFromRedirect', () => {
+  it('takes the code from the whole address, or a bare code', () => {
+    expect(
+      codeFromRedirect(
+        'https://www.google.com/?code=4/0AbC-dEf_123&scope=https://www.googleapis.com/auth/sdm.service',
+      ),
+    ).toBe('4/0AbC-dEf_123');
+    expect(codeFromRedirect('  4/0AbC  ')).toBe('4/0AbC');
+  });
+
+  it('says what to copy when the address has no code', () => {
+    expect(() => codeFromRedirect('https://www.google.com/?error=access_denied')).toThrow(
+      /no \?code=/,
+    );
+    expect(() => codeFromRedirect('')).toThrow(/Paste the address/);
+  });
+});
+
+describe('exchangeAuthorizationCode', () => {
+  const app = { clientId: 'client-id-x1', clientSecret: 'client-secret-x2' };
+
+  it('exchanges the code for the refresh token with the agreed redirect URI', async () => {
+    const fetch = vi.fn(() =>
+      reply(200, { access_token: 'a1', expires_in: 3599, refresh_token: '1//refresh-x3' }),
+    );
+    vi.stubGlobal('fetch', fetch);
+    expect(await exchangeAuthorizationCode(app, 'code-x4', signal)).toBe('1//refresh-x3');
+    const body = (fetch.mock.calls[0] as unknown as [string, RequestInit])[1]
+      .body as URLSearchParams;
+    expect(Object.fromEntries(body)).toEqual({
+      client_id: 'client-id-x1',
+      client_secret: 'client-secret-x2',
+      code: 'code-x4',
+      grant_type: 'authorization_code',
+      redirect_uri: 'https://www.google.com',
+    });
+  });
+
+  it('explains a used or expired code, without echoing secrets', async () => {
+    vi.stubGlobal('fetch', () =>
+      reply(400, { error: 'invalid_grant', error_description: 'Bad Request' }),
+    );
+    const err = await exchangeAuthorizationCode(app, 'code-x4', signal).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(NestAuthError);
+    expect(String(err)).toMatch(/Codes work once/);
+    expect(String(err)).not.toMatch(/client-secret-x2|code-x4/);
+  });
+
+  it('notices when Google sends no refresh token', async () => {
+    vi.stubGlobal('fetch', () => reply(200, { access_token: 'a1', expires_in: 3599 }));
+    await expect(exchangeAuthorizationCode(app, 'code-x4', signal)).rejects.toThrow(
+      /access_type=offline&prompt=consent/,
+    );
   });
 });

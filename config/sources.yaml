@@ -74,13 +74,12 @@ sources:
     expected_delay: 0s
     enabled: false
 
-  nest: # built (M6); enable once the NEST_* values are in .env (docs/06 §5b)
+  nest: # Google Smart Device Management API; needs the NEST_* values in .env (docs/06 § 5b)
     name: Nest thermostat
     description: Temp, humidity, target, boiler status
     kind: api
     poll: 2m
     expected_delay: 0s
-    enabled: false
 
   smart_meters: # Bright (Hildebrand Glowmarkt) API; needs BRIGHT_USERNAME/PASSWORD in .env (docs/06 § 5e)
     name: Smart meters
