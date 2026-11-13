@@ -61,3 +61,58 @@ export async function getAccessToken(
   cached = { accessToken: token.access_token, expiresAt: now + token.expires_in * 1000 };
   return token.access_token;
 }
+
+/** Where Google sends the browser after consent (docs/06 § 5b); also the OAuth client's redirect URI. */
+export const REDIRECT_URI = 'https://www.google.com';
+
+/** The `code` from the whole address Google redirected to, or the bare code itself. */
+export function codeFromRedirect(input: string): string {
+  const text = input.trim();
+  if (/^https?:\/\//.test(text)) {
+    const code = new URL(text).searchParams.get('code');
+    if (!code) throw new Error('That address has no ?code= in it: copy the whole address bar');
+    return code;
+  }
+  if (!text) throw new Error('Paste the address Google sent you to (it contains ?code=…)');
+  return text;
+}
+
+/**
+ * The one-off consent step: authorisation code → refresh token (docs/06 § 5b). Codes are
+ * single-use and expire after a few minutes. Errors name Google's reason, never the secrets.
+ */
+export async function exchangeAuthorizationCode(
+  creds: Omit<NestCredentials, 'refreshToken'>,
+  code: string,
+  signal: AbortSignal,
+): Promise<string> {
+  const res = await fetch(TOKEN_URL, {
+    method: 'POST',
+    signal,
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: creds.clientId,
+      client_secret: creds.clientSecret,
+      code,
+      grant_type: 'authorization_code',
+      redirect_uri: REDIRECT_URI,
+    }),
+  });
+  const body: unknown = await res.json().catch(() => null);
+  if (!res.ok) {
+    const err = ErrorSchema.safeParse(body);
+    const reason = err.success
+      ? (err.data.error_description ?? err.data.error)
+      : `HTTP ${res.status}`;
+    throw new NestAuthError(
+      `Google refused the code (${reason}). Codes work once and only for a few minutes: authorise again and run this straight away.`,
+    );
+  }
+  const token = z.object({ refresh_token: z.string().min(1) }).safeParse(body);
+  if (!token.success) {
+    throw new NestAuthError(
+      'Google sent no refresh token. Make sure the authorise link has access_type=offline&prompt=consent.',
+    );
+  }
+  return token.data.refresh_token;
+}

@@ -181,29 +181,30 @@ Troubleshooting:
 
 ## 5b. Nest thermostat (M6)
 
-Google's Smart Device Management (SDM) API needs a one-off setup. Budget 30 minutes.
+Google's Smart Device Management (SDM) API needs a one-off setup, about 30 minutes. Use the **personal Google account the Nest is linked to** in the Google Home app (Device Access doesn't accept Google Workspace accounts). Google renames its console menus now and then: if a name below doesn't match, use the console's search box.
 
-1. **Device Access project.** Go to console.nest.google.com/device-access, accept the terms and pay Google's one-off registration fee (US$5). Create a project; leave Pub/Sub off. Note the **Project ID**: that's `NEST_PROJECT_ID`.
-2. **Google Cloud OAuth client.** In console.cloud.google.com create (or pick) a project and enable the **Smart Device Management API**. Under *APIs & Services → OAuth consent screen* choose **External** and add your own Google account as a test user. Under *Credentials* create an **OAuth client ID** of type **Web application** with the authorised redirect URI `https://www.google.com`. Copy the client ID and secret into `NEST_CLIENT_ID` / `NEST_CLIENT_SECRET`, and paste the client ID into the Device Access project too.
-3. **Keep the token from expiring.** While the consent screen is in *Testing*, Google expires refresh tokens after 7 days. Set it to **In production** (you'll see an "unverified app" warning when you sign in; that's expected for your own app).
-4. **Authorise once.** Open this in a browser (fill in the two ids), sign in with the account that owns the Nest, and allow access:
+1. **Google Cloud project and OAuth client** (console.cloud.google.com):
+   - Create a project (e.g. `home-dashboard`), then **APIs & Services → Library**: enable the **Smart Device Management API**.
+   - **Google Auth Platform** (older consoles: *OAuth consent screen*): set it up as **External**; under **Audience**, add your Google account as a test user, then **Publish app** so it's **In production**. While it's in *Testing*, Google expires the refresh token after 7 days. You'll see an "unverified app" warning when you sign in in step 3; that's expected for your own app.
+   - **Clients → Create client**: type **Web application**, authorised redirect URI exactly `https://www.google.com`. Copy the **client ID** and **client secret** into `.env` as `NEST_CLIENT_ID` and `NEST_CLIENT_SECRET`.
+2. **Device Access project** (console.nest.google.com/device-access): accept the terms and pay Google's one-off registration fee (US$5). **Create project**: any name, paste the OAuth client ID from step 1, leave events (Pub/Sub) off. Copy the **Project ID** (a UUID) into `.env` as `NEST_PROJECT_ID`.
+3. **Authorise once.** Open this link in a browser, with your two ids filled in:
 
    ```
    https://nestservices.google.com/partnerconnections/<NEST_PROJECT_ID>/auth?redirect_uri=https://www.google.com&access_type=offline&prompt=consent&client_id=<NEST_CLIENT_ID>&response_type=code&scope=https://www.googleapis.com/auth/sdm.service
    ```
 
-   You land on google.com with `?code=...` in the address bar. Copy that code (valid for a few minutes) and exchange it on the Pi:
+   Sign in, tick your home and the thermostat, allow access. You end up on google.com with `?code=…` in the address bar. Within a few minutes (codes expire and work once), copy the **whole address** and turn it into the refresh token on the Pi, keeping the single quotes:
 
    ```bash
-   curl -s https://oauth2.googleapis.com/token \
-     -d client_id="$NEST_CLIENT_ID" -d client_secret="$NEST_CLIENT_SECRET" \
-     -d code='<code>' -d grant_type=authorization_code -d redirect_uri=https://www.google.com
+   docker compose up -d collector        # picks up NEST_CLIENT_ID / NEST_CLIENT_SECRET from .env
+   docker compose exec collector node dist/tools/nest-token.js 'https://www.google.com/?code=…'
    ```
 
-   Put the `refresh_token` from the answer into `NEST_REFRESH_TOKEN`. (Don't paste these values anywhere else; `.env` only.)
-5. In `config/sources.yaml` set `nest: enabled: true`, then `docker compose up -d collector api`.
-6. Check: `docker compose logs collector | grep nest` shows no errors; the Heating page shows the hallway temperature within 2 minutes. If Google later refuses the token, the System page shows a `nest_auth` alert; redo step 4.
-7. Optional: capture a real response for the parser tests: `docker compose exec collector node dist/tools/nest-capture.js` (ids and names are redacted) and replace `apps/collector/src/sources/nest/__fixtures__/devices-heating.json`.
+   Put the printed token in `.env` as `NEST_REFRESH_TOKEN` (`.env` only; don't paste it anywhere else).
+4. `docker compose up -d collector`. The source is enabled in `config/sources.yaml`; until the `NEST_*` values are in, the System page shows it failing with the missing setting.
+5. Check: `docker compose logs collector | grep nest` shows no errors; within 2 minutes the Heating page and the Overview show the thermostat's temperature, humidity, target and heating state. If Google later refuses the token, the System page shows a `nest_auth` alert: redo step 3.
+6. Optional: capture a real response for the parser tests: `docker compose exec collector node dist/tools/nest-capture.js > nest.json` (ids and names are redacted) to replace `apps/collector/src/sources/nest/__fixtures__/devices-heating.json`.
 
 The thermostat's room name in the Google Home app becomes the entity (`Hallway` → `hallway`); override with `options: { entity: hallway }` on `nest` in `config/sources.yaml`.
 
