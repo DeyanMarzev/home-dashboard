@@ -4,3 +4,6 @@ coverage/
 .env
 *.log
 *.tsbuildinfo
+
+# ESP32 firmware secrets (Wi-Fi, MQTT, Telegram): never committed
+firmware/**/secrets.h

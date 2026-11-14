@@ -176,7 +176,7 @@ interface CollectorContext {
 - Writes are batched every 1 s. If the database is down, up to 20,000 readings are kept and retried; beyond that the oldest are dropped and the drop is reported in `collector_runs`.
 - **Fake sensor** (`apps/collector/src/tools/fake-sensor.ts`, built into the collector image rather than `scripts/` so it can run on the Pi): publishes realistic values for `living_room`, `kitchen`, `bedroom` every 30 s through the same topic contract. Local: `pnpm fake-sensor`. Pi: `docker compose --profile fake up -d fake-sensor`.
 - Entities from the mockup: `living_room`, `kitchen`, `bedroom`. Metrics: `temperature`, `humidity`, `co2`, `pressure`.
-- **Open question:** what hardware the existing sensors are and how they report today. See `docs/08`. Build the MQTT path; if the existing sensors can't publish MQTT, a bridge collector is added later.
+- Hardware (2026-11-14): ESP32 + BME280 (temperature, humidity, pressure) + SenseAir S8 (CO₂) + TFT screen + Telegram bot, in the kitchen. Firmware in `firmware/room-sensor/` (Arduino IDE): publishes every 30 s per this contract with the sensors' MQTT login, `rssi` on the temperature message, `ts` once NTP has answered; never blocks on Wi-Fi/MQTT/Telegram. Secrets in its git-ignored `secrets.h`.
 
 ### pi_stats (local): live
 
