@@ -348,6 +348,8 @@ What happens every night at 03:00 (`scripts/backup.sh`, run by the host's cron):
 
 The output goes to `$DATA_DIR/backups/backup.log` (trimmed to the last 2,000 lines).
 
+`pg_dump` prints a warning about "circular foreign-key constraints" on `continuous_agg`: that's TimescaleDB's own catalog, expected and harmless (restore.sh runs `timescaledb_pre_restore()` / `timescaledb_post_restore()` around the restore). First run on the Pi (2026-11-14): a 1.6 MB dump for 191k readings, and `restore.sh --test` matched the live row counts.
+
 ### 8.1 Google Drive (rclone)
 
 `rclone` runs on the Pi itself, not in a container. The Drive connection uses the `drive.file` scope: rclone can only see and delete the files it uploaded, never the rest of the Drive.
