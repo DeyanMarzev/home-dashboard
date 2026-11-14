@@ -235,11 +235,12 @@ void serviceWifi() {
     lastWifiAttempt = millis();
     Serial.printf("Wi-Fi not connected to \"%s\": %s (reason %d). Retrying...\n", WIFI_SSID,
                   wifiFailText(wifiFailReason), (int)wifiFailReason);
+    WiFi.disconnect();  // a scan can't run during a connection attempt
     if (!networksListed) {
       networksListed = true;
+      delay(100);
       listNetworks();
     }
-    WiFi.disconnect();
     WiFi.reconnect();
   }
   wifiWasUp = up;
