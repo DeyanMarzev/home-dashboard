@@ -191,6 +191,37 @@ String mqttStatus() {
 
 // ---- Wi-Fi ----------------------------------------------------------------------------------
 
+volatile uint8_t wifiFailReason = 0;  // from the last "disconnected" event
+bool networksListed = false;
+
+void onWifiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
+  if (event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED) wifiFailReason = info.wifi_sta_disconnected.reason;
+}
+
+/** Why the ESP32 couldn't join, in words (ESP-IDF wifi_err_reason_t codes). */
+const char *wifiFailText(uint8_t reason) {
+  switch (reason) {
+    case 2: case 15: case 204: return "wrong password? (handshake failed)";
+    case 202: return "wrong password (authentication failed)";
+    case 201: return "network name not found: check WIFI_SSID (the ESP32 only sees 2.4 GHz)";
+    case 210: case 211: return "network found, but its security mode isn't supported (WPA3-only?)";
+    case 212: return "network found, but the signal is too weak";
+    case 203: case 205: return "the router refused the connection";
+    case 0: return "no answer yet";
+    default: return "see ESP-IDF wifi_err_reason_t";
+  }
+}
+
+/** Once, after the first failed attempt: every network in range, to compare with WIFI_SSID. */
+void listNetworks() {
+  int n = WiFi.scanNetworks();
+  Serial.printf("Networks in range (%d):\n", n);
+  for (int i = 0; i < n; i++) {
+    Serial.printf("  \"%s\"  %d dBm  channel %d\n", WiFi.SSID(i).c_str(), (int)WiFi.RSSI(i), (int)WiFi.channel(i));
+  }
+  WiFi.scanDelete();
+}
+
 void serviceWifi() {
   bool up = WiFi.status() == WL_CONNECTED;
   if (!up && wifiWasUp) dropTimes++;
@@ -202,7 +233,12 @@ void serviceWifi() {
   }
   if (!up && millis() - lastWifiAttempt >= WIFI_RETRY_MS) {
     lastWifiAttempt = millis();
-    Serial.println("Reconnecting to Wi-Fi...");
+    Serial.printf("Wi-Fi not connected to \"%s\": %s (reason %d). Retrying...\n", WIFI_SSID,
+                  wifiFailText(wifiFailReason), (int)wifiFailReason);
+    if (!networksListed) {
+      networksListed = true;
+      listNetworks();
+    }
     WiFi.disconnect();
     WiFi.reconnect();
   }
@@ -395,8 +431,10 @@ void setup() {
     if (!s8Ok) Serial.println("SenseAir S8 not found: check wiring (carrying on without it)");
   }
 
+  WiFi.onEvent(onWifiEvent);
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
+  Serial.printf("Joining Wi-Fi \"%s\"\n", WIFI_SSID);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   lastWifiAttempt = millis();
   configTzTime(TIME_ZONE, "pool.ntp.org", "time.google.com");
