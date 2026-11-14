@@ -4,8 +4,6 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 
 | # | Question | Blocks | Notes |
 |---|---|---|---|
-| 1 | What are the existing room sensors (model/firmware), and how do they send data today? Can they publish MQTT? | M3 real data | The MQTT topic contract is in `docs/03`. If they can't publish MQTT, add a bridge collector for whatever they do support. |
-| 2 | Which rooms have which sensors? Does any room have more than temperature/humidity? | M3, M5 | Mockup assumes living room, kitchen, bedroom with temp/humidity/CO₂/pressure, plus the Nest in the hallway. |
 | 4 | Energy tariff: unit rates and standing charges for electricity and gas; fixed or time-of-use? | M7 costs | Fixed rates can already be entered on the Energy page (Tariff → Edit rates). If time-of-use, `tariffs` needs time bands. |
 | 5 | Home location for weather and carbon intensity (`HOME_LAT`, `HOME_LON`, postcode outcode). | M3 | Ask the owner to fill `.env`; don't hardcode. |
 | 7 | Smart plugs: brand and which appliances? | Later | Shelly and Tapo have local APIs. |
@@ -24,4 +22,6 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 | 3 | Smart meter data source | Bright (Hildebrand Glowmarkt API) for electricity and gas. No solar export, no Glow in-home display (so no live feed) (2026-11-07). |
 | 6b | Router device data | Captured from the MX4200 (2026-11-09): GetDevices3 + GetNetworkConnections2 give name, band, signal and link speed for the main router's clients; the satellite's clients only their band (the node actions aren't on this firmware). |
 | 13 | Thames Water account data | Owner sees hourly use on the account site, 3 days behind (2026-11-10). Built by porting the `thameswaterapi` client's sign-in and endpoints (docs/03 § thames_water), confirmed with a capture from the owner's account the same day. |
+| 1 | Room sensor hardware | ESP32 + BME280 + SenseAir S8 + TFT + Telegram bot; it had MQTT code but wasn't publishing. New firmware in `firmware/room-sensor/` publishes per the `docs/03` contract (2026-11-14). |
+| 2 | Which rooms have sensors | The kitchen only for now (temperature, humidity, pressure, CO₂); the firmware takes the room and fitted sensors as settings, so more rooms are a copy and a rename (2026-11-14). |
 | 10 | Off-Pi backup destination | Google Drive, via `rclone` with the `drive.file` scope (it only sees the files it uploads). Setup in `docs/06` § 8 (2026-11-07). |

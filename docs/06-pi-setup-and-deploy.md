@@ -275,6 +275,16 @@ docker compose exec collector node dist/tools/thames-capture.js > thames.json
 
 The Water page fills in after the next 06:00 run. The same run adds Thames Water's published metered rates (public page) to the tariffs, so water costs need no typing; set `surface_water_rebate: true` under `thames_water` → `options` in `config/sources.yaml` if your roof water doesn't drain to the public sewer. If Thames changes its site, the System page shows Thames Water as failing with the step that broke.
 
+## 5g. Room sensors (ESP32)
+
+The firmware and its README are in `firmware/room-sensor/`. The sensors connect to Mosquitto on the Pi (port 1883 on the home network) with the sensors' login from `.env`:
+
+```bash
+grep '^MQTT_SENSOR_' .env
+```
+
+Put those in the sketch's `secrets.h` with the Wi-Fi and Telegram details, flash it from the Arduino IDE, and within a minute the room appears on the Overview and the Rooms page. To watch readings arrive: `docker compose logs -f collector | grep room_sensors` (rejected messages are logged with the reason).
+
 ## 6. Start
 
 ```bash
