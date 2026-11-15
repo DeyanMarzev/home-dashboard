@@ -278,7 +278,9 @@ describe.each(testBackends)('database ($name)', ({ start }) => {
     });
 
     it('writes large batches in several statements', async () => {
-      const writer = createReadingWriter(sql);
+      // Weeks-old rows: a backfill, which also refreshes the hourly rollup (Timescale only).
+      const rollupErrors: unknown[] = [];
+      const writer = createReadingWriter(sql, { onRollupError: (e) => rollupErrors.push(e) });
       const many: ReadingInput[] = Array.from({ length: 12_000 }, (_, i) => ({
         metric: 'cpu_temperature',
         entity: 'pi',
@@ -291,6 +293,7 @@ describe.each(testBackends)('database ($name)', ({ start }) => {
       const [row] = await sql<{ n: string }[]>`
         select count(*) as n from readings r join series s on s.id = r.series_id where s.metric = 'cpu_temperature'`;
       expect(Number(row?.n)).toBe(12_000);
+      expect(rollupErrors).toEqual([]);
     });
 
     it('notifies listeners with the newest point of each series, after commit', async (ctx) => {

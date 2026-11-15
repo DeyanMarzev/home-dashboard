@@ -285,6 +285,29 @@ grep '^MQTT_SENSOR_' .env
 
 Put those in the sketch's `secrets.h` with the Wi-Fi and Telegram details, flash it from the Arduino IDE, and within a minute the room appears on the Overview and the Rooms page. To watch readings arrive: `docker compose logs -f collector | grep room_sensors` (rejected messages are logged with the reason).
 
+## 5h. Roborock vacuum
+
+The `roborock` container (docs/01, docs/03 § roborock) signs in to the Roborock account once with a code Roborock emails; the saved session goes in `$DATA_DIR/roborock` (a token, not the password). One command per paste:
+
+```bash
+cd /opt/home-dashboard
+sudo install -d -o 1000 -g 1000 -m 700 /mnt/ssd/home-dashboard/roborock
+docker compose build roborock
+docker compose run --rm roborock login you@example.com
+```
+
+The last command waits for the code: open the email from Roborock, type the code, press Enter. It says `Signed in`. Then:
+
+```bash
+docker compose up -d roborock
+docker compose restart collector
+docker compose logs --tail 20 roborock
+```
+
+Within an hour (or straight after the collector restart) the Misc page shows the vacuum calendar. If Roborock ever drops the session, the dashboard raises a `roborock_auth` alert: run the `login` command again, then `docker compose restart roborock`.
+
+To check the helper by hand: `docker compose exec collector node -e "fetch('http://roborock:8080/health').then(r=>r.text()).then(console.log)"`.
+
 ## 6. Start
 
 ```bash

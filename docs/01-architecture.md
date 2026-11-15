@@ -34,10 +34,13 @@
 | `api` | built from `apps/api` | REST, SSE, serves `apps/web` build | 384 MB |
 | `cloudflared` | `cloudflare/cloudflared:2026.10.7` | Tunnel to Cloudflare | 128 MB |
 | `netprobe` | built from the root `Dockerfile` (target `netprobe`) | Wi-Fi, latency, devices, channel scans, speed test (host network) | 96 MB |
+| `roborock` | built from `docker/roborock` (`python:3.12-slim-trixie`) | Roborock vacuum: sign-in and the robot's protocol via python-roborock; read-only HTTP API on `roborock:8080` for the collector | 128 MB |
 
-Image tags are pinned in `docker-compose.yml`; all have `linux/arm64` variants (checked 2026-11-07). `api` and `collector` are built from the root `Dockerfile` (targets `api` / `collector`, base `node:24-trixie-slim`).
+Image tags are pinned in `docker-compose.yml`; all have `linux/arm64` variants (checked 2026-11-07).
 
-Total about 1.9 GB with `netprobe`, leaving room for the OS, page cache and the owner's existing FastAPI project on a 4 GB Pi.
+**`roborock` is the one Python container** in an otherwise TypeScript stack, chosen by the owner (2026-11-15): Roborock's sign-in and encrypted robot protocol are maintained upstream in python-roborock (the library Home Assistant uses), so protocol changes are fixed by bumping its version in `docker/roborock/requirements.txt`. The helper only sends read commands and does no parsing or storage; the TypeScript `roborock` collector does that like any other source. `api` and `collector` are built from the root `Dockerfile` (targets `api` / `collector`, base `node:24-trixie-slim`).
+
+Total about 2.0 GB with `netprobe` and `roborock`, leaving room for the OS, page cache and the owner's existing FastAPI project on a 4 GB Pi.
 
 ### Postgres tuning for 4 GB Pi (set via `command:` args or a mounted conf)
 

@@ -1,0 +1,3 @@
+# The version the owner tested against the S8 on 2026-11-15. Update deliberately (it fixes
+# Roborock protocol changes); rebuild with: docker compose build roborock
+python-roborock==7.22.2

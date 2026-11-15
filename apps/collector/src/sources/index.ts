@@ -5,6 +5,7 @@ import { carbonIntensity } from './carbon_intensity/index.js';
 import { nest } from './nest/index.js';
 import { openMeteo } from './open_meteo/index.js';
 import { piStats } from './pi_stats/index.js';
+import { roborock } from './roborock/index.js';
 import { roomSensors } from './room_sensors/index.js';
 import { smartMeters } from './smart_meters/index.js';
 import { speedTest } from './speed_test/index.js';
@@ -24,4 +25,5 @@ export const collectors: readonly Collector[] = [
   thamesWater,
   wifi,
   speedTest,
+  roborock,
 ];

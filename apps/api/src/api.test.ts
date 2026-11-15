@@ -196,6 +196,7 @@ describe('GET /api/sources', () => {
       'nest',
       'smart_meters',
       'thames_water',
+      'roborock',
     ]);
     const byId = Object.fromEntries(sources.map((s) => [s.id, s]));
 

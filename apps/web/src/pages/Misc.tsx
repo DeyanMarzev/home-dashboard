@@ -1,16 +1,34 @@
 import {
   addLondonDays,
+  formatLondonTime,
   formatLongDate,
+  londonDayBounds,
   londonDateString,
   upcomingCollections,
   type Bin,
 } from '@home/shared';
-import { useMisc } from '../api/hooks.js';
+import { useState } from 'react';
+import { useMisc, useReadings, useSeriesList, useSource } from '../api/hooks.js';
 import { Empty, Panel, Skeleton } from '../components/Cards.js';
+import { NotConnected, SourceBadge } from '../components/PageBits.js';
 import { PageHeader } from '../components/PageHeader.js';
 import { Status } from '../components/Status.js';
 import { useNow } from '../lib/now-context.js';
 import { weekdayLabel } from '../model/energy.js';
+import {
+  addMonths,
+  floorLabel,
+  floorRank,
+  floorStyle,
+  floorsByDay,
+  formatMinutes,
+  formatMonth,
+  londonMonth,
+  monthBounds,
+  monthWeeks,
+  runsOfDay,
+  type FloorDay,
+} from '../model/vacuum.js';
 
 const BIN_COLOURS = ['green', 'black', 'brown', 'blue', 'grey', 'purple'];
 
@@ -54,6 +72,7 @@ export function MiscPage() {
       <PageHeader title="Misc" subtitle={formatLongDate(now)} />
       <div className="row">
         <BinsPanel />
+        <VacuumPanel />
       </div>
     </div>
   );
@@ -119,6 +138,183 @@ function BinsPanel() {
             From config/misc.yaml. Bank holidays (Christmas, New Year) can move collections: check
             the council&apos;s notice.
           </p>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+/** A floor's mark: its colour, or hatched grey for a map beyond the three floors. */
+function FloorMark({ entity, className }: { entity: string; className: string }) {
+  const style = floorStyle(entity);
+  return (
+    <span
+      className={`${className}${style.kind === 'other' ? ` ${className}--other` : ''}`}
+      style={style.kind === 'solid' ? { background: style.colour } : undefined}
+      aria-hidden="true"
+    />
+  );
+}
+
+const WEEK_HEAD = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+/** Which floor the Roborock cleaned each day (docs/05 § Misc, docs/03 § roborock). */
+function VacuumPanel() {
+  const now = useNow();
+  const source = useSource('roborock');
+  const series = useSeriesList('roborock');
+  const thisMonth = londonMonth(now);
+  const today = londonDateString(now);
+  const [month, setMonth] = useState(thisMonth);
+  const [picked, setPicked] = useState<string | null>(null);
+
+  const minutes = (series.data ?? []).filter((s) => s.metric === 'clean_minutes');
+  const runSeries = (series.data ?? []).filter(
+    (s) => s.metric === 'clean_minutes' || s.metric === 'clean_area',
+  );
+  const bounds = monthBounds(month);
+  const daily = useReadings(
+    minutes.map((s) => s.id),
+    '30d',
+    {
+      between: { from: bounds.from.toISOString(), to: bounds.to.toISOString() },
+      bucket: '1d',
+      agg: 'sum',
+    },
+  );
+  const days = floorsByDay(daily.data);
+  const latestDay = [...days.keys()].sort().at(-1);
+  const selected = picked?.startsWith(month) ? picked : (latestDay ?? null);
+  const dayBounds = selected ? londonDayBounds(selected) : null;
+  const detail = useReadings(dayBounds ? runSeries.map((s) => s.id) : [], '24h', {
+    between: dayBounds
+      ? { from: dayBounds.from.toISOString(), to: dayBounds.to.toISOString() }
+      : { from: '', to: '' },
+    bucket: 'raw',
+  });
+  const runs = runsOfDay(detail.data);
+  const floors = [...minutes].sort((a, b) => floorRank(a.entity) - floorRank(b.entity));
+
+  // Hidden until the source is in config/sources.yaml (like the boiler probes).
+  if (!source) return null;
+
+  const describe = (date: string, list: FloorDay[] | undefined) =>
+    `${weekdayLabel(date)}: ${list?.length ? list.map((f) => `${f.label} ${formatMinutes(f.minutes)}`).join(', ') : 'no cleaning'}`;
+
+  return (
+    <Panel
+      id="vacuum-h"
+      title="Vacuum"
+      flex="1 1 420px"
+      badge={<SourceBadge source={source} compact />}
+    >
+      {!source.enabled ? (
+        <NotConnected source={source} />
+      ) : series.isPending ? (
+        <Skeleton height={300} />
+      ) : (
+        <div className="stack">
+          <div className="cal-head">
+            <button
+              type="button"
+              className="cal-nav"
+              aria-label="Previous month"
+              onClick={() => setMonth(addMonths(month, -1))}
+            >
+              ‹
+            </button>
+            <strong>{formatMonth(month)}</strong>
+            <button
+              type="button"
+              className="cal-nav"
+              aria-label="Next month"
+              disabled={month >= thisMonth}
+              onClick={() => setMonth(addMonths(month, 1))}
+            >
+              ›
+            </button>
+          </div>
+          <div className="cal" role="grid" aria-label={`Vacuum runs, ${formatMonth(month)}`}>
+            <div className="cal-row" role="row">
+              {WEEK_HEAD.map((d) => (
+                <span key={d} className="cal-weekday" role="columnheader">
+                  {d}
+                </span>
+              ))}
+            </div>
+            {monthWeeks(month).map((week, w) => (
+              <div className="cal-row" role="row" key={w}>
+                {week.map((date, i) =>
+                  date === null ? (
+                    <span key={i} className="cal-day cal-day--pad" role="gridcell" />
+                  ) : (
+                    <button
+                      key={date}
+                      type="button"
+                      role="gridcell"
+                      className={`cal-day${date === today ? ' cal-day--today' : ''}${date === selected ? ' cal-day--picked' : ''}`}
+                      disabled={date > today}
+                      aria-label={describe(date, days.get(date))}
+                      aria-selected={date === selected}
+                      title={describe(date, days.get(date))}
+                      onClick={() => setPicked(date)}
+                    >
+                      <span className="cal-date">{Number(date.slice(8))}</span>
+                      <span className="cal-marks">
+                        {days.get(date)?.map((f) => (
+                          <FloorMark key={f.entity} entity={f.entity} className="cal-mark" />
+                        ))}
+                      </span>
+                    </button>
+                  ),
+                )}
+              </div>
+            ))}
+          </div>
+          {floors.length > 0 && (
+            <ul className="cal-legend" aria-label="Floors">
+              {floors.map((f) => (
+                <li key={f.entity}>
+                  <FloorMark entity={f.entity} className="cal-swatch" />
+                  {floorLabel(f)}
+                </li>
+              ))}
+            </ul>
+          )}
+          {daily.isError ? (
+            <Empty>{daily.error.message}</Empty>
+          ) : minutes.length === 0 ? (
+            <Empty>No runs stored yet: they appear after the robot&apos;s next clean</Empty>
+          ) : selected === null ? (
+            <p className="small muted">No cleaning this month.</p>
+          ) : (
+            <div className="stack" style={{ gap: 4 }}>
+              <span className="small muted">{weekdayLabel(selected)}</span>
+              {detail.isPending ? (
+                <Skeleton height={40} />
+              ) : runs.length === 0 ? (
+                <p className="small muted">
+                  {days.has(selected)
+                    ? 'Run details are kept for 90 days.'
+                    : 'No cleaning that day.'}
+                </p>
+              ) : (
+                <ul className="runs">
+                  {runs.map((r) => (
+                    <li key={`${r.entity}${r.ts}`}>
+                      <FloorMark entity={r.entity} className="cal-swatch" />
+                      <span className="runs-time">{formatLondonTime(new Date(r.ts))}</span>
+                      <span className="runs-floor">{r.label}</span>
+                      <span className="small muted">
+                        {formatMinutes(r.minutes)}
+                        {r.areaM2 !== null && ` · ${r.areaM2.toFixed(1)} m²`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
       )}
     </Panel>

@@ -160,6 +160,8 @@ SELECT add_retention_policy('readings', INTERVAL '90 days');      -- raw kept 90
 
 Migration `003_hourly_realtime.sql` turns on real-time aggregation (`timescaledb.materialized_only = false`): since TimescaleDB 2.13 continuous aggregates are materialized-only by default, and with the refresh policy stopping an hour short of now, the latest hour(s) would otherwise be missing from every chart.
 
+The refresh policy only looks back 10 days, so history written later than that (a source's first backfill, such as the Roborock's last 20 runs going back weeks) would never be materialized. The reading writer (`packages/db/src/readings.ts`) handles it: when a batch has rows older than the policy's window, it calls `refresh_continuous_aggregate` once for that span after the commit (TimescaleDB only; a failure is logged and the rows stay written).
+
 The API's queries use plain Postgres (`date_bin`, `date_trunc(..., tz)`) rather than `time_bucket`, so they run unchanged on PGlite in tests.
 
 Daily totals for the UI are computed from `readings_hourly` using Europe/London day boundaries:
