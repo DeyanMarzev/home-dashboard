@@ -1,13 +1,15 @@
 import {
+  formatLondonTime,
   formatLongDate,
   formatNumber,
   formatPounds,
+  londonDayBounds,
   relativeChange,
   type EnergyDay,
   type EnergySummary,
 } from '@home/shared';
 import { useSearchParams } from 'react-router';
-import { useEnergySummary, useSources } from '../api/hooks.js';
+import { useEnergySummary, useLatest, useReadings, useSources } from '../api/hooks.js';
 import { Empty, Panel, Skeleton, StatTile } from '../components/Cards.js';
 import { BarChart } from '../components/charts/BarChart.js';
 import { token } from '../components/charts/theme.js';
@@ -16,7 +18,8 @@ import { PageHeader } from '../components/PageHeader.js';
 import { FreshnessKey, NotConnected, SourceBadge } from '../components/PageBits.js';
 import { TariffPanel } from '../components/TariffPanel.js';
 import { useFreshnessNow } from '../lib/freshness.js';
-import { dayLabel, dayPence, sumDays as sum, weekdayLabel } from '../model/energy.js';
+import { averageKwh, dayLabel, dayPence, sumDays as sum, weekdayLabel } from '../model/energy.js';
+import { pick } from '../model/latest.js';
 import { useNow } from '../lib/now-context.js';
 
 const MONTHS = [
@@ -79,6 +82,14 @@ export function EnergyPage() {
       ) : (
         <>
           <Tiles s={s} />
+          <div className="row">
+            <HourlyUse s={s} fuel="electricity" />
+            <HourlyUse s={s} fuel="gas" />
+          </div>
+          <div className="row">
+            <DailyUse s={s} fuel="electricity" />
+            <DailyUse s={s} fuel="gas" />
+          </div>
           <DailyCost s={s} />
           <div className="row">
             <Panel
@@ -189,6 +200,93 @@ function Tiles({ s }: { s: EnergySummary }) {
         }
       />
     </section>
+  );
+}
+
+const FUEL = {
+  electricity: { name: 'Electricity', colour: '--cool' },
+  gas: { name: 'Gas', colour: '--heat' },
+} as const;
+type Fuel = keyof typeof FUEL;
+
+/** kWh per hour on the newest complete day, like the Water page's hour by hour. */
+function HourlyUse({ s, fuel }: { s: EnergySummary; fuel: Fuel }) {
+  const at = useFreshnessNow();
+  const meters = useLatest({ source: 'smart_meters' });
+  const id = pick(meters.data, 'energy_import', fuel)?.series.id;
+  const bounds = s.latestDay ? londonDayBounds(s.latestDay) : null;
+  const hourly = useReadings(id && bounds ? [id] : [], '24h', {
+    bucket: '1h',
+    agg: 'sum',
+    between: bounds ? { from: bounds.from.toISOString(), to: bounds.to.toISOString() } : undefined,
+  });
+  const points = hourly.data?.series[0]?.points ?? [];
+  const day = s.days.find((d) => d.date === s.latestDay)?.[fuel];
+  const peak = points.reduce<(typeof points)[number] | null>(
+    (a, p) => (!a || p[1] > a[1] ? p : a),
+    null,
+  );
+  const baseloadKwh = fuel === 'electricity' && s.baseload ? s.baseload.watts / 1000 : undefined;
+  const { name, colour } = FUEL[fuel];
+  return (
+    <Panel
+      id={`${fuel}-hour-h`}
+      title={s.latestDay ? `${name} by hour, ${weekdayLabel(s.latestDay)}` : `${name} by hour`}
+      flex="1 1 420px"
+      badge={s.freshness && <FreshnessBadge freshness={at(s.freshness, 'smart_meters')} compact />}
+      meta={
+        day && (
+          <>
+            {formatNumber(day.kwh, 1)} kWh
+            {day.energyPence !== null && ` · ${formatPounds(day.energyPence)}`}
+            {peak && ` · peak ${formatLondonTime(new Date(peak[0]))}`}
+          </>
+        )
+      }
+    >
+      {!s.latestDay ? (
+        <Empty>No complete day yet</Empty>
+      ) : hourly.isPending && id ? (
+        <Skeleton height={180} />
+      ) : points.length === 0 ? (
+        <Empty>No {name.toLowerCase()} readings that day</Empty>
+      ) : (
+        <BarChart
+          labels={points.map(([t]) => formatLondonTime(new Date(t)).slice(0, 2))}
+          series={[{ name, color: token(colour), values: points.map(([, v]) => v) }]}
+          reference={baseloadKwh}
+          formatAxis={(v) => formatNumber(v, Number.isInteger(v) ? 0 : 1)}
+          ariaLabel={`Bar chart of ${name.toLowerCase()} kWh per hour on ${weekdayLabel(s.latestDay)}${peak ? `, highest ${formatNumber(peak[1], 2)} kWh at ${formatLondonTime(new Date(peak[0]))}` : ''}${baseloadKwh ? `; dashed line is the ${s.baseload!.watts} W baseload` : ''}.`}
+        />
+      )}
+    </Panel>
+  );
+}
+
+/** kWh per day over the page's range, with the average dashed. */
+function DailyUse({ s, fuel }: { s: EnergySummary; fuel: Fuel }) {
+  const { name, colour } = FUEL[fuel];
+  const shown = s.days.filter((d) => d[fuel]);
+  const avg = averageKwh(s.days, fuel);
+  return (
+    <Panel
+      id={`${fuel}-days-h`}
+      title={`${name} per day, ${dayLabel(s.from)} – ${dayLabel(s.to)}`}
+      flex="1 1 420px"
+      meta={avg !== null && `Average ${formatNumber(avg, 1)} kWh a day`}
+    >
+      {shown.length === 0 ? (
+        <Empty>No {name.toLowerCase()} readings yet</Empty>
+      ) : (
+        <BarChart
+          labels={shown.map((d) => dayLabel(d.date))}
+          series={[{ name, color: token(colour), values: shown.map((d) => d[fuel]!.kwh) }]}
+          reference={avg ?? undefined}
+          formatAxis={(v) => `${formatNumber(v)}`}
+          ariaLabel={`Bar chart of daily ${name.toLowerCase()} use over ${shown.length} days${avg !== null ? `, averaging ${formatNumber(avg, 1)} kWh` : ''}.`}
+        />
+      )}
+    </Panel>
   );
 }
 

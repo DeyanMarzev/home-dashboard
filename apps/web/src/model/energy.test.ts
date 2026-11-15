@@ -1,6 +1,6 @@
 import type { EnergyDay } from '@home/shared';
 import { describe, expect, it } from 'vitest';
-import { dayLabel, dayPence, sumDays, weekdayLabel } from './energy.js';
+import { averageKwh, dayLabel, dayPence, sumDays, weekdayLabel } from './energy.js';
 
 const day = (e: number | null, g: number | null): EnergyDay => ({
   date: '2026-11-05',
@@ -26,5 +26,23 @@ describe('energy view helpers', () => {
     expect(dayLabel('2026-11-05')).toBe('5 Nov');
     expect(weekdayLabel('2026-11-05')).toBe('Thu 5 Nov');
     expect(sumDays([day(1, 2), day(3, null)], (d) => d.gas?.kwh)).toBe(32);
+  });
+});
+
+describe('averageKwh', () => {
+  const d = (kwh: number | null, complete = true): EnergyDay => ({
+    ...day(1, 1),
+    electricity: kwh === null ? null : { kwh, energyPence: 1, standingPence: 1 },
+    complete,
+  });
+
+  it('averages complete days with that fuel, ignoring partial days and gaps', () => {
+    expect(averageKwh([d(8), d(10), d(2, false), d(null)], 'electricity')).toBe(9);
+    expect(averageKwh([d(8), d(9.25)], 'electricity')).toBe(8.6);
+  });
+
+  it('is null without any', () => {
+    expect(averageKwh([d(null), d(5, false)], 'electricity')).toBeNull();
+    expect(averageKwh([], 'gas')).toBeNull();
   });
 });

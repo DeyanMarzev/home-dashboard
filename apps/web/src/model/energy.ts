@@ -20,3 +20,13 @@ export function dayPence(d: EnergyDay, withStanding: boolean): number | null {
   }
   return total;
 }
+
+/**
+ * Average kWh a day for a fuel over the complete days that have it (a partly-received day
+ * would drag the average down). Null without any.
+ */
+export function averageKwh(days: readonly EnergyDay[], fuel: 'electricity' | 'gas'): number | null {
+  const kwh = days.flatMap((d) => (d.complete && d[fuel] ? [d[fuel].kwh] : []));
+  if (kwh.length === 0) return null;
+  return Math.round((kwh.reduce((a, b) => a + b, 0) / kwh.length) * 10) / 10;
+}
