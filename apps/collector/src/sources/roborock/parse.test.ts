@@ -47,9 +47,31 @@ describe('parseRoborockSnapshot', () => {
     for (const r of readings) expect(ReadingInputSchema.safeParse(r).success).toBe(true);
   });
 
-  it('skips records in another shape instead of failing the run', () => {
+  it('treats map_flag -1, null or missing as no map, and a missing area as unknown', () => {
+    const run = { begin: 1792540000, duration: 600 };
+    const parsed = parseRoborockSnapshot(
+      {
+        records: [
+          { ...run, area: 5_000_000, map_flag: -1 },
+          { ...run, begin: run.begin + 1000, map_flag: null },
+          { ...run, begin: run.begin + 2000, area: null },
+        ],
+      },
+      now,
+    );
+    expect(parsed.skipped).toBe(0);
+    expect(parsed.readings.map((r) => [r.metric, r.entity])).toEqual([
+      ['clean_minutes', 'no_map'],
+      ['clean_area', 'no_map'],
+      ['clean_minutes', 'no_map'],
+      ['clean_minutes', 'no_map'],
+    ]);
+  });
+
+  it('skips records in another shape instead of failing the run, saying which field', () => {
     const odd = parseRoborockSnapshot({ ...snapshot, records: [[1, 2, 3], { begin: 'x' }] }, now);
     expect(odd.skipped).toBe(2);
+    expect(odd.problems).toContain('begin: Invalid input: expected number, received string');
     expect(odd.readings.map((r) => r.metric)).toEqual(['battery']);
   });
 

@@ -11,8 +11,9 @@ export const MIN_RUN_SECONDS = 60;
 const RecordSchema = z.object({
   begin: z.number().int().positive(), // Unix seconds; also the run's id
   duration: z.number().nonnegative(), // seconds
-  area: z.number().nonnegative(), // mm² (19 897 500 = 19.9 m²)
-  map_flag: z.number().int().nonnegative().optional(), // absent: cleaned without a map
+  area: z.number().nonnegative().nullish(), // mm² (19 897 500 = 19.9 m²)
+  // Runs without a map (landings, single rooms): -1, or absent.
+  map_flag: z.number().int().nullish(),
 });
 
 const SnapshotSchema = z.object({
@@ -33,8 +34,12 @@ export interface Floor {
 }
 
 /** "Ground Floor" → ground_floor; a map without a usable name → map_<flag>. */
-export function floorFor(flag: number | undefined, names: ReadonlyMap<number, string>): Floor {
-  if (flag === undefined) return { entity: NO_MAP_ENTITY, label: 'No map' };
+export function floorFor(
+  flag: number | null | undefined,
+  names: ReadonlyMap<number, string>,
+): Floor {
+  if (flag === undefined || flag === null || flag < 0)
+    return { entity: NO_MAP_ENTITY, label: 'No map' };
   const name = names.get(flag)?.trim();
   const key = (name ?? '')
     .toLowerCase()
@@ -50,6 +55,8 @@ export interface ParsedSnapshot {
   readings: ReadingInput[];
   /** Records that weren't in the expected shape (left out). */
   skipped: number;
+  /** Which fields those records had wrong, e.g. `duration: Invalid input` (no values). */
+  problems: string[];
 }
 
 /**
@@ -65,27 +72,31 @@ export function parseRoborockSnapshot(body: unknown, now: Date): ParsedSnapshot 
 
   const readings: ReadingInput[] = [];
   let skipped = 0;
+  const problems = new Set<string>();
   for (const raw of snapshot.records) {
     const record = RecordSchema.safeParse(raw);
     if (!record.success) {
       skipped++;
+      for (const issue of record.error.issues) {
+        problems.add(`${issue.path.join('.') || 'record'}: ${issue.message}`);
+      }
       continue;
     }
     const { begin, duration, area, map_flag } = record.data;
     if (duration < MIN_RUN_SECONDS) continue;
     const { entity, label } = floorFor(map_flag, names);
     const ts = new Date(begin * 1000);
-    readings.push(
-      {
-        metric: 'clean_minutes',
-        entity,
-        unit: 'min',
-        valueType: 'gauge',
-        ts,
-        value: Math.round(duration / 6) / 10,
-        label,
-      },
-      {
+    readings.push({
+      metric: 'clean_minutes',
+      entity,
+      unit: 'min',
+      valueType: 'gauge',
+      ts,
+      value: Math.round(duration / 6) / 10,
+      label,
+    });
+    if (area !== undefined && area !== null) {
+      readings.push({
         metric: 'clean_area',
         entity,
         unit: 'm²',
@@ -93,8 +104,8 @@ export function parseRoborockSnapshot(body: unknown, now: Date): ParsedSnapshot 
         ts,
         value: Math.round(area / 100_000) / 10,
         label,
-      },
-    );
+      });
+    }
   }
 
   const battery = snapshot.status?.battery;
@@ -108,5 +119,5 @@ export function parseRoborockSnapshot(body: unknown, now: Date): ParsedSnapshot 
       value: battery,
     });
   }
-  return { readings, skipped };
+  return { readings, skipped, problems: [...problems] };
 }

@@ -90,7 +90,8 @@
       "cleaned_area": 1200000,
       "manual_replenish": 0,
       "dirty_replenish": 0,
-      "clean_times": 1
+      "clean_times": 1,
+      "map_flag": -1
     },
     {
       "begin": 1792832700,
