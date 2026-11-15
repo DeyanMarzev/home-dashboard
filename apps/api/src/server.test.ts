@@ -5,6 +5,8 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Config } from './config.js';
 import { buildServer } from './server.js';
+import { MiscResponseSchema } from '@home/shared';
+import { fileURLToPath } from 'node:url';
 import { AUDIENCE, fakeAccess, ISSUER, TEAM } from './test/access-token.js';
 
 const INDEX_HTML = '<!doctype html><title>Home</title><h1>Home dashboard is running</h1>';
@@ -178,5 +180,40 @@ describe('without a web build', () => {
     expect(res.statusCode).toBe(404);
     expect(res.json()).toMatchObject({ error: { code: 'NOT_FOUND' } });
     await app.close();
+  });
+});
+
+describe('GET /api/misc', () => {
+  const REAL_FILE = fileURLToPath(new URL('../../../config/misc.yaml', import.meta.url));
+  const serve = async (miscFile?: string) => {
+    const app = await buildServer(config({ auth: { disabled: true } }), { miscFile });
+    const res = await app.inject({ method: 'GET', url: '/api/misc' });
+    await app.close();
+    return res;
+  };
+
+  it('serves the bins from config/misc.yaml', async () => {
+    const res = await serve(REAL_FILE);
+    expect(res.statusCode).toBe(200);
+    const body = MiscResponseSchema.parse(res.json());
+    expect(body.bins.map((b) => `${b.name} every ${b.everyWeeks} from ${b.collectedOn}`)).toEqual([
+      'Green every 1 from 2026-11-19',
+      'Black every 2 from 2026-11-19',
+      'Brown every 2 from 2026-11-19',
+    ]);
+  });
+
+  it('is empty without the file', async () => {
+    expect((await serve()).json()).toEqual({ bins: [] });
+    expect((await serve(join(publicDir, 'no-such-file.yaml'))).json()).toEqual({ bins: [] });
+  });
+
+  it('says what is wrong with a broken file', async () => {
+    const broken = join(publicDir, 'misc-broken.yaml');
+    writeFileSync(broken, 'bins:\n  - name: Green\n    colour: green\n    every_week: 1\n');
+    const res = await serve(broken);
+    expect(res.statusCode).toBe(500);
+    expect(res.json()).toMatchObject({ error: { code: 'BAD_CONFIG' } });
+    expect(JSON.stringify(res.json())).toMatch(/every_week/);
   });
 });

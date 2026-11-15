@@ -16,8 +16,9 @@ const db = createDb({ applicationName: 'api', max: 10, log });
 
 // Migrations and registry sync finish before the port opens, so the healthcheck (and
 // cloudflared, which waits for it) only see a ready API.
-const registry = await prepareDatabase(db, startupPaths(process.env), log);
-const app = await buildServer(config, { db, registry, logger: log });
+const paths = startupPaths(process.env);
+const registry = await prepareDatabase(db, paths, log);
+const app = await buildServer(config, { db, registry, logger: log, miscFile: paths.miscFile });
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, () => {

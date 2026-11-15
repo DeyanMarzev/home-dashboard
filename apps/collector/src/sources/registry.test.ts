@@ -5,6 +5,8 @@ import { collectors } from './index.js';
 
 /** Registry sources whose collector belongs to a later milestone (docs/07). */
 const NOT_BUILT_YET: string[] = [];
+/** Collectors built but deliberately left out of config/sources.yaml (hardware not bought yet). */
+const LEFT_OUT_OF_CONFIG = ['boiler_probes'];
 
 describe('collector registration', () => {
   it('has a collector for every source in config/sources.yaml (except later milestones)', async () => {
@@ -20,7 +22,10 @@ describe('collector registration', () => {
       fileURLToPath(new URL('../../../../config/sources.yaml', import.meta.url)),
     );
     expect(
-      collectors.map((c) => c.id).filter((id) => !registry.sources.some((s) => s.id === id)),
+      collectors
+        .map((c) => c.id)
+        .filter((id) => !registry.sources.some((s) => s.id === id))
+        .filter((id) => !LEFT_OUT_OF_CONFIG.includes(id)),
     ).toEqual([]);
     expect(new Set(collectors.map((c) => c.id)).size).toBe(collectors.length);
   });

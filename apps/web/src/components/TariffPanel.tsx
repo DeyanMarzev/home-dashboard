@@ -1,5 +1,5 @@
-import { FUELS, formatLondonDayMonth, TariffsPutSchema, type Tariff } from '@home/shared';
-import { useState } from 'react';
+import { formatLondonDayMonth, TariffsPutSchema, type Tariff } from '@home/shared';
+import { useState, type ReactNode } from 'react';
 import { useSaveTariffs, useTariffs } from '../api/hooks.js';
 import { Empty, Skeleton } from './Cards.js';
 
@@ -29,22 +29,43 @@ const toDraft = (t: Tariff): Draft => ({
 const period = (t: Pick<Tariff, 'validFrom' | 'validTo'>) =>
   `${formatLondonDayMonth(new Date(`${t.validFrom}T12:00:00Z`))} ${t.validFrom.slice(0, 4)} – ${t.validTo ? `${formatLondonDayMonth(new Date(`${t.validTo}T12:00:00Z`))} ${t.validTo.slice(0, 4)}` : 'now'}`;
 
-/** Tariff table with an editor (docs/05 § Energy). Rates are entered by hand (docs/08 question 4). */
-export function TariffPanel() {
+/**
+ * Tariff table with an editor for some fuels (docs/05): electricity and gas on the Energy page,
+ * water on the Water page. Saving replaces every tariff row (PUT /api/tariffs), so the rows of
+ * the other fuels are sent back unchanged.
+ */
+export function TariffPanel({
+  fuels,
+  title = 'Tariff',
+  id = 'tariff-h',
+  note,
+  empty,
+}: {
+  fuels: readonly Tariff['fuel'][];
+  title?: string;
+  id?: string;
+  /** Shown under the table. */
+  note?: ReactNode;
+  /** Shown when none of these fuels has a rate. */
+  empty: string;
+}) {
   const tariffs = useTariffs();
+  const shown = (tariffs.data?.items ?? []).filter((t) => fuels.includes(t.fuel));
+  const others = (tariffs.data?.items ?? []).filter((t) => !fuels.includes(t.fuel));
+  const firstFuel = fuels[0] ?? 'electricity';
   const save = useSaveTariffs();
   const [drafts, setDrafts] = useState<Draft[] | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
 
   const startEditing = () => {
     setProblem(null);
-    const rows = tariffs.data?.items.map(toDraft) ?? [];
+    const rows = shown.map(toDraft);
     setDrafts(
       rows.length
         ? rows
         : [
             {
-              fuel: 'electricity',
+              fuel: firstFuel,
               unitRatePence: '',
               standingPence: '',
               validFrom: new Date().toISOString().slice(0, 10),
@@ -58,13 +79,23 @@ export function TariffPanel() {
 
   const submit = () => {
     if (!drafts) return;
-    const items = drafts.map((d) => ({
-      fuel: d.fuel,
-      unitRatePence: Number(d.unitRatePence),
-      standingPence: d.standingPence === '' ? 0 : Number(d.standingPence),
-      validFrom: d.validFrom,
-      validTo: d.validTo === '' ? null : d.validTo,
-    }));
+    const items = [
+      ...drafts.map((d) => ({
+        fuel: d.fuel,
+        unitRatePence: Number(d.unitRatePence),
+        standingPence: d.standingPence === '' ? 0 : Number(d.standingPence),
+        validFrom: d.validFrom,
+        validTo: d.validTo === '' ? null : d.validTo,
+      })),
+      // Not shown here: kept exactly as they are.
+      ...others.map(({ fuel, unitRatePence, standingPence, validFrom, validTo }) => ({
+        fuel,
+        unitRatePence,
+        standingPence,
+        validFrom,
+        validTo,
+      })),
+    ];
     const checked = TariffsPutSchema.safeParse({ items });
     if (!checked.success) {
       setProblem(checked.error.issues.map((i) => i.message).join('; '));
@@ -78,10 +109,10 @@ export function TariffPanel() {
   };
 
   return (
-    <section aria-labelledby="tariff-h" className="card">
+    <section aria-labelledby={id} className="card">
       <div className="card-head">
         <div className="card-title">
-          <h2 id="tariff-h">Tariff</h2>
+          <h2 id={id}>{title}</h2>
         </div>
         {!drafts && (
           <button
@@ -128,7 +159,7 @@ export function TariffPanel() {
                         value={d.fuel}
                         onChange={(e) => update(i, { fuel: e.target.value as Draft['fuel'] })}
                       >
-                        {FUELS.map((f) => (
+                        {fuels.map((f) => (
                           <option key={f} value={f}>
                             {FUEL_NAME[f]}
                           </option>
@@ -196,7 +227,7 @@ export function TariffPanel() {
                 setDrafts([
                   ...drafts,
                   {
-                    fuel: 'electricity',
+                    fuel: firstFuel,
                     unitRatePence: '',
                     standingPence: '',
                     validFrom: '',
@@ -219,7 +250,7 @@ export function TariffPanel() {
             recalculated straight away.
           </p>
         </form>
-      ) : tariffs.data?.items.length ? (
+      ) : shown.length ? (
         <div className="table-wrap">
           <table className="data">
             <thead>
@@ -231,7 +262,7 @@ export function TariffPanel() {
               </tr>
             </thead>
             <tbody>
-              {tariffs.data.items.map((t) => (
+              {shown.map((t) => (
                 <tr key={t.id}>
                   <td>{FUEL_NAME[t.fuel]}</td>
                   <td>
@@ -245,8 +276,9 @@ export function TariffPanel() {
           </table>
         </div>
       ) : (
-        <Empty>No rates yet. Add your electricity and gas rates to see costs.</Empty>
+        <Empty>{empty}</Empty>
       )}
+      {!drafts && note && <p className="note">{note}</p>}
     </section>
   );
 }

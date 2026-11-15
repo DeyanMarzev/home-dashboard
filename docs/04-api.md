@@ -150,6 +150,9 @@ Daily litres, hourly profile for a day, nightly minimum flow (leak check).
 - `costPence` = litres ÷ 1000 × the `water` tariff's unit rate (p/m³) + its standing charge; null without a water tariff for that date.
 - `complete` = every hour of the London day present (23/24/25). `hourly` is for `latestDay`. `nights` are keyed by the morning's date; `leak.state` is `ok`, `watch` (flow on the latest night or two), `leak` (3+ in a row) or `unknown`. Cached 30 s.
 
+### `GET /api/misc`
+The Misc page's settings from `config/misc.yaml`, read on every request (edits apply without a restart): `{ "bins": [{ "name", "colour", "everyWeeks", "collectedOn" }] }`, where `collectedOn` is any one collection date (YYYY-MM-DD) and the rest follow every `everyWeeks` weeks (`upcomingCollections` in `packages/shared` works out the dates). A missing file gives `{ "bins": [] }`; an invalid one a 500 with code `BAD_CONFIG` and the problems listed. Not a data source: no freshness.
+
 ### `GET /api/events?limit=50&level=&kind=`
 Recent events, newest first: `{ "items": [{ "id", "ts", "level", "sourceId", "kind", "message", "data", "resolvedAt" }] }`. `limit` 1–500. `kind` filters to one event kind (e.g. `backup`, used by the System page for the last backup).
 

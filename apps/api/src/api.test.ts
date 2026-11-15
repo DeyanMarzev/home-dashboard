@@ -193,7 +193,6 @@ describe('GET /api/sources', () => {
       'carbon_intensity',
       'wifi',
       'speed_test',
-      'boiler_probes',
       'nest',
       'smart_meters',
       'thames_water',

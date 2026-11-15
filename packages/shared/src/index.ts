@@ -11,6 +11,7 @@ export * from './pi-health.js';
 export * from './series-math.js';
 export * from './weather.js';
 export * from './air-quality.js';
+export * from './misc.js';
 export * from './grid.js';
 export * from './heating.js';
 export * from './energy.js';

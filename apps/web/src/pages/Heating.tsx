@@ -44,6 +44,8 @@ export function HeatingPage() {
   const summary = useHeatingSummary();
   const source = (id: string) => sources.data?.find((s) => s.id === id);
   const nestSource = source('nest');
+  // The pipe probes appear only while boiler_probes is in config/sources.yaml (not bought yet).
+  const probesFitted = source('boiler_probes') !== undefined;
 
   return (
     <div className="page">
@@ -60,11 +62,14 @@ export function HeatingPage() {
           <Tiles
             nest={nest.data}
             summary={summary.data}
+            probes={probesFitted}
             loading={nest.isPending || summary.isPending}
           />
           <SchedulePanel summary={summary.data} />
           <div className="row">
-            <PipesPanel latest={probes.data} source={source('boiler_probes')} range={range} />
+            {probesFitted && (
+              <PipesPanel latest={probes.data} source={source('boiler_probes')} range={range} />
+            )}
             <TipsPanel summary={summary.data} />
           </div>
           <div className="row">
@@ -80,17 +85,20 @@ export function HeatingPage() {
 function Tiles({
   nest,
   summary,
+  probes,
   loading,
 }: {
   nest: LatestResponse | undefined;
   summary: HeatingSummary | undefined;
+  /** Boiler pipe probes configured: show the condensing tile. */
+  probes: boolean;
   loading: boolean;
 }) {
   const at = useFreshnessNow();
   if (loading) {
     return (
       <section aria-label="Heating now" className="row">
-        {[0, 1, 2, 3].map((i) => (
+        {(probes ? [0, 1, 2, 3] : [0, 1, 2]).map((i) => (
           <div key={i} className="tile">
             <Skeleton height={86} />
           </div>
@@ -155,22 +163,24 @@ function Tiles({
             : undefined
         }
       />
-      <StatTile
-        flex="1 1 200px"
-        label="Condensing today"
-        badge={summaryBadge}
-        value={share === null ? '—' : formatNumber(share * 100)}
-        unit={share === null ? undefined : ' %'}
-        context={
-          share === null ? (
-            'Needs the boiler pipe probes'
-          ) : (
-            <Status tone={share >= 0.9 ? 'good' : 'warn'}>
-              of firing time with return below {CONDENSING_LIMIT_C} °C
-            </Status>
-          )
-        }
-      />
+      {probes && (
+        <StatTile
+          flex="1 1 200px"
+          label="Condensing today"
+          badge={summaryBadge}
+          value={share === null ? '—' : formatNumber(share * 100)}
+          unit={share === null ? undefined : ' %'}
+          context={
+            share === null ? (
+              'Needs the boiler pipe probes'
+            ) : (
+              <Status tone={share >= 0.9 ? 'good' : 'warn'}>
+                of firing time with return below {CONDENSING_LIMIT_C} °C
+              </Status>
+            )
+          }
+        />
+      )}
     </section>
   );
 }

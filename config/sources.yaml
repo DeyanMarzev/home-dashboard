@@ -66,13 +66,15 @@ sources:
   # Not built yet: enabled in the milestone that adds the collector (docs/07-build-plan.md).
   # Disabled sources don't show as Late or raise events.
 
-  boiler_probes: # built (M6); enable once the probes are fitted and their ids are in .env (docs/06 §5c)
-    name: Boiler pipe probes
-    description: Flow and return temperature
-    kind: local
-    poll: 30s
-    expected_delay: 0s
-    enabled: false
+  # Boiler pipe probes: built (M6), left out until the probes are bought and fitted. Uncomment
+  # (with the BOILER_*_W1_ID values in .env, docs/06 § 5c) and the Heating page's pipe chart,
+  # the condensing tile and the Overview's flow/return return by themselves.
+  # boiler_probes:
+  #   name: Boiler pipe probes
+  #   description: Flow and return temperature
+  #   kind: local
+  #   poll: 30s
+  #   expected_delay: 0s
 
   nest: # Google Smart Device Management API; needs the NEST_* values in .env (docs/06 § 5b)
     name: Nest thermostat
