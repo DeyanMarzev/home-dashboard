@@ -42,6 +42,12 @@
   --cool-bg: #dce6fb;
   --cool-text: #1e3a8a;
   --shadow: rgb(0 0 0 / 8%);
+  --bin-green: #15803d;
+  --bin-black: #1f2328;
+  --bin-brown: #8b5a2b;
+  --bin-blue: #2563eb;
+  --bin-grey: #9aa19c;
+  --bin-purple: #7c3aed;
 
   --radius-card: 14px;
   --radius-control: 9px;
@@ -95,6 +101,12 @@
     --cool-bg: #1b2a44;
     --cool-text: #bfdbfe;
     --shadow: rgb(0 0 0 / 40%);
+    --bin-green: #22c55e;
+    --bin-black: #0b0d0c;
+    --bin-brown: #a86b3c;
+    --bin-blue: #60a5fa;
+    --bin-grey: #6c756f;
+    --bin-purple: #a78bfa;
   }
 }
 
@@ -1062,4 +1074,38 @@ table.data tr:last-child td {
   flex: 1 1 220px;
   grid-template-columns: 1fr;
   gap: 8px;
+}
+
+/* ---- Misc -------------------------------------------------------------------------- */
+
+.bins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.bin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.collections {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.collections li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--row-border);
+}
+
+.collections li:last-child {
+  border-bottom: none;
 }

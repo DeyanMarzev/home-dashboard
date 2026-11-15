@@ -98,7 +98,10 @@ export function OverviewPage() {
           source={source('open_meteo')}
           loading={weather.isPending}
         />
-        <HeatingPanel source={source('nest')} />
+        <HeatingPanel
+          source={source('nest')}
+          probesConfigured={source('boiler_probes') !== undefined}
+        />
       </div>
       <RoomsSection rooms={rooms} loading={sensors.isPending} />
       <div className="row">
@@ -260,20 +263,31 @@ function Tiles({
   );
 }
 
-function HeatingPanel({ source }: { source: SourceInfo | undefined }) {
+function HeatingPanel({
+  source,
+  probesConfigured,
+}: {
+  source: SourceInfo | undefined;
+  probesConfigured: boolean;
+}) {
   if (source && !source.enabled) {
     return (
       <Panel id="heat-h" title="Heating" flex="1 1 300px" badge={<SourceBadge source={source} />}>
-        <NotConnected source={source}>
-          Nest thermostat and boiler probes aren&apos;t connected yet
-        </NotConnected>
+        <NotConnected source={source}>The Nest thermostat isn&apos;t connected yet</NotConnected>
       </Panel>
     );
   }
-  return <HeatingCard source={source} />;
+  return <HeatingCard source={source} probesConfigured={probesConfigured} />;
 }
 
-function HeatingCard({ source }: { source: SourceInfo | undefined }) {
+/** `probesConfigured`: boiler_probes is in config/sources.yaml (left out until they're fitted). */
+function HeatingCard({
+  source,
+  probesConfigured,
+}: {
+  source: SourceInfo | undefined;
+  probesConfigured: boolean;
+}) {
   const summary = useHeatingSummary();
   const nest = useLatest({ source: 'nest' });
   const probes = useLatest({ source: 'boiler_probes' });
@@ -325,9 +339,11 @@ function HeatingCard({ source }: { source: SourceInfo | undefined }) {
           )}
         </>
       ) : (
-        <p className="meta">
-          No boiler pipe probes yet: flow and return temperatures appear when they&apos;re fitted.
-        </p>
+        probesConfigured && (
+          <p className="meta">
+            No boiler pipe probes yet: flow and return temperatures appear when they&apos;re fitted.
+          </p>
+        )
       )}
       <dl className="facts">
         <div>

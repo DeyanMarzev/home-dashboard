@@ -4,6 +4,7 @@ import {
   HealthSchema,
   HeatingSummarySchema,
   LatestResponseSchema,
+  MiscResponseSchema,
   ReadingsResponseSchema,
   SeriesResponseSchema,
   SourcesResponseSchema,
@@ -15,6 +16,7 @@ import {
   type FreshnessPolicy,
   type HeatingSummary,
   type LatestResponse,
+  type MiscResponse,
   type ReadingsResponse,
   type SeriesMeta,
   type SourceInfo,
@@ -199,5 +201,14 @@ export function useWaterSummary(days?: number, enabled = true) {
     enabled,
     queryFn: () => getJson<WaterSummary>(`/api/summary/water${q}`, WaterSummarySchema),
     refetchInterval: 15 * MINUTE,
+  });
+}
+
+/** The Misc page's settings (config/misc.yaml): bin collections. */
+export function useMisc() {
+  return useQuery({
+    queryKey: ['misc'],
+    queryFn: () => getJson<MiscResponse>('/api/misc', MiscResponseSchema),
+    staleTime: 10 * MINUTE,
   });
 }

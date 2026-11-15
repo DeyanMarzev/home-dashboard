@@ -1,6 +1,6 @@
 import { createReadingWriter, loadRegistryFile, migrate, syncSources } from '@home/db';
 import { SOURCES_FILE, startPglite, type TestDatabase } from '@home/db/testing';
-import { HeatingSummarySchema, type ReadingInput } from '@home/shared';
+import { HeatingSummarySchema, parseRegistry, type ReadingInput } from '@home/shared';
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Config } from './config.js';
@@ -48,6 +48,20 @@ const firing = (t: Date) => {
 beforeAll(async () => {
   db = await startPglite();
   const registry = await loadRegistryFile(SOURCES_FILE);
+  // The probes are left out of config/sources.yaml until they're fitted; these tests still
+  // cover the condensing maths, so they register the source themselves.
+  registry.sources.push(
+    ...parseRegistry({
+      sources: {
+        boiler_probes: {
+          name: 'Boiler pipe probes',
+          kind: 'local',
+          poll: '30s',
+          expected_delay: '0s',
+        },
+      },
+    }).sources,
+  );
   await migrate(db.sql, db.migrationsDir);
   await syncSources(db.sql, registry);
   const w = createReadingWriter(db.sql);

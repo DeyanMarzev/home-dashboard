@@ -20,6 +20,7 @@ import { ClockIcon } from '../components/icons.js';
 import { PageHeader } from '../components/PageHeader.js';
 import { NotConnected, PageFreshness, SourceBadge } from '../components/PageBits.js';
 import { Status } from '../components/Status.js';
+import { TariffPanel } from '../components/TariffPanel.js';
 import { useFreshnessNow } from '../lib/freshness.js';
 import { useNow } from '../lib/now-context.js';
 import { dayLabel, weekdayLabel } from '../model/energy.js';
@@ -80,8 +81,8 @@ export function WaterPage() {
         <Panel id="water-off-h" title="Water" badge={<SourceBadge source={source} />}>
           <NotConnected source={source}>
             Thames Water isn&apos;t connected yet: the account scraper needs a sample of your
-            account&apos;s data (docs/08). Volumes, costs (with a water tariff on the Energy page)
-            and the leak check appear here once it runs.
+            account&apos;s data (docs/08). Volumes, costs (with the water tariff below) and the leak
+            check appear here once it runs.
           </NotConnected>
         </Panel>
       ) : summary.isPending ? (
@@ -98,6 +99,13 @@ export function WaterPage() {
           </div>
         </>
       )}
+      <TariffPanel
+        fuels={['water']}
+        title="Water tariff"
+        id="water-tariff-h"
+        empty="No water rates yet: Thames Water's published rates are added at the first daily run, or add your own."
+        note="Clean water and wastewater per m³, and both yearly fixed charges as a daily standing charge: from Thames Water's published metered rates, added automatically each April. Rates you enter win."
+      />
     </div>
   );
 }

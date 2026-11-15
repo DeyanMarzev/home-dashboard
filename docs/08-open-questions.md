@@ -16,7 +16,7 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 |---|---|---|
 | 12a | Git hosting | GitHub. A public repo is fine; secrets stay in `.env` (git-ignored) and never enter the repo (2026-11-07). |
 | 9 | Cloudflare Access allowed emails | `(owner email removed)` (2026-11-07). |
-| 11 | Water: tariff or volume only? | Volume, and cost where possible: add a `water` rate (p/m³ + standing p/day) on the Energy page's tariff editor; costs show wherever one applies (2026-11-07). |
+| 11 | Water: tariff or volume only? | Volume, and cost where possible: add a `water` rate (p/m³ + standing p/day) on the Water page's tariff editor; costs show wherever one applies (2026-11-07). |
 | 6 | Router make/model | Linksys MX4200 (Velop mesh). Local JNAP API (`POST http://<router>/JNAP/`, admin password): used for device counts (2026-11-07). |
 | 3b | Bright data format | Confirmed with a capture from the owner's account: classifiers, kWh units and the zero padding for half-hours not yet received are as the provider assumes (2026-11-08). |
 | 3 | Smart meter data source | Bright (Hildebrand Glowmarkt API) for electricity and gas. No solar export, no Glow in-home display (so no live feed) (2026-11-07). |

@@ -1,6 +1,6 @@
 import fastifyCompress from '@fastify/compress';
-import { pingDb, type Sql } from '@home/db';
-import type { Registry } from '@home/shared';
+import { loadMiscFile, MiscFileError, pingDb, type Sql } from '@home/db';
+import { toMiscResponse, type Registry } from '@home/shared';
 import Fastify, { type FastifyBaseLogger, type FastifyInstance } from 'fastify';
 import type { JWTVerifyGetKey } from 'jose';
 import { pino } from 'pino';
@@ -27,6 +27,8 @@ export interface ServerDeps {
   /** Override Postgres LISTEN (tests). */
   notifications?: NotificationSource;
   logger?: FastifyBaseLogger;
+  /** config/misc.yaml (GET /api/misc); without it the Misc page is empty. */
+  miscFile?: string;
 }
 
 // Everything the web app loads is same-origin (fonts are self-hosted). Inline styles are
@@ -82,6 +84,18 @@ export async function buildServer(config: Config, deps: ServerDeps = {}): Promis
     db: deps.db && (await pingDb(deps.db)) ? 'up' : 'down',
     version: config.version,
   }));
+
+  // The Misc page: read on each request, so edits to the file apply straight away.
+  app.get('/api/misc', async () => {
+    if (!deps.miscFile) return toMiscResponse({ bins: [] });
+    try {
+      return toMiscResponse(await loadMiscFile(deps.miscFile));
+    } catch (err) {
+      // A typo in the file: say what's wrong (it's the owner's own config, nothing secret).
+      if (err instanceof MiscFileError) throw new HttpError(500, 'BAD_CONFIG', err.message);
+      throw err;
+    }
+  });
 
   if (deps.db && deps.registry) {
     const now = deps.now ?? (() => new Date());

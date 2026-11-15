@@ -1,0 +1,19 @@
+# Misc page settings (docs/05 § Misc): schedules rather than readings. Read on every request,
+# so edits apply without restarting anything.
+
+# Bin collections. `collected_on` is any one collection day (past or future); the rest follow
+# every `every_weeks` weeks. Colours: green, black, brown, blue, grey, purple.
+# Bank-holiday changes aren't known: check the council's notice around Christmas.
+bins:
+  - name: Green
+    colour: green
+    every_weeks: 1
+    collected_on: 2026-11-19
+  - name: Black
+    colour: black
+    every_weeks: 2
+    collected_on: 2026-11-19
+  - name: Brown
+    colour: brown
+    every_weeks: 2
+    collected_on: 2026-11-19

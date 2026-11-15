@@ -190,6 +190,7 @@ interface CollectorContext {
 
 - Two DS18B20 on 1-Wire: `/sys/bus/w1/devices/28-*/temperature` (millidegrees). Map sensor IDs to `boiler_flow` / `boiler_return` via env (`BOILER_FLOW_W1_ID`, `BOILER_RETURN_W1_ID`).
 - Hardware not installed yet: the collector must handle "no devices" quietly (log once, no crash).
+- **Left out of `config/sources.yaml` until the probes are bought (owner, 2026-11-15)**: the entry is there commented out. The UI shows probe parts (Heating page pipe chart and condensing tile, the Overview heating card's flow/return) only while `boiler_probes` is in the registry, so uncommenting it brings them back with no code change. The collector module and its tests stay.
 - Implemented (`apps/collector/src/sources/boiler_probes/`): reads `temperature` (or `w1_slave` on older kernels, CRC checked) under `/host/sys/bus/w1/devices`. Rejects the 85 °C power-on value and −127 °C (disconnected). A configured probe that's missing fails the run (the other probe's reading is still stored). Series: `temperature` on entities `boiler_flow` and `boiler_return`.
 
 ### nest (Google Smart Device Management API): live

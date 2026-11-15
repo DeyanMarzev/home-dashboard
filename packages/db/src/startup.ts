@@ -10,16 +10,19 @@ import { syncSources } from './sources.js';
 export interface StartupPaths {
   migrationsDir: string;
   sourcesFile: string;
+  /** The Misc page's settings (bins), read on each request. */
+  miscFile: string;
 }
 
 /**
  * Where migrations and the registry live. Defaults are relative to the working directory,
- * which is /app in the Docker images; `pnpm dev` sets MIGRATIONS_DIR / SOURCES_FILE.
+ * which is /app in the Docker images; `pnpm dev` sets MIGRATIONS_DIR / SOURCES_FILE / MISC_FILE.
  */
 export function startupPaths(env: Record<string, string | undefined>): StartupPaths {
   return {
     migrationsDir: resolve(env.MIGRATIONS_DIR || 'db/migrations'),
     sourcesFile: resolve(env.SOURCES_FILE || 'config/sources.yaml'),
+    miscFile: resolve(env.MISC_FILE || 'config/misc.yaml'),
   };
 }
 

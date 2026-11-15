@@ -99,7 +99,10 @@ export function EnergyPage() {
           </div>
         </>
       )}
-      <TariffPanel />
+      <TariffPanel
+        fuels={['electricity', 'gas']}
+        empty="No rates yet. Add your electricity and gas rates to see costs."
+      />
     </div>
   );
 }

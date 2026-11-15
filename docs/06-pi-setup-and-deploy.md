@@ -217,7 +217,7 @@ ls /sys/bus/w1/devices/                 # two 28-… entries
 cat /sys/bus/w1/devices/28-*/temperature   # millidegrees; warm the flow pipe to tell them apart
 ```
 
-Put the ids in `BOILER_FLOW_W1_ID` / `BOILER_RETURN_W1_ID`, set `boiler_probes: enabled: true`, `docker compose up -d collector`. Until the ids are set, the collector logs the probes it can see and writes nothing.
+Put the ids in `BOILER_FLOW_W1_ID` / `BOILER_RETURN_W1_ID`, uncomment the `boiler_probes` entry in `config/sources.yaml` (left out until the probes are bought), then `docker compose up -d collector api`. The Heating page's pipe chart and condensing tile, and the Overview's flow/return, appear again. Until the ids are set, the collector logs the probes it can see and writes nothing.
 
 ## 5d. Network measurements (netprobe, M9)
 

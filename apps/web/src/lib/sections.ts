@@ -7,5 +7,6 @@ export const SECTIONS = [
   { to: '/heating', label: 'Heating' },
   { to: '/water', label: 'Water' },
   { to: '/wifi', label: 'Wi-Fi' },
+  { to: '/misc', label: 'Misc' },
   { to: '/system', label: 'System' },
 ] as const;
