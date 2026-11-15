@@ -58,8 +58,10 @@ export const roborock: PullCollector = {
     }
     await resolveEvent(ctx.db, 'roborock', AUTH_EVENT);
 
-    const { readings, skipped } = parseRoborockSnapshot(body, new Date());
-    if (skipped > 0) ctx.log.warn({ skipped }, 'cleaning records in an unexpected shape left out');
+    const { readings, skipped, problems } = parseRoborockSnapshot(body, new Date());
+    if (skipped > 0) {
+      ctx.log.warn({ skipped, problems }, 'cleaning records in an unexpected shape left out');
+    }
 
     // The robot re-sends its last ~20 runs every time: write only the ones not stored yet.
     const stored = new Map<string, number>();
