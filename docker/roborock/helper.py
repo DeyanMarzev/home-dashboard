@@ -23,13 +23,14 @@ from typing import Any
 from aiohttp import web
 from roborock.data import UserData
 from roborock.devices.device_manager import DeviceManager, UserParams, create_device_manager
-from roborock.devices.file_cache import FileCache
+from roborock.devices.cache import InMemoryCache
 from roborock.exceptions import RoborockException
 from roborock.web_api import RoborockApiClient
 
 DATA_DIR = pathlib.Path(os.environ.get("ROBOROCK_DATA_DIR", "/data"))
 SESSION_FILE = DATA_DIR / "session.json"
-CACHE_FILE = DATA_DIR / "device-cache.pkl"
+# Left by helpers before 2026-11-15, which kept a device cache on disk.
+OLD_CACHE_FILE = DATA_DIR / "device-cache.pkl"
 DEVICE_ID = os.environ.get("ROBOROCK_DEVICE_ID", "").strip() or None
 PORT = int(os.environ.get("PORT", "8080"))
 SNAPSHOT_TIMEOUT_S = 90
@@ -58,7 +59,6 @@ async def login(email: str) -> None:
     with os.fdopen(fd, "w") as f:
         json.dump(session, f)
     os.replace(tmp, SESSION_FILE)
-    CACHE_FILE.unlink(missing_ok=True)  # device details from an older session
     print("Signed in. Now run: docker compose restart roborock")
 
 
@@ -85,7 +85,9 @@ def _record_ids(summary: Any) -> list[int]:
 class Robot:
     def __init__(self) -> None:
         self._manager: DeviceManager | None = None
-        self._cache = FileCache(CACHE_FILE)
+        # In memory only: the helper runs all the time, and a half-written cache file on disk
+        # stopped every later start (EOFError on 2026-11-15).
+        self._cache = InMemoryCache()
         self._unauthorized = False
         self._lock = asyncio.Lock()
         # Finished runs never change, so each is fetched once.
@@ -109,7 +111,6 @@ class Robot:
             self._manager = await create_device_manager(
                 params, cache=self._cache, mqtt_session_unauthorized_hook=self._on_unauthorized
             )
-            await self._cache.flush()
         vacuums = [d for d in await self._manager.get_devices() if d.v1_properties is not None]
         if DEVICE_ID:
             vacuums = [d for d in vacuums if d.duid == DEVICE_ID]
@@ -132,7 +133,7 @@ class Robot:
         async with self._lock:
             try:
                 return await asyncio.wait_for(self._snapshot(), SNAPSHOT_TIMEOUT_S)
-            except (RoborockException, asyncio.TimeoutError):
+            except Exception:
                 await self._reset()  # reconnect from scratch next time
                 raise
 
@@ -175,9 +176,17 @@ async def serve() -> None:
         except RoborockException as err:
             log.warning("snapshot failed: %s", err)
             return _error(502, f"Roborock: {err}")
+        except Exception as err:  # pylint: disable=broad-except
+            log.exception("snapshot failed unexpectedly")
+            return _error(500, f"Roborock helper: {type(err).__name__}: {err}")
 
     async def health(_: web.Request) -> web.Response:
         return web.json_response({"ok": True, "signedIn": SESSION_FILE.exists()})
+
+    try:
+        OLD_CACHE_FILE.unlink(missing_ok=True)
+    except OSError as err:
+        log.warning("couldn't remove the old device cache %s: %s", OLD_CACHE_FILE, err)
 
     app = web.Application()
     app.add_routes([web.get("/snapshot", snapshot), web.get("/health", health)])
