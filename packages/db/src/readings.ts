@@ -15,6 +15,10 @@ export const READINGS_CHANNEL = 'readings';
 
 const ROWS_PER_STATEMENT = 5000;
 
+const HOUR_MS = 3_600_000;
+/** How far back the hourly rollup's refresh policy looks (migration 002: start_offset). */
+const ROLLUP_LOOKBACK_MS = 10 * 24 * HOUR_MS;
+
 interface SeriesRow {
   id: number;
   metric: string;
@@ -33,9 +37,15 @@ export interface ReadingWriter {
   write(sourceId: string, inputs: readonly ReadingInput[]): Promise<number>;
 }
 
-export function createReadingWriter(sql: Sql): ReadingWriter {
+export interface ReadingWriterOptions {
+  /** A failed rollup refresh after a backfill (the readings themselves were written). */
+  onRollupError?: (err: unknown) => void;
+}
+
+export function createReadingWriter(sql: Sql, options: ReadingWriterOptions = {}): ReadingWriter {
   // Series ids by `${sourceId}|${metric}|${entity}`. Only filled after a commit.
   const cache = new Map<string, SeriesRow>();
+  let timescale: Promise<boolean> | undefined;
 
   return {
     async write(sourceId, inputs) {
@@ -66,9 +76,40 @@ export function createReadingWriter(sql: Sql): ReadingWriter {
       });
 
       for (const [key, row] of resolved) cache.set(`${sourceId}|${key}`, row);
+
+      // Backfilled history older than the refresh policy's window would never reach
+      // readings_hourly (so daily charts would miss it): refresh that part once now.
+      const oldest = batch.rows.reduce((min, r) => Math.min(min, r.ts.getTime()), Infinity);
+      if (oldest < Date.now() - ROLLUP_LOOKBACK_MS + HOUR_MS) {
+        try {
+          timescale ??= sql<{ yes: boolean }[]>`
+            select exists (select 1 from pg_extension where extname = 'timescaledb') as yes`.then(
+            ([row]) => row?.yes === true,
+          );
+          if (await timescale) await refreshRollup(sql, oldest);
+        } catch (err) {
+          timescale = undefined;
+          options.onRollupError?.(err);
+        }
+      }
       return batch.rows.length;
     },
   };
+}
+
+/**
+ * Re-materializes readings_hourly from the hour of `oldest` up to where the refresh policy
+ * takes over. A procedure that can't run in a transaction, so it's sent as a simple query
+ * (the two instants are ISO strings from Date, safe to inline).
+ */
+async function refreshRollup(sql: Sql, oldest: number): Promise<void> {
+  const from = Math.floor(oldest / HOUR_MS) * HOUR_MS;
+  const policyFrom = Math.ceil((Date.now() - ROLLUP_LOOKBACK_MS) / HOUR_MS) * HOUR_MS;
+  const to = Math.max(from + 2 * HOUR_MS, policyFrom + 2 * HOUR_MS);
+  const iso = (ms: number) => new Date(ms).toISOString();
+  await sql.unsafe(
+    `call refresh_continuous_aggregate('readings_hourly', '${iso(from)}'::timestamptz, '${iso(to)}'::timestamptz)`,
+  );
 }
 
 /** Finds or creates every series in the batch; throws if one exists with a different shape. */

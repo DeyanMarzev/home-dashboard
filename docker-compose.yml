@@ -1,6 +1,6 @@
 # Home dashboard on the Raspberry Pi 4. See docs/01-architecture.md and docs/06-pi-setup-and-deploy.md.
 # Every image here has a linux/arm64 variant (checked 2026-11-07).
-# Memory limits are hard limits (CLAUDE.md rule 8); total ~1.8 GB.
+# Memory limits are hard limits (CLAUDE.md rule 8); total ~1.9 GB.
 
 name: home-dashboard
 
@@ -116,6 +116,7 @@ services:
       THAMES_METER_ID: ${THAMES_METER_ID:-}
       BOILER_FLOW_W1_ID: ${BOILER_FLOW_W1_ID:-}
       BOILER_RETURN_W1_ID: ${BOILER_RETURN_W1_ID:-}
+      ROBOROCK_HELPER_URL: http://roborock:8080
     volumes:
       - ./config:/app/config:ro # source registry; edit + `docker compose restart api collector`
       # Pi health (pi_stats) and 1-Wire boiler probes (/host/sys/bus/w1/devices). Read-only.
@@ -207,6 +208,30 @@ services:
       resources:
         limits:
           memory: 96m
+    logging: *logging
+
+  # Roborock vacuum: python-roborock (sign-in and the robot's protocol) behind a small
+  # read-only HTTP API that the collector polls (docs/01, docs/03 § roborock). No ports
+  # published. One-time sign-in, which saves a session (not the password) in
+  # DATA_DIR/roborock: docs/06 § 5h.
+  roborock:
+    build: ./docker/roborock
+    image: home-dashboard/roborock
+    restart: unless-stopped
+    environment:
+      ROBOROCK_DEVICE_ID: ${ROBOROCK_DEVICE_ID:-}
+      TZ: Europe/London
+    volumes:
+      - ${DATA_DIR}/roborock:/data
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs: [/tmp]
+    networks: [home]
     logging: *logging
 
   # Publishes realistic readings for three rooms, as real sensors would (M3 pipeline test).

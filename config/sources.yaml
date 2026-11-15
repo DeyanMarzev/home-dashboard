@@ -102,3 +102,10 @@ sources:
       # Water rates are fetched from Thames Water's public page. true = the lower wastewater
       # fixed charge for homes whose roof water doesn't drain to the public sewer.
       surface_water_rebate: false
+
+  roborock: # Roborock vacuum via the roborock helper container; one-time sign-in (docs/06 § 5h)
+    name: Roborock vacuum
+    description: Cleaning runs per floor, battery
+    kind: api
+    poll: 1h
+    expected_delay: 0s

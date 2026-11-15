@@ -43,7 +43,10 @@ process.on('unhandledRejection', (err) =>
 
 const db = createDb({ applicationName: 'collector', max: 4, log });
 const registry = await prepareDatabase(db, startupPaths(process.env), log);
-const writer = createReadingWriter(db);
+const writer = createReadingWriter(db, {
+  onRollupError: (err) =>
+    log.warn({ error: describeError(err) }, 'hourly rollup refresh after a backfill failed'),
+});
 const shutdown = new AbortController();
 
 function makeContext(sourceId: string) {

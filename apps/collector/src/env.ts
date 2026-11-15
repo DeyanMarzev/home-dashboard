@@ -47,6 +47,12 @@ const EnvSchema = z.object({
   THAMES_ACCOUNT_NUMBER: optionalString,
   THAMES_METER_ID: optionalString,
 
+  // Roborock vacuum: the python-roborock helper container (docker/roborock), compose network only.
+  ROBOROCK_HELPER_URL: z.preprocess(
+    blankToUndefined,
+    z.string().url().default('http://localhost:8080'),
+  ),
+
   // DS18B20 boiler pipe probes (1-Wire ids like 28-0123456789ab). Unset until fitted.
   BOILER_FLOW_W1_ID: optionalString,
   BOILER_RETURN_W1_ID: optionalString,
