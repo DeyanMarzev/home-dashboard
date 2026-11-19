@@ -1,5 +1,7 @@
 /** Small calculations over chart points ([ISO time, value], oldest first). */
 
+import { londonParts } from './london.js';
+
 export type Point = readonly [string, number];
 
 export function stats(points: readonly Point[]): { min: number; max: number; avg: number } | null {
@@ -83,4 +85,20 @@ export function lowestWindow(
   const from = points[best]![0];
   const to = new Date(Date.parse(points[best + count - 1]![0]) + stepSeconds * 1000).toISOString();
   return { from, to, avg: bestSum / count };
+}
+
+/**
+ * A typical day: the average of the points falling in each Europe/London hour of the day
+ * (index 0 = 00:00–00:59), over however many days the points cover. Hours with no points are
+ * null. Uses local hours, so 07:00 means 07:00 on the clock in summer and winter alike.
+ */
+export function byLondonHour(points: readonly Point[]): (number | null)[] {
+  const sums = Array.from({ length: 24 }, () => ({ sum: 0, n: 0 }));
+  for (const [t, v] of points) {
+    const s = sums[londonParts(new Date(t)).hour];
+    if (!s) continue;
+    s.sum += v;
+    s.n++;
+  }
+  return sums.map(({ sum, n }) => (n ? sum / n : null));
 }

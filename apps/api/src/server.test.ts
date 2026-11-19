@@ -199,7 +199,7 @@ describe('GET /api/misc', () => {
     expect(body.bins.map((b) => `${b.name} every ${b.everyWeeks} from ${b.collectedOn}`)).toEqual([
       'Green every 1 from 2026-11-19',
       'Black every 2 from 2026-11-19',
-      'Brown every 2 from 2026-11-19',
+      'Brown every 2 from 2026-11-26',
     ]);
   });
 

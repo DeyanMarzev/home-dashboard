@@ -21,6 +21,8 @@ export interface TimeChartProps {
   reference?: { value: number; color: string };
   /** Shaded spans, e.g. boiler firing: [start, end] ISO times. */
   bands?: readonly (readonly [string, string])[];
+  /** Shaded value range across the whole chart, e.g. 40–60 % comfortable humidity. */
+  valueBand?: { from: number; to: number; color: string };
   /** Label times as HH:mm (≤ 2 days) or as dates. */
   spanSeconds: number;
   height?: number;
@@ -34,6 +36,7 @@ export function TimeChart({
   digits = 1,
   reference,
   bands,
+  valueBand,
   spanSeconds,
   height = 232,
   ariaLabel,
@@ -112,18 +115,28 @@ export function TimeChart({
               },
             }
           : {}),
-        ...(i === 0 && bands?.length
+        ...(i === 0 && (bands?.length || valueBand)
           ? {
               markArea: {
                 silent: true,
                 itemStyle: { color: token('--heat-band') },
-                data: bands.map(([from, to]) => [{ xAxis: from }, { xAxis: to }]),
+                data: [
+                  ...(bands ?? []).map(([from, to]) => [{ xAxis: from }, { xAxis: to }]),
+                  ...(valueBand
+                    ? [
+                        [
+                          { yAxis: valueBand.from, itemStyle: { color: valueBand.color } },
+                          { yAxis: valueBand.to },
+                        ],
+                      ]
+                    : []),
+                ],
               },
             }
           : {}),
       })),
     };
-  }, [series, unit, digits, reference, bands, spanSeconds]);
+  }, [series, unit, digits, reference, bands, valueBand, spanSeconds]);
 
   return <EChart option={option} height={height} ariaLabel={ariaLabel} />;
 }
