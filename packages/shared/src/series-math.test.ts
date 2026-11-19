@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   averageByWindow,
   averageSeries,
+  byLondonHour,
   lowestWindow,
   secondsAbove,
   stats,
@@ -52,5 +53,27 @@ describe('lowestWindow', () => {
 
   it('needs enough points', () => {
     expect(lowestWindow([p(0, 1)], 2, 1800)).toBeNull();
+  });
+});
+
+describe('byLondonHour', () => {
+  it('averages each London hour across days', () => {
+    const at = (iso: string, v: number): [string, number] => [new Date(iso).toISOString(), v];
+    const hours = byLondonHour([
+      at('2026-11-05T07:00:00Z', 60), // GMT: 07:00 London
+      at('2026-11-06T07:30:00Z', 70),
+      at('2026-11-06T19:00:00Z', 50),
+    ]);
+    expect(hours).toHaveLength(24);
+    expect(hours[7]).toBe(65);
+    expect(hours[19]).toBe(50);
+    expect(hours[8]).toBeNull();
+  });
+
+  it('uses clock time in summer (BST)', () => {
+    // 06:00 UTC in July is 07:00 in London.
+    const hours = byLondonHour([['2026-07-01T06:00:00.000Z', 80]]);
+    expect(hours[7]).toBe(80);
+    expect(hours[6]).toBeNull();
   });
 });

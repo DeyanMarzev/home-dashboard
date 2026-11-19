@@ -54,6 +54,15 @@
   --floor-top: #7c3aed;
   --floor-none: #b8beba;
 
+  /* One colour per room in multi-room charts (humidity), in room order. */
+  --series-1: #0f766e;
+  --series-2: #c2410c;
+  --series-3: #2563eb;
+  --series-4: #7c3aed;
+  --series-5: #be185d;
+  --series-6: #4d7c0f;
+  --comfort-band: #e6f3ea;
+
   --radius-card: 14px;
   --radius-control: 9px;
 
@@ -116,6 +125,13 @@
     --floor-first: #cc820a;
     --floor-top: #8b5cf6;
     --floor-none: #c3cac5;
+    --series-1: #2dd4bf;
+    --series-2: #fb923c;
+    --series-3: #60a5fa;
+    --series-4: #a78bfa;
+    --series-5: #f472b6;
+    --series-6: #a3e635;
+    --comfort-band: #16271c;
   }
 }
 

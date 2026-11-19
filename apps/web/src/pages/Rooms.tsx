@@ -16,6 +16,7 @@ import {
 } from '@home/shared';
 import { useLatest, useReadings } from '../api/hooks.js';
 import { Empty, Skeleton } from '../components/Cards.js';
+import { HumidityPanels } from '../components/HumidityPanels.js';
 import { Sparkline } from '../components/charts/Sparkline.js';
 import { token } from '../components/charts/theme.js';
 import { PageHeader } from '../components/PageHeader.js';
@@ -76,6 +77,7 @@ export function RoomsPage() {
   const combine = useCombinedFreshness();
   const sensors = useLatest({ source: 'room_sensors' });
   const nest = useLatest({ source: 'nest' });
+  const weather = useLatest({ source: 'open_meteo' });
   const rooms = buildRooms([...(sensors.data?.items ?? []), ...(nest.data?.items ?? [])]);
 
   const ids = rooms.flatMap((r) =>
@@ -132,6 +134,7 @@ export function RoomsPage() {
               />
             ))}
           </div>
+          <HumidityPanels rooms={rooms} weather={weather.data} range={range} />
           <Comparison rooms={rooms} histories={histories} range={range} />
         </>
       )}
