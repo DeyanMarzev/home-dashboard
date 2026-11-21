@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+    <channel>
+        <title>Met Office warnings for London &amp; South East England</title>
+        <link>https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings</link>
+        <description>Weather warnings of severe and extreme weather from the Met Office</description>
+        <language>en-gb</language>
+        <copyright>(c) Crown copyright</copyright>
+        <pubDate>Mon, 23 Nov 2026 10:00:00 GMT</pubDate>
+        <dc:creator>webteam@metoffice.gov.uk</dc:creator>
+        <item>
+            <title>Yellow warning of wind affecting London &amp; South East England</title>
+            <link>https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings#?date=2026-11-25&amp;id=11111111-aaaa-4bbb-8ccc-000000000001&amp;referrer=rss</link>
+            <description>Yellow warning of wind affecting London &amp; South East England: Barnet, Enfield, Haringey, Waltham Forest valid from 0600 Tue 24 Nov to 2100 Tue 24 Nov</description>
+            <guid isPermaLink="false">https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings#?date=2026-11-25&amp;id=11111111-aaaa-4bbb-8ccc-000000000001&amp;referrer=rss&amp;region=London &amp; South East England</guid>
+            <enclosure length="15285" type="image/png" url="https://data.consumer-digital.api.metoffice.gov.uk/v1/warnings/rss/image/yellow-wind.png"/>
+        </item>
+        <item>
+            <title>Amber warning of rain affecting London &amp; South East England</title>
+            <link>https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings#?date=2026-11-24&amp;id=22222222-aaaa-4bbb-8ccc-000000000002&amp;referrer=rss</link>
+            <description>Amber warning of rain affecting London &amp; South East England: Greater London, Surrey valid from 1800 Mon 23 Nov to 0600 Wed 25 Nov</description>
+            <guid isPermaLink="false">https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings#?date=2026-11-24&amp;id=22222222-aaaa-4bbb-8ccc-000000000002&amp;referrer=rss&amp;region=London &amp; South East England</guid>
+            <enclosure length="15285" type="image/png" url="https://data.consumer-digital.api.metoffice.gov.uk/v1/warnings/rss/image/amber-rain.png"/>
+        </item>
+        <item>
+            <title>Yellow warning of snow, ice affecting London &amp; South East England</title>
+            <link>https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings#?date=2026-11-25&amp;id=33333333-aaaa-4bbb-8ccc-000000000003&amp;referrer=rss</link>
+            <description>Yellow warning of snow, ice affecting London &amp; South East England: Kent, Medway valid from 0000 Tue 24 Nov to 1200 Tue 24 Nov</description>
+            <guid isPermaLink="false">https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings#?date=2026-11-25&amp;id=33333333-aaaa-4bbb-8ccc-000000000003&amp;referrer=rss&amp;region=London &amp; South East England</guid>
+            <enclosure length="15285" type="image/png" url="https://data.consumer-digital.api.metoffice.gov.uk/v1/warnings/rss/image/yellow-snow-ice.png"/>
+        </item>
+        <item>
+            <title>Yellow warning of fog affecting London &amp; South East England</title>
+            <link>https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings#?date=2026-11-23&amp;id=44444444-aaaa-4bbb-8ccc-000000000004&amp;referrer=rss</link>
+            <description>Yellow warning of fog affecting London &amp; South East England: Waltham Forest, Redbridge valid from 0300 Sun 22 Nov to 1100 Sun 22 Nov</description>
+            <guid isPermaLink="false">https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings#?date=2026-11-23&amp;id=44444444-aaaa-4bbb-8ccc-000000000004&amp;referrer=rss&amp;region=London &amp; South East England</guid>
+            <enclosure length="15285" type="image/png" url="https://data.consumer-digital.api.metoffice.gov.uk/v1/warnings/rss/image/yellow-fog.png"/>
+        </item>
+    </channel>
+</rss>

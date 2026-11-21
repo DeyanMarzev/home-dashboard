@@ -32,6 +32,16 @@ sources:
     poll: 15m
     expected_delay: 0s
 
+  met_office_warnings: # severe weather warnings RSS (docs/10 §4); no key
+    name: Met Office warnings
+    description: Severe weather warnings for the home area
+    kind: api
+    poll: 15m
+    expected_delay: 0s
+    options:
+      region: se # London & South East England (codes on weather.metoffice.gov.uk/guides/rss)
+      areas: [Waltham Forest] # alert only for warnings naming these (or London as a whole)
+
   air_quality:
     name: Air quality
     description: UK Daily Air Quality Index, from Open-Meteo (CAMS model)

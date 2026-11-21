@@ -216,6 +216,15 @@ interface CollectorContext {
 - Current: `temperature`, `apparent_temperature` °C, `humidity`, `cloud_cover` %, `precipitation` mm, `weather_code` (state, `wmo`), `pressure` hPa (mean sea level), `wind_speed`, `wind_gust` km/h, `wind_direction` ° (where it blows from), `is_day` (state).
 - Forecasts are separate `forecast_*` metrics, so they're never confused with measurements (freshness ignores them). Hourly, next 24 h: `forecast_temperature`, `forecast_precipitation_probability`, `forecast_weather_code`, `forecast_wind_speed`, `forecast_wind_gust`, `forecast_is_day`. Daily, 7 London days, each stamped at its London midnight: `forecast_day_weather_code`, `forecast_day_temperature_max` / `_min`, `forecast_day_precipitation` (mm), `forecast_day_precipitation_probability`, `forecast_day_wind_speed_max`, `forecast_day_wind_gust_max`, and `forecast_day_sunrise` / `_sunset` as seconds after that midnight (so the instant is exact even on clock-change days).
 
+### met_office_warnings (Met Office RSS): live
+
+- `https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/<region>`, every 15 min, no key, conditional GET (`ETag`/`Last-Modified`). Settings in the registry: `options.region` (`se` = London & South East England) and `options.areas` (`[Waltham Forest]`). `MET_OFFICE_FEED_URL` (env, dev/test) reads another URL or a local file instead.
+- Item: title "Yellow|Amber|Red warning of <type> affecting <region>", description "<title>: <areas, comma-separated> valid from HHMM Ddd D Mon to HHMM Ddd D Mon" (London time, no year), link with the warning's `id=`. Parsed strictly (`parse.ts`): anything else fails the run, so the source turns Late rather than a warning being lost.
+- A warning counts for the home if it names one of `areas`, or London / Greater London as a whole; with no areas configured, or none in the item, every warning counts (logged).
+- Each one opens a `weather_warning` event (entity `w_<uuid>`; yellow = `warning`, amber/red = `alert`, so a colour change escalates); events of warnings that ended or were withdrawn are resolved. Notifies through the `weather_warning` rule (`docs/10` §4).
+- Readings every run so it's Live with no warnings: `active_warnings` (gauge, `warnings`) and `warning_level` (state: 0 none, 1 yellow, 2 amber, 3 red), entity `home_area`.
+- Fixtures: real feeds with no warning and with one (South West England), and a constructed London one in the real format (`__fixtures__/README.md`).
+
 ### air_quality: live
 
 - `https://air-quality-api.open-meteo.com/v1/air-quality` (CAMS European model, about 10 km grid; no API key), same `HOME_LAT` / `HOME_LON`, hourly `pm2_5`, `pm10`, `nitrogen_dioxide`, `ozone`, `sulphur_dioxide` from a day back to two days ahead. Poll 1 h. Units must be µg/m³ (Open-Meteo writes the Greek μ).

@@ -78,6 +78,22 @@ export function londonMidnight(date: string): Date {
     : new Date(utcMidnight.getTime() - 3600_000);
 }
 
+/**
+ * The instant of a London wall-clock time on a London date, e.g. a Met Office warning's
+ * "0600 Sun 22 Nov". London is UTC or UTC+1, so one of the two offsets matches. A time that
+ * doesn't exist (01:30 on the last Sunday of March) gives the UTC+0 reading.
+ */
+export function londonLocalTime(date: string, hour: number, minute: number): Date {
+  const [y, m, d] = date.split('-').map(Number) as [number, number, number];
+  const asUtc = Date.UTC(y, m - 1, d, hour, minute);
+  for (const offsetHours of [1, 0]) {
+    const t = new Date(asUtc - offsetHours * 3600_000);
+    const p = londonParts(t);
+    if (p.day === d && p.hour === hour && p.minute === minute) return t;
+  }
+  return new Date(asUtc);
+}
+
 /** [start, end) of a London calendar day: 24 h, or 23 h / 25 h when the clocks change. */
 export function londonDayBounds(date: string): { from: Date; to: Date } {
   const from = londonMidnight(date);
