@@ -265,6 +265,68 @@ export const TariffSchema = z.object({
 export type Tariff = z.infer<typeof TariffSchema>;
 export const TariffsResponseSchema = z.object({ items: z.array(TariffSchema) });
 
+// --- Users and notifications (M11; docs/04 § Users and notifications) -------------------
+
+export const ROLES = ['member', 'admin'] as const;
+export type Role = (typeof ROLES)[number];
+const ClockTime = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'expected a time like 23:00');
+
+export const MeSchema = z.object({
+  id: z.number().int(),
+  email: z.string(),
+  name: z.string().nullable(),
+  role: z.enum(ROLES),
+  /** From ADMIN_EMAILS: always admin, can't be changed in the UI. */
+  roleLocked: z.boolean(),
+  tz: z.string(),
+  quietStart: ClockTime.nullable(),
+  quietEnd: ClockTime.nullable(),
+  urgentIgnoresQuiet: z.boolean(),
+  pausedUntil: IsoTimestamp.nullable(),
+  /** Null while push isn't set up (M11 step 4) or in development without keys. */
+  vapidPublicKey: z.string().nullable(),
+});
+export type Me = z.infer<typeof MeSchema>;
+
+export const MePatchSchema = z
+  .strictObject({
+    name: z.string().trim().min(1).max(60).nullable(),
+    quietStart: ClockTime.nullable(),
+    quietEnd: ClockTime.nullable(),
+    urgentIgnoresQuiet: z.boolean(),
+    pausedUntil: IsoTimestamp.nullable(),
+  })
+  .partial()
+  .refine(
+    (p) => (p.quietStart === undefined) === (p.quietEnd === undefined),
+    'give quietStart and quietEnd together',
+  )
+  .refine(
+    (p) => (p.quietStart === null) === (p.quietEnd === null),
+    'quietStart and quietEnd are both times or both null',
+  );
+export type MePatch = z.infer<typeof MePatchSchema>;
+
+export const UserItemSchema = z.object({
+  id: z.number().int(),
+  email: z.string(),
+  name: z.string().nullable(),
+  role: z.enum(ROLES),
+  roleLocked: z.boolean(),
+  enabled: z.boolean(),
+  lastSeenAt: IsoTimestamp.nullable(),
+  devices: z.number().int(),
+});
+export type UserItem = z.infer<typeof UserItemSchema>;
+export const UsersResponseSchema = z.object({ items: z.array(UserItemSchema) });
+export type UsersResponse = z.infer<typeof UsersResponseSchema>;
+
+export const UserPatchSchema = z
+  .strictObject({ role: z.enum(ROLES), enabled: z.boolean() })
+  .partial()
+  .refine((p) => p.role !== undefined || p.enabled !== undefined, 'give role or enabled');
+export type UserPatch = z.infer<typeof UserPatchSchema>;
+
 // --- GET /api/stream (Server-Sent Events) ------------------------------------------------
 
 export const StreamReadingSchema = z.object({

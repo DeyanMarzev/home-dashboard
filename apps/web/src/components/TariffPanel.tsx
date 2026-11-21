@@ -1,6 +1,6 @@
 import { formatLondonDayMonth, TariffsPutSchema, type Tariff } from '@home/shared';
 import { useState, type ReactNode } from 'react';
-import { useSaveTariffs, useTariffs } from '../api/hooks.js';
+import { useIsAdmin, useSaveTariffs, useTariffs } from '../api/hooks.js';
 import { Empty, Skeleton } from './Cards.js';
 
 const UNIT: Record<Tariff['fuel'], string> = { electricity: 'p/kWh', gas: 'p/kWh', water: 'p/m³' };
@@ -50,6 +50,7 @@ export function TariffPanel({
   empty: string;
 }) {
   const tariffs = useTariffs();
+  const isAdmin = useIsAdmin();
   const shown = (tariffs.data?.items ?? []).filter((t) => fuels.includes(t.fuel));
   const others = (tariffs.data?.items ?? []).filter((t) => !fuels.includes(t.fuel));
   const firstFuel = fuels[0] ?? 'electricity';
@@ -114,7 +115,7 @@ export function TariffPanel({
         <div className="card-title">
           <h2 id={id}>{title}</h2>
         </div>
-        {!drafts && (
+        {!drafts && isAdmin && (
           <button
             type="button"
             className="pill"

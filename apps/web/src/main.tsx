@@ -5,9 +5,9 @@ import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-qu
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router';
-import { SessionExpiredError } from './api/client.js';
+import { ApiError, SessionExpiredError } from './api/client.js';
 import { LiveProvider } from './api/live.js';
-import { markSessionExpired } from './api/session.js';
+import { markAccessDisabled, markSessionExpired } from './api/session.js';
 import { watchInstall } from './lib/install.js';
 import { NowProvider } from './lib/now.js';
 import { router } from './router.js';
@@ -16,11 +16,16 @@ const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
       if (error instanceof SessionExpiredError) markSessionExpired();
+      else if (error instanceof ApiError && error.code === 'USER_DISABLED') markAccessDisabled();
     },
   }),
   defaultOptions: {
     queries: {
-      retry: (failures, error) => !(error instanceof SessionExpiredError) && failures < 2,
+      // Retrying can't fix a sign-in or a permission problem.
+      retry: (failures, error) =>
+        !(error instanceof SessionExpiredError) &&
+        !(error instanceof ApiError && error.status === 403) &&
+        failures < 2,
       refetchOnWindowFocus: true,
     },
   },

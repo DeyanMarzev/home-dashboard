@@ -2,7 +2,11 @@ import { isAbsolute } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { ConfigError, loadConfig, normaliseAccessTeam } from './config.js';
 
-const access = { CF_ACCESS_TEAM: 'myteam', CF_ACCESS_AUD: 'aud-tag' };
+const access = {
+  CF_ACCESS_TEAM: 'myteam',
+  CF_ACCESS_AUD: 'aud-tag',
+  ADMIN_EMAILS: 'owner@example.com',
+};
 
 describe('loadConfig', () => {
   it('builds the Access issuer and certs URL from the team name', () => {
@@ -59,6 +63,24 @@ describe('loadConfig', () => {
   it('resolves a relative PUBLIC_DIR to an absolute path', () => {
     const { publicDir } = loadConfig({ PUBLIC_DIR: '../web/dist', ...access });
     expect(publicDir && isAbsolute(publicDir)).toBe(true);
+  });
+
+  it('reads ADMIN_EMAILS lowercased, and needs at least one in production', () => {
+    const { users } = loadConfig({
+      ...access,
+      ADMIN_EMAILS: ' Owner@Example.com, second@example.com ',
+    });
+    expect(users).toEqual({
+      adminEmails: ['owner@example.com', 'second@example.com'],
+      devUserEmail: 'dev@localhost',
+    });
+    expect(() => loadConfig({ NODE_ENV: 'production', ...access, ADMIN_EMAILS: '' })).toThrow(
+      /ADMIN_EMAILS is required/,
+    );
+    expect(() => loadConfig({ ...access, ADMIN_EMAILS: 'owner' })).toThrow(/not an email address/);
+    expect(
+      loadConfig({ NODE_ENV: 'development', AUTH_DISABLED: 'true' }).users?.adminEmails,
+    ).toEqual([]);
   });
 
   it('never binds port 8000 (the FastAPI project)', () => {

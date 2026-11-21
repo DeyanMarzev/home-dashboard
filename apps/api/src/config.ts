@@ -27,6 +27,15 @@ export interface Config {
   /** Built web app to serve at `/`, or null to serve the API only. */
   publicDir: string | null;
   auth: AuthConfig;
+  /** Who is who (docs/09 §2). Optional so tests can leave it out: no admins, dev@localhost. */
+  users?: UsersConfig;
+}
+
+export interface UsersConfig {
+  /** Lowercased; always admin, and their role can't be changed in the UI. */
+  adminEmails: string[];
+  /** The signed-in person when AUTH_DISABLED=true (development), as an admin. */
+  devUserEmail: string;
 }
 
 // Compose passes unset optional variables as empty strings (`${VAR:-}`).
@@ -54,7 +63,11 @@ const EnvSchema = z.object({
   ),
   CF_ACCESS_TEAM: optional,
   CF_ACCESS_AUD: optional,
+  ADMIN_EMAILS: optional,
+  DEV_USER_EMAIL: optional,
 });
+
+const EMAIL = /^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/;
 
 /** Accepts `myteam`, `myteam.cloudflareaccess.com` or `https://myteam.cloudflareaccess.com/`. */
 export function normaliseAccessTeam(value: string): string {
@@ -100,6 +113,17 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
     };
   }
 
+  const adminEmails = (e.ADMIN_EMAILS ?? '')
+    .split(',')
+    .map((a) => a.trim().toLowerCase())
+    .filter((a) => a !== '');
+  for (const a of adminEmails) {
+    if (!EMAIL.test(a)) problems.push(`ADMIN_EMAILS: "${a}" is not an email address`);
+  }
+  if (adminEmails.length === 0 && e.NODE_ENV === 'production') {
+    problems.push('ADMIN_EMAILS is required: the email(s) you sign in to Cloudflare Access with');
+  }
+
   if (problems.length > 0) {
     throw new ConfigError(`Invalid environment:\n  - ${problems.join('\n  - ')}`);
   }
@@ -111,5 +135,9 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
     version: e.APP_VERSION ?? '0.0.0-dev',
     publicDir: e.PUBLIC_DIR ? resolve(e.PUBLIC_DIR) : DEFAULT_PUBLIC_DIR,
     auth,
+    users: {
+      adminEmails,
+      devUserEmail: (e.DEV_USER_EMAIL ?? 'dev@localhost').toLowerCase(),
+    },
   };
 }

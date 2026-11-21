@@ -175,12 +175,17 @@ Read and replace tariff rows. Validate no overlapping periods per fuel. From M11
 
 ## Users and notifications (M11)
 
-**Draft for the owner's review (21 Nov 2026)**, from `docs/09` and `docs/10`; tables in `docs/02` § Users and notifications. Every route here needs a person (403 `FORBIDDEN` for a service token); a disabled user gets 403 `USER_DISABLED` on everything but `/api/health`. Admin routes return 403 `FORBIDDEN` to members, enforced in the API.
+From `docs/09` and `docs/10`; tables in `docs/02` § Users and notifications. **Built so far (step 2):** `GET`/`PATCH /api/me` (`vapidPublicKey` stays null until step 4), `GET /api/users`, `PATCH /api/users/:id`, and admin-only `PUT /api/tariffs`. The rest comes with later M11 steps.
+
+- Every `/api` request except `/api/health` gets its user (`apps/api/src/users.ts`): the Access JWT's email, lowercased, upserted into `users` on first visit (a member, or an admin if it's in `ADMIN_EMAILS`), cached for 60 s. With `AUTH_DISABLED=true` it's `DEV_USER_EMAIL`, an admin.
+- A token without an email (service token) is a `service` identity: read access, 403 `FORBIDDEN` on `/api/me*` and admin routes.
+- A disabled user gets 403 `USER_DISABLED` on every `/api` route but `/api/health` (the web app's files still load; they hold no data, and the app shows "Your access … has been turned off").
+- Admin routes return 403 `FORBIDDEN` to members, enforced in the API.
 
 #### Me
 
 - `GET /api/me` → `{ id, email, name, role, roleLocked, tz, quietStart, quietEnd, urgentIgnoresQuiet, pausedUntil, vapidPublicKey }`. `quietStart`/`quietEnd` are `"23:00"` or null; `vapidPublicKey` is null when push is off (development without keys).
-- `PATCH /api/me` with any of `{ name, quietStart, quietEnd, urgentIgnoresQuiet, pausedUntil }` → the same shape.
+- `PATCH /api/me` with any of `{ name, quietStart, quietEnd, urgentIgnoresQuiet, pausedUntil }` → the same shape. `quietStart`/`quietEnd` come together (both times, or both null to clear); anything else is a 400.
 - `GET /api/me/devices` → `{ items: [{ id, label, createdAt, lastSeenAt, lastSuccessAt, failureCount }] }` (never the endpoint or keys).
 - `POST /api/me/devices` with `{ subscription: PushSubscriptionJSON, label? }` → the device. Upsert on the endpoint: refreshes `lastSeenAt`, and moves the device to the signed-in user if it belonged to someone else.
 - `PATCH /api/me/devices/:id` `{ label }` · `DELETE /api/me/devices/:id` · `POST /api/me/devices/:id/test` (sends "Test notification"; 202, result in the log). Another user's device id gives 404.
@@ -191,7 +196,7 @@ Read and replace tariff rows. Validate no overlapping periods per fuel. From M11
 
 - `GET /api/alert-rules` → `{ items: [{ id, group, name, type, effective, defaults, override: { params, updatedBy, updatedAt } | null }] }`.
 - `PATCH /api/alert-rules/:id` `{ enabled?, warning?, alert?, clear?, options? }` → the rule. The merged rule is validated (`docs/09` §3, `docs/10` §1); 400 `BAD_REQUEST` lists the problems. `DELETE /api/alert-rules/:id/override` → back to the YAML.
-- `GET /api/users` → `{ items: [{ id, email, name, role, roleLocked, enabled, lastSeenAt, devices }] }`. `PATCH /api/users/:id` `{ role?, enabled? }`; 409 `CONFLICT` for a `roleLocked` user or yourself.
+- `GET /api/users` → `{ items: [{ id, email, name, role, roleLocked, enabled, lastSeenAt, devices }] }`. `PATCH /api/users/:id` `{ role?, enabled? }` → the user; 409 `CONFLICT` for a `roleLocked` user or yourself, 404 for an unknown id. Applies to the next request (the user cache is cleared).
 - `GET /api/notifications/log?limit=50` → `{ items: [{ ts, user, ruleId, entity, phase, status, device }] }`, newest first; `limit` 1–500.
 - `GET /api/network/devices?known=` · `PATCH /api/network/devices/:mac` · `DELETE /api/network/devices/:mac`: `docs/10` §5 (built after M11 step 2).
 

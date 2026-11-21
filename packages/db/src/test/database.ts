@@ -46,6 +46,7 @@ const PGLITE_MIGRATIONS: Record<string, (sql: string) => string | null> = {
            avg(value) AS avg, min(value) AS min, max(value) AS max, sum(value) AS sum, count(*) AS n
     FROM readings GROUP BY series_id, bucket;`,
   '003_hourly_realtime.sql': () => null,
+  '004_users_notifications.sql': (sql) => sql,
 };
 
 export async function startPglite(): Promise<TestDatabase> {
