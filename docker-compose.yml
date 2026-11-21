@@ -158,6 +158,7 @@ services:
       CF_ACCESS_TEAM: ${CF_ACCESS_TEAM:?set CF_ACCESS_TEAM in .env (docs/06 §5.1)}
       CF_ACCESS_AUD: ${CF_ACCESS_AUD:?set CF_ACCESS_AUD in .env (docs/06 §5.2)}
       AUTH_DISABLED: ${AUTH_DISABLED:-false}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:?set ADMIN_EMAILS in .env (docs/09 §2)}
     volumes:
       - ./config:/app/config:ro
     ports:

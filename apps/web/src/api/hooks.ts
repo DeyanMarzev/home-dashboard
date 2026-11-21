@@ -4,6 +4,7 @@ import {
   HealthSchema,
   HeatingSummarySchema,
   LatestResponseSchema,
+  MeSchema,
   MiscResponseSchema,
   ReadingsResponseSchema,
   SeriesResponseSchema,
@@ -16,6 +17,7 @@ import {
   type FreshnessPolicy,
   type HeatingSummary,
   type LatestResponse,
+  type Me,
   type MiscResponse,
   type ReadingsResponse,
   type SeriesMeta,
@@ -35,6 +37,20 @@ const MINUTE = 60_000;
 /** Poll every minute without the live stream, every 5 minutes as a safety net with it. */
 function useLatestInterval(): number {
   return useLive().connected ? 5 * MINUTE : MINUTE;
+}
+
+/** The signed-in person (docs/09 §2). */
+export function useMe() {
+  return useQuery({
+    queryKey: ['me'],
+    queryFn: () => getJson<Me>('/api/me', MeSchema),
+    staleTime: 5 * MINUTE,
+  });
+}
+
+/** Admin-only controls are hidden from members (the API enforces it anyway). */
+export function useIsAdmin(): boolean {
+  return useMe().data?.role === 'admin';
 }
 
 export function useSources() {

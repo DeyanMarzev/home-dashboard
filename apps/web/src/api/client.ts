@@ -8,6 +8,8 @@ export class ApiError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    /** The API's error code, e.g. USER_DISABLED (docs/04 § Errors). */
+    readonly code?: string,
   ) {
     super(message);
   }
@@ -43,8 +45,14 @@ async function request<T>(path: string, init: RequestInit, schema?: z.ZodType<T>
   });
   if (res.type === 'opaqueredirect' || res.status === 401) throw new SessionExpiredError();
   if (!res.ok) {
-    const body = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
-    throw new ApiError(res.status, body?.error?.message ?? `Request failed (HTTP ${res.status})`);
+    const body = (await res.json().catch(() => null)) as {
+      error?: { message?: string; code?: string };
+    } | null;
+    throw new ApiError(
+      res.status,
+      body?.error?.message ?? `Request failed (HTTP ${res.status})`,
+      body?.error?.code,
+    );
   }
   const body: unknown = await res.json();
   // In development, catch API/UI drift early; in production trust the API (it's tested).

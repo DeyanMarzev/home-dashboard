@@ -17,6 +17,7 @@ import {
 } from '@home/shared';
 import type { FastifyInstance } from 'fastify';
 import { HttpError } from '../errors.js';
+import { requireAdmin } from '../users.js';
 import type { FreshnessService } from '../freshness.js';
 import {
   bucketsFromHourly,
@@ -277,6 +278,7 @@ export function registerDataRoutes(
   app.get('/api/tariffs', () => listTariffs());
 
   app.put('/api/tariffs', async (request) => {
+    requireAdmin(request);
     const { items } = parseInput(TariffsPutSchema, request.body);
     await db.begin(async (tx) => {
       await tx`delete from tariffs`;

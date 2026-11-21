@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { Sql } from 'postgres';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { openEvent, resolveEvent } from './events.js';
+import { EVENTS_CHANNEL, openEvent, resolveEvent } from './events.js';
 import { latestBySource } from './latest.js';
 import { migrate, MigrationError } from './migrate.js';
 import { createReadingWriter, lastDataTo, READINGS_CHANNEL } from './readings.js';
@@ -13,6 +13,7 @@ import { attemptsSince, finishRun, pruneRuns, recordRun, startRun } from './runs
 import { syncSources } from './sources.js';
 import { addPublishedTariff } from './tariffs.js';
 import { SOURCES_FILE, testBackends, type TestDatabase } from './test/database.js';
+import { listUsers, signInUser, updateProfile, updateUserAccess } from './users.js';
 
 const kitchenTemps: ReadingInput[] = [
   {
@@ -85,6 +86,12 @@ describe.each(testBackends)('database ($name)', ({ start }) => {
           'series',
           'sources',
           'tariffs',
+          'users',
+          'push_subscriptions',
+          'user_alert_prefs',
+          'alert_rule_overrides',
+          'alert_state',
+          'notification_log',
         ]),
       );
     });
@@ -483,6 +490,108 @@ describe.each(testBackends)('database ($name)', ({ start }) => {
       expect(await openEvent(sql, late)).toEqual(expect.any(Number));
       expect(await openCount()).toBe(1);
       await resolveEvent(sql, 'room_sensors', 'source_late');
+    });
+
+    it('keeps one open event per entity, and resolves only that entity', async () => {
+      const warn = {
+        level: 'warning' as const,
+        sourceId: 'roborock',
+        kind: 'test_kind',
+        message: 'x',
+      };
+      expect(await openEvent(sql, { ...warn, entity: 'kitchen' })).toEqual(expect.any(Number));
+      expect(await openEvent(sql, { ...warn, entity: 'bedroom' })).toEqual(expect.any(Number));
+      expect(await openEvent(sql, { ...warn, entity: 'kitchen' })).toBeNull();
+      expect(await resolveEvent(sql, 'roborock', 'test_kind', 'kitchen')).toEqual(
+        expect.any(Number),
+      );
+      const open = await sql<{ entity: string }[]>`
+        select entity from events where kind = 'test_kind' and resolved_at is null`;
+      expect(open.map((r) => r.entity)).toEqual(['bedroom']);
+      await resolveEvent(sql, 'roborock', 'test_kind', 'bedroom');
+    });
+
+    it('lets sourceless events (backups) repeat while open, as before', async () => {
+      await sql`insert into events (level, kind, message) values ('info', 'backup', 'one'), ('info', 'backup', 'two')`;
+      const [row] = await sql<{ n: number }[]>`
+        select count(*)::int as n from events where kind = 'backup' and resolved_at is null`;
+      expect(row?.n).toBe(2);
+    });
+
+    it('notifies the event id from a trigger, on open and on resolve', async (ctx) => {
+      if (!db.supportsNotify) ctx.skip('PGlite: needs TEST_DATABASE_URL (real Postgres)');
+      const received: string[] = [];
+      const unlisten = await db.listen(EVENTS_CHANNEL, (payload) => received.push(payload));
+      try {
+        const id = await openEvent(sql, { ...late, kind: 'notify_test' });
+        await resolveEvent(sql, 'room_sensors', 'notify_test');
+        for (let i = 0; i < 50 && received.length < 2; i++)
+          await new Promise((r) => setTimeout(r, 50));
+        expect(received).toEqual([String(id), String(id)]);
+      } finally {
+        await unlisten();
+      }
+    });
+  });
+
+  describe('users', () => {
+    it('creates members, makes ADMIN_EMAILS admin, and keeps a stored role', async () => {
+      const anna = await signInUser(sql, 'Anna@Example.com', { admin: false });
+      expect(anna).toMatchObject({
+        email: 'anna@example.com',
+        role: 'member',
+        enabled: true,
+        tz: 'Europe/London',
+        quietStart: null,
+        urgentIgnoresQuiet: true,
+      });
+      expect(anna.lastSeenAt).toBeInstanceOf(Date);
+      expect((await signInUser(sql, 'owner@example.com', { admin: true })).role).toBe('admin');
+      await updateUserAccess(sql, anna.id, { role: 'admin' });
+      expect((await signInUser(sql, 'anna@example.com', { admin: false })).role).toBe('admin');
+      await updateUserAccess(sql, anna.id, { role: 'member' });
+    });
+
+    it('moves last_seen_at at most every 5 minutes', async () => {
+      const first = await signInUser(sql, 'seen@example.com', { admin: false });
+      const again = await signInUser(sql, 'seen@example.com', { admin: false });
+      expect(again.lastSeenAt).toEqual(first.lastSeenAt);
+      await sql`update users set last_seen_at = now() - interval '6 minutes' where id = ${first.id}`;
+      const later = await signInUser(sql, 'seen@example.com', { admin: false });
+      expect(later.lastSeenAt!.getTime()).toBeGreaterThan(Date.now() - 60_000);
+    });
+
+    it('changes only the profile fields given', async () => {
+      const u = await signInUser(sql, 'quiet@example.com', { admin: false });
+      const named = await updateProfile(sql, u.id, { name: 'Quiet one' });
+      expect(named).toMatchObject({ name: 'Quiet one', quietStart: null });
+      const quiet = await updateProfile(sql, u.id, {
+        quiet: { start: '23:00', end: '07:00' },
+        urgentIgnoresQuiet: false,
+      });
+      expect(quiet).toMatchObject({
+        name: 'Quiet one',
+        quietStart: '23:00',
+        quietEnd: '07:00',
+        urgentIgnoresQuiet: false,
+      });
+      expect(await updateProfile(sql, u.id, { quiet: null })).toMatchObject({ quietStart: null });
+    });
+
+    it('disables a user and lists everyone with their device count', async () => {
+      const u = await signInUser(sql, 'gone@example.com', { admin: false });
+      expect(await updateUserAccess(sql, u.id, { enabled: false })).toMatchObject({
+        enabled: false,
+      });
+      expect(await updateUserAccess(sql, 999_999, { enabled: false })).toBeNull();
+      await sql`insert into push_subscriptions (user_id, endpoint, p256dh, auth, label)
+                values (${u.id}, 'https://push.example/1', 'k', 'a', 'Phone')`;
+      const all = await listUsers(sql);
+      expect(all.find((x) => x.email === 'gone@example.com')).toMatchObject({
+        devices: 1,
+        enabled: false,
+      });
+      expect(all.find((x) => x.email === 'anna@example.com')).toMatchObject({ devices: 0 });
     });
   });
 });

@@ -102,7 +102,7 @@ CREATE TABLE tariffs (
 
 ## Users and notifications (migration `004_users_notifications.sql`, M11)
 
-**Draft for the owner's review (21 Nov 2026).** Tables for `docs/09` (users, push, alert rules) and `docs/10`. Rules themselves live in `config/alerts.yaml`; the database only holds the household's overrides, each person's choices and the engine's state, so `rule_id` columns are plain text (no foreign key: a rule removed from the YAML is simply ignored).
+**Migration `004` (M11 step 2, 21 Nov 2026; reviewed by the owner without changes).** Tables for `docs/09` (users, push, alert rules) and `docs/10`. Rules themselves live in `config/alerts.yaml`; the database only holds the household's overrides, each person's choices and the engine's state, so `rule_id` columns are plain text (no foreign key: a rule removed from the YAML is simply ignored).
 
 ### Changes to `events`
 
@@ -230,7 +230,7 @@ CREATE INDEX ON notification_log (user_id, ts DESC);   -- rate limit: pushes per
 -- Rows older than 90 days are deleted daily.
 ```
 
-### Choices to confirm
+### Choices made
 
 - **`alert_state` per series**, not per `(rule, entity)` as `docs/09` §3 says: a room with both a room sensor and the Nest (same entity, two sources) then gets two independent state machines instead of mixing two sensors' readings. Today no entity has two sources for the same metric, so the difference only matters later.
 - **"Back to normal" is off by default** for every rule (`docs/09` doesn't say). People switch it on per rule.

@@ -11,8 +11,10 @@ import { FreshnessService } from './freshness.js';
 import { registerDataRoutes } from './routes/data.js';
 import { registerEnergyRoutes } from './routes/energy.js';
 import { registerHeatingRoutes } from './routes/heating.js';
+import { registerUserRoutes } from './routes/users.js';
 import { registerWaterRoutes } from './routes/water.js';
 import { postgresNotifications, StreamHub, type NotificationSource } from './stream.js';
+import { registerUsers } from './users.js';
 import { registerWebApp } from './web-app.js';
 
 export interface ServerDeps {
@@ -96,6 +98,16 @@ export async function buildServer(config: Config, deps: ServerDeps = {}): Promis
       throw err;
     }
   });
+
+  if (deps.db) {
+    // After the Access check: every /api request gets its user (docs/09 §2).
+    const directory = registerUsers(app, {
+      db: deps.db,
+      users: config.users ?? { adminEmails: [], devUserEmail: 'dev@localhost' },
+      authDisabled: config.auth.disabled,
+    });
+    registerUserRoutes(app, { db: deps.db, directory });
+  }
 
   if (deps.db && deps.registry) {
     const now = deps.now ?? (() => new Date());

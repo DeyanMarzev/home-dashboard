@@ -1,5 +1,4 @@
 import type { Sql } from 'postgres';
-import { EVENTS_CHANNEL } from './events.js';
 
 export interface PublishedTariff {
   fuel: 'electricity' | 'gas' | 'water';
@@ -30,13 +29,12 @@ export async function addPublishedTariff(sql: Sql, t: PublishedTariff): Promise<
     await tx`
       insert into tariffs (fuel, unit_rate_pence, standing_pence, valid_from)
       values (${t.fuel}, ${t.unitRatePence}, ${t.standingPence}, ${t.validFrom}::date)`;
-    const [event] = await tx<{ id: string }[]>`
+    // The events trigger (migration 004) NOTIFYs the API.
+    await tx`
       insert into events (level, source_id, kind, message, data, resolved_at)
       values ('info', null, 'tariff_updated',
               ${`${t.fuel[0]!.toUpperCase()}${t.fuel.slice(1)} rates from ${t.publisher} added: ${t.unitRatePence} p per ${t.fuel === 'water' ? 'm³' : 'kWh'}, ${t.standingPence} p a day, from ${t.validFrom}`},
-              ${JSON.stringify(t)}::jsonb, now())
-      returning id`;
-    await tx`select pg_notify(${EVENTS_CHANNEL}, ${event!.id})`;
+              ${JSON.stringify(t)}::jsonb, now())`;
     return true;
   });
 }
