@@ -100,6 +100,143 @@ CREATE TABLE tariffs (
 );
 ```
 
+## Users and notifications (migration `004_users_notifications.sql`, M11)
+
+**Draft for the owner's review (21 Nov 2026).** Tables for `docs/09` (users, push, alert rules) and `docs/10`. Rules themselves live in `config/alerts.yaml`; the database only holds the household's overrides, each person's choices and the engine's state, so `rule_id` columns are plain text (no foreign key: a rule removed from the YAML is simply ignored).
+
+### Changes to `events`
+
+What's built stays: `openEvent()` / `resolveEvent()` in `packages/db/src/events.ts` remain the only writers from TypeScript, `source_id` keeps meaning "which source raised it", and existing kinds (`source_late`, `nest_auth`, `water_leak`, `backup`, `roborock_auth`, `vacuum_not_charging`, `tariff_updated`) keep their names.
+
+```sql
+ALTER TABLE events
+  ADD COLUMN entity                 text NOT NULL DEFAULT '',  -- 'kitchen', a MAC, a warning id; '' = source-wide
+  ADD COLUMN rule_id                text,                      -- set when the event should notify (below)
+  ADD COLUMN escalated_at           timestamptz,
+  ADD COLUMN dispatched_at          timestamptz,               -- opened/escalated push handled
+  ADD COLUMN resolved_dispatched_at timestamptz;               -- resolved push handled
+
+-- One open event per source + kind + entity (was: per source + kind). Rows without a source
+-- (backups) stay unconstrained, as today: NULLs are distinct.
+DROP INDEX events_one_open_per_source_kind;
+CREATE UNIQUE INDEX events_one_open ON events (source_id, kind, entity) WHERE resolved_at IS NULL;
+
+-- Dispatcher work queue: only rows that notify.
+CREATE INDEX events_to_dispatch ON events (ts)
+  WHERE rule_id IS NOT NULL AND (dispatched_at IS NULL OR resolved_dispatched_at IS NULL);
+
+-- NOTIFY 'events' with the id on insert and when level, resolved_at or escalated_at change.
+-- Replaces the explicit pg_notify in openEvent/resolveEvent, and also covers scripts/backup.sh,
+-- whose plain INSERTs don't notify today. The SSE stream listens on the same channel.
+CREATE FUNCTION events_notify() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  PERFORM pg_notify('events', NEW.id::text);
+  RETURN NULL;
+END $$;
+CREATE TRIGGER events_notify_insert AFTER INSERT ON events
+  FOR EACH ROW EXECUTE FUNCTION events_notify();
+CREATE TRIGGER events_notify_update AFTER UPDATE OF level, resolved_at, escalated_at ON events
+  FOR EACH ROW EXECUTE FUNCTION events_notify();
+```
+
+- `rule_id`: `openEvent` sets it to `kind` when a rule of that id exists and the level is `warning` or `alert`. `info` events (backup finished, tariff updated) never notify. Threshold rules write their own events with `rule_id` = the rule id, `source_id` = the series' source, `entity` = the series' entity.
+- Existing rows keep `entity = ''` and `rule_id = NULL`, so nothing old is pushed when M11 is deployed.
+- `level` only ever goes up while an event is open (no de-escalation), so for a resolved event it is the highest level reached (`docs/09` §4 rule 4).
+
+### New tables
+
+```sql
+CREATE TABLE users (
+  id                   serial PRIMARY KEY,
+  email                text NOT NULL UNIQUE CHECK (email = lower(email)),  -- from the Access JWT
+  name                 text,                                    -- editable display name
+  role                 text NOT NULL DEFAULT 'member' CHECK (role IN ('member','admin')),
+  enabled              boolean NOT NULL DEFAULT true,
+  tz                   text NOT NULL DEFAULT 'Europe/London',
+  quiet_start          time,                                    -- local time in tz; may cross midnight
+  quiet_end            time,
+  urgent_ignores_quiet boolean NOT NULL DEFAULT true,
+  paused_until         timestamptz,
+  created_at           timestamptz NOT NULL DEFAULT now(),
+  last_seen_at         timestamptz,                             -- updated at most every 5 min
+  CHECK ((quiet_start IS NULL) = (quiet_end IS NULL))
+);
+-- ADMIN_EMAILS users are made admin on every sign-in and are "roleLocked" (computed from the
+-- env, not stored).
+
+CREATE TABLE push_subscriptions (
+  id              serial PRIMARY KEY,
+  user_id         int NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  endpoint        text NOT NULL UNIQUE,     -- upsert on endpoint; re-links the phone if someone else signs in
+  p256dh          text NOT NULL,            -- never logged
+  auth            text NOT NULL,            -- never logged
+  label           text NOT NULL,            -- "Chrome on Android", renamed by the user
+  user_agent      text,
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  last_seen_at    timestamptz NOT NULL DEFAULT now(),
+  last_success_at timestamptz,
+  failure_count   int NOT NULL DEFAULT 0
+);
+CREATE INDEX ON push_subscriptions (user_id);
+
+-- One row per user per rule, only once the user changes something (no row = rule defaults).
+CREATE TABLE user_alert_prefs (
+  user_id         int NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  rule_id         text NOT NULL,
+  enabled         boolean NOT NULL,
+  min_level       text NOT NULL CHECK (min_level IN ('warning','alert')),
+  entities        text[],                   -- NULL = all
+  notify_resolved boolean NOT NULL,
+  updated_at      timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, rule_id)
+);
+
+-- Admin changes on top of the YAML (deep-merged; validated with the rule's zod schema).
+CREATE TABLE alert_rule_overrides (
+  rule_id    text PRIMARY KEY,
+  params     jsonb NOT NULL,                -- { enabled?, warning?, alert?, clear?, options? }
+  updated_by int REFERENCES users(id) ON DELETE SET NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+-- After a change: NOTIFY alert_rules_changed (the collector reloads).
+
+-- Threshold engine state, one row per rule and series. Loaded at collector start.
+CREATE TABLE alert_state (
+  rule_id       text NOT NULL,
+  series_id     int NOT NULL REFERENCES series(id) ON DELETE CASCADE,
+  warning_since timestamptz,                -- first reading beyond warning, cleared when back inside
+  alert_since   timestamptz,                -- same for alert
+  clear_since   timestamptz,                -- first reading inside clear while an event is open
+  last_value    double precision,
+  last_ts       timestamptz,
+  updated_at    timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (rule_id, series_id)
+);
+
+CREATE TABLE notification_log (
+  id              bigserial PRIMARY KEY,
+  ts              timestamptz NOT NULL DEFAULT now(),
+  event_id        bigint REFERENCES events(id) ON DELETE CASCADE,  -- NULL for test pushes
+  user_id         int NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  subscription_id int REFERENCES push_subscriptions(id) ON DELETE SET NULL,
+  phase           text NOT NULL CHECK (phase IN ('opened','escalated','resolved','test','rate_limit')),
+  status          text NOT NULL CHECK (status IN ('sent','failed','gone',
+                    'skipped_disabled','skipped_level','skipped_entity','skipped_paused',
+                    'skipped_quiet','skipped_rate_limited')),
+  error           text                      -- short reason; never the endpoint or keys
+);
+CREATE INDEX ON notification_log (ts DESC);
+CREATE INDEX ON notification_log (user_id, ts DESC);   -- rate limit: pushes per user per hour
+-- Rows older than 90 days are deleted daily.
+```
+
+### Choices to confirm
+
+- **`alert_state` per series**, not per `(rule, entity)` as `docs/09` §3 says: a room with both a room sensor and the Nest (same entity, two sources) then gets two independent state machines instead of mixing two sensors' readings. Today no entity has two sources for the same metric, so the difference only matters later.
+- **"Back to normal" is off by default** for every rule (`docs/09` doesn't say). People switch it on per rule.
+- **Backups:** `scripts/backup.sh` keeps inserting plain rows (`source_id` NULL). After a good backup it will resolve any open `backup` warning, so the Overview strip stops showing an old failure (today it stays forever).
+- `network_devices` (`docs/10` §5) comes next as migration `005_network_devices.sql`, because it references `users`.
+
 ## Migrations
 
 - Plain numbered SQL files in `db/migrations/` (`001_init.sql`, `002_...`), applied in order at startup by **both** `api` and `collector` (`packages/db/src/migrate.ts`), recorded in `schema_migrations` (version, name, sha256 checksum).

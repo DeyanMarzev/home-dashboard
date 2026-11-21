@@ -175,7 +175,9 @@ Troubleshooting:
 | Cloudflare error 502 / 1033 | Tunnel is up but `api` isn't answering (`docker compose ps`, `docker compose logs api`), or the hostname's service URL isn't `http://api:3000`. |
 | `api` exits with "Invalid environment" | The message lists exactly which `.env` values are missing or wrong. |
 
-### 5.5 Service token (for the Android app, M11)
+### 5.5 Service token (for scripts and `curl`)
+
+The phone app doesn't need one: it's the installed web app and signs in like a browser (`docs/09`). From M11 a service token is a `service` identity with read access only.
 
 **Access → Service credentials → Service Tokens → Create.** Then in the `Home dashboard` application add a second policy: action **Service Auth**, Include → **Service Token** → the new token. Nothing changes in the API.
 

@@ -3,7 +3,7 @@
 ## Overview
 
 ```
- Browser (home.deyan.uk)      Android app (later)
+ Browser (home.deyan.uk)      Phone: installed web app (PWA, M11)
             \                     /
              \                   /
          Cloudflare: DNS · TLS · Access login
@@ -77,7 +77,7 @@ Disable `timescaledb-tune` auto-tuning in the image (`NO_TS_TUNE=true`) so these
 
 - Cloudflare Tunnel (remotely managed, token in `.env` as `CLOUDFLARE_TUNNEL_TOKEN`).
 - Public hostname `home.deyan.uk` → `http://api:3000`.
-- Cloudflare Access application on `home.deyan.uk`: allow listed emails only. A service token for the Android app.
+- Cloudflare Access application on `home.deyan.uk`: allow listed emails only. The phone app is the installed web app and signs in the same way; push notifications go Pi → push service → phone, not through Cloudflare (`docs/09`).
 - The API also verifies the `Cf-Access-Jwt-Assertion` header (defence in depth). See `docs/04-api.md`.
 - Optional later: the same tunnel can publish the owner's FastAPI project on another hostname (`http://host.docker.internal:8000` with `extra_hosts: ["host.docker.internal:host-gateway"]`).
 

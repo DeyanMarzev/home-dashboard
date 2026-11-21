@@ -1,12 +1,12 @@
 # 04 · API
 
-Fastify 5, TypeScript, zod-validated inputs and outputs (schemas live in `packages/shared` so the web and Android apps get the same types). Base path `/api`. JSON only. The same server serves the built web app at `/` with SPA fallback.
+Fastify 5, TypeScript, zod-validated inputs and outputs (schemas live in `packages/shared` so the web app and the API share the same types). Base path `/api`. JSON only. The same server serves the built web app at `/` with SPA fallback.
 
 ## Auth
 
 - Cloudflare Access sits in front of `home.deyan.uk`. Every request that reaches the API carries `Cf-Access-Jwt-Assertion`.
 - Middleware verifies that JWT (RS256) against `https://${CF_ACCESS_TEAM}.cloudflareaccess.com/cdn-cgi/access/certs` with audience `CF_ACCESS_AUD`. Cache the keys. Reject with 401 if missing or invalid.
-- The Android app uses an Access **service token** (`CF-Access-Client-Id` / `CF-Access-Client-Secret` headers); Access then forwards a valid JWT, so the API needs no special case.
+- Scripts can use an Access **service token** (`CF-Access-Client-Id` / `CF-Access-Client-Secret` headers); Access then forwards a valid JWT without an `email`. From M11 that is a `service` identity: read access like a member, 403 on `/api/me*` (`docs/09` §2). The phone app is the installed web app and signs in like a browser.
 - `AUTH_DISABLED=true` for local development only. The API must refuse to start with `AUTH_DISABLED=true` when `NODE_ENV=production`.
 - `/api/health` is unauthenticated (used by the Docker healthcheck), returns no data.
 - Only RS256 is accepted; issuer must be `https://${CF_ACCESS_TEAM}.cloudflareaccess.com`; 30 s clock tolerance. `CF_ACCESS_TEAM` may be given as `team`, `team.cloudflareaccess.com` or the full URL.
@@ -154,10 +154,10 @@ Daily litres, hourly profile for a day, nightly minimum flow (leak check).
 The Misc page's settings from `config/misc.yaml`, read on every request (edits apply without a restart): `{ "bins": [{ "name", "colour", "everyWeeks", "collectedOn" }] }`, where `collectedOn` is any one collection date (YYYY-MM-DD) and the rest follow every `everyWeeks` weeks (`upcomingCollections` in `packages/shared` works out the dates). A missing file gives `{ "bins": [] }`; an invalid one a 500 with code `BAD_CONFIG` and the problems listed. Not a data source: no freshness.
 
 ### `GET /api/events?limit=50&level=&kind=`
-Recent events, newest first: `{ "items": [{ "id", "ts", "level", "sourceId", "kind", "message", "data", "resolvedAt" }] }`. `limit` 1–500. `kind` filters to one event kind (e.g. `backup`, used by the System page for the last backup).
+Recent events, newest first: `{ "items": [{ "id", "ts", "level", "sourceId", "kind", "message", "data", "resolvedAt" }] }` (from M11 also `entity`, `ruleId`, `escalatedAt`). `limit` 1–500. `kind` filters to one event kind (e.g. `backup`, used by the System page for the last backup).
 
 ### `GET /api/tariffs` · `PUT /api/tariffs`
-Read and replace tariff rows. Validate no overlapping periods per fuel.
+Read and replace tariff rows. Validate no overlapping periods per fuel. From M11, `PUT` is admin only (403 `FORBIDDEN` for members).
 
 `{ "items": [{ "id", "fuel": "electricity" | "gas" | "water", "unitRatePence", "standingPence", "validFrom": "2026-10-01", "validTo": "2027-03-31" | null }] }`. `validTo` is the last day the rate applies (inclusive); null = still current. PUT takes `{ "items": [...] }` without ids, replaces every row in one transaction, and returns the new list. Pence have at most 3 decimals.
 
@@ -171,7 +171,29 @@ Read and replace tariff rows. Validate no overlapping periods per fuel.
 - `freshness` is re-checked every 30 s, and within 1 s when a reading arrives for a source that isn't Live (so a badge flips back promptly).
 - `event` is sent for new and for resolved events (`resolvedAt` set).
 - Never compressed (compression would buffer the stream). At most 50 clients; more get 503. One Postgres `LISTEN` connection serves all clients. Clients that stop reading (> 1 MB buffered) are dropped.
-- Through Cloudflare: browsers authenticate with the Access cookie (EventSource can't send headers); the Android app's service token headers work the same way.
+- Through Cloudflare: browsers and the installed app authenticate with the Access cookie (EventSource can't send headers).
+
+## Users and notifications (M11)
+
+**Draft for the owner's review (21 Nov 2026)**, from `docs/09` and `docs/10`; tables in `docs/02` § Users and notifications. Every route here needs a person (403 `FORBIDDEN` for a service token); a disabled user gets 403 `USER_DISABLED` on everything but `/api/health`. Admin routes return 403 `FORBIDDEN` to members, enforced in the API.
+
+#### Me
+
+- `GET /api/me` → `{ id, email, name, role, roleLocked, tz, quietStart, quietEnd, urgentIgnoresQuiet, pausedUntil, vapidPublicKey }`. `quietStart`/`quietEnd` are `"23:00"` or null; `vapidPublicKey` is null when push is off (development without keys).
+- `PATCH /api/me` with any of `{ name, quietStart, quietEnd, urgentIgnoresQuiet, pausedUntil }` → the same shape.
+- `GET /api/me/devices` → `{ items: [{ id, label, createdAt, lastSeenAt, lastSuccessAt, failureCount }] }` (never the endpoint or keys).
+- `POST /api/me/devices` with `{ subscription: PushSubscriptionJSON, label? }` → the device. Upsert on the endpoint: refreshes `lastSeenAt`, and moves the device to the signed-in user if it belonged to someone else.
+- `PATCH /api/me/devices/:id` `{ label }` · `DELETE /api/me/devices/:id` · `POST /api/me/devices/:id/test` (sends "Test notification"; 202, result in the log). Another user's device id gives 404.
+- `GET /api/me/alerts` → `{ groups: [{ id, name, rules: [{ id, name, type, description, levels, entities, resolvedNotice, enabled, minLevel, entitiesSelected, notifyResolved, isDefault, open: [{ entity, level, since }] }] }] }`. `description` is generated from the effective thresholds; `levels` is `['warning']` or `['warning','alert']`; `entities` are the ones the rule covers now.
+- `PUT /api/me/alerts/:ruleId` `{ enabled, minLevel, entities, notifyResolved }` → the rule as above. `DELETE /api/me/alerts/:ruleId` resets it to the defaults.
+
+#### Admin
+
+- `GET /api/alert-rules` → `{ items: [{ id, group, name, type, effective, defaults, override: { params, updatedBy, updatedAt } | null }] }`.
+- `PATCH /api/alert-rules/:id` `{ enabled?, warning?, alert?, clear?, options? }` → the rule. The merged rule is validated (`docs/09` §3, `docs/10` §1); 400 `BAD_REQUEST` lists the problems. `DELETE /api/alert-rules/:id/override` → back to the YAML.
+- `GET /api/users` → `{ items: [{ id, email, name, role, roleLocked, enabled, lastSeenAt, devices }] }`. `PATCH /api/users/:id` `{ role?, enabled? }`; 409 `CONFLICT` for a `roleLocked` user or yourself.
+- `GET /api/notifications/log?limit=50` → `{ items: [{ ts, user, ruleId, entity, phase, status, device }] }`, newest first; `limit` 1–500.
+- `GET /api/network/devices?known=` · `PATCH /api/network/devices/:mac` · `DELETE /api/network/devices/:mac`: `docs/10` §5 (built after M11 step 2).
 
 ## Errors
 
