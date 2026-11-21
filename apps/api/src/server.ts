@@ -1,5 +1,5 @@
 import fastifyCompress from '@fastify/compress';
-import { loadMiscFile, MiscFileError, pingDb, type Sql } from '@home/db';
+import { loadAlertsFile, loadMiscFile, MiscFileError, pingDb, type Sql } from '@home/db';
 import { toMiscResponse, type Registry } from '@home/shared';
 import Fastify, { type FastifyBaseLogger, type FastifyInstance } from 'fastify';
 import type { JWTVerifyGetKey } from 'jose';
@@ -8,7 +8,11 @@ import { registerAccessAuth } from './auth.js';
 import type { Config } from './config.js';
 import { HttpError, registerErrorHandler } from './errors.js';
 import { FreshnessService } from './freshness.js';
+import { WebPushChannel, type Channel } from './push/channel.js';
+import { Dispatcher } from './push/dispatcher.js';
+import { RulesStore } from './push/rules.js';
 import { registerDataRoutes } from './routes/data.js';
+import { registerDeviceRoutes } from './routes/devices.js';
 import { registerEnergyRoutes } from './routes/energy.js';
 import { registerHeatingRoutes } from './routes/heating.js';
 import { registerUserRoutes } from './routes/users.js';
@@ -31,6 +35,10 @@ export interface ServerDeps {
   logger?: FastifyBaseLogger;
   /** config/misc.yaml (GET /api/misc); without it the Misc page is empty. */
   miscFile?: string;
+  /** config/alerts.yaml: with it (and a database) the push dispatcher runs (docs/09 §5). */
+  alertsFile?: string;
+  /** How pushes leave (tests: a fake). Default: Web Push when VAPID keys are set. */
+  channel?: Channel | null;
 }
 
 // Everything the web app loads is same-origin (fonts are self-hosted). Inline styles are
@@ -106,7 +114,43 @@ export async function buildServer(config: Config, deps: ServerDeps = {}): Promis
       users: config.users ?? { adminEmails: [], devUserEmail: 'dev@localhost' },
       authDisabled: config.auth.disabled,
     });
-    registerUserRoutes(app, { db: deps.db, directory });
+    registerUserRoutes(app, {
+      db: deps.db,
+      directory,
+      vapidPublicKey: config.push?.publicKey ?? null,
+    });
+
+    // Push notifications: off without keys (development) or without the rules file.
+    const channel =
+      deps.channel !== undefined
+        ? deps.channel
+        : config.push
+          ? new WebPushChannel(config.push)
+          : null;
+    let dispatcher: Dispatcher | null = null;
+    if (channel && deps.alertsFile) {
+      let file = null;
+      try {
+        file = await loadAlertsFile(deps.alertsFile);
+      } catch (err) {
+        app.log.error({ err }, 'alert rules not loaded: no notifications until fixed');
+      }
+      const rules = new RulesStore({ db: deps.db, file, log: app.log });
+      const d = new Dispatcher({ db: deps.db, channel, rules: () => rules.get(), log: app.log });
+      dispatcher = d;
+      const notifications = deps.notifications ?? postgresNotifications(deps.db);
+      app.addHook('onReady', async () => {
+        await rules.start(notifications);
+        await d.start(notifications);
+      });
+      app.addHook('onClose', async () => {
+        await d.stop();
+        await rules.stop();
+      });
+    } else if (!channel) {
+      app.log.warn('VAPID keys not set: push notifications are off');
+    }
+    registerDeviceRoutes(app, { db: deps.db, dispatcher });
   }
 
   if (deps.db && deps.registry) {

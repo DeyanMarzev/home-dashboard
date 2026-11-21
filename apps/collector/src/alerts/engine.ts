@@ -1,7 +1,7 @@
 import { loadAlertRules, openEvent, resolveEvent, type Sql } from '@home/db';
 import {
   evaluateThreshold,
-  formatNumber,
+  formatAlertValue,
   freshness,
   freshnessPolicy,
   humanise,
@@ -137,7 +137,7 @@ export class AlertEngine {
           kind: rule.id,
           entity: s.entity,
           ruleId: rule.id,
-          message: `${rule.name} · ${label} ${formatValue(action.value, s.unit)}`,
+          message: `${rule.name} · ${label} ${formatAlertValue(action.value, s.unit)}`,
           data: {
             value: action.value,
             unit: s.unit,
@@ -197,10 +197,4 @@ export class AlertEngine {
         update events set rule_id = null where resolved_at is null and rule_id = any(${otherIds}::text[])`;
     }
   }
-}
-
-/** 1240 ppm → "1,240 ppm"; 13.46 °C → "13.5 °C"; 42 % → "42%". */
-export function formatValue(value: number, unit: string): string {
-  const digits = Number.isInteger(value) || Math.abs(value) >= 100 ? 0 : 1;
-  return `${formatNumber(value, digits)}${unit === '%' ? '' : ' '}${unit}`;
 }

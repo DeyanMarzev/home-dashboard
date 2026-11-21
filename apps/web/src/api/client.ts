@@ -35,6 +35,21 @@ export async function putJson<T>(path: string, body: unknown, schema?: z.ZodType
   );
 }
 
+/** POST / PATCH / DELETE with an optional JSON body; a 204 resolves to undefined. */
+export async function sendJson<T>(
+  method: 'POST' | 'PATCH' | 'DELETE',
+  path: string,
+  body?: unknown,
+): Promise<T> {
+  return request(path, {
+    method,
+    ...(body !== undefined && {
+      body: JSON.stringify(body),
+      headers: { 'content-type': 'application/json' },
+    }),
+  });
+}
+
 async function request<T>(path: string, init: RequestInit, schema?: z.ZodType<T>): Promise<T> {
   const res = await fetch(API_BASE + path, {
     ...init,
@@ -54,6 +69,7 @@ async function request<T>(path: string, init: RequestInit, schema?: z.ZodType<T>
       body?.error?.code,
     );
   }
+  if (res.status === 204 || res.status === 202) return undefined as T;
   const body: unknown = await res.json();
   // In development, catch API/UI drift early; in production trust the API (it's tested).
   if (import.meta.env.DEV && schema) {

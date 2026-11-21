@@ -230,6 +230,7 @@ function RoomCard({
 
   return (
     <article
+      id={room.entity}
       aria-labelledby={id}
       className={`card${highCo2 ? ' card--warn' : ''}`}
       style={{ flex: '1 1 520px', gap: 14 }}

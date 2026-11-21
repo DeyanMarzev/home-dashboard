@@ -9,6 +9,7 @@ import { ApiError, SessionExpiredError } from './api/client.js';
 import { LiveProvider } from './api/live.js';
 import { markAccessDisabled, markSessionExpired } from './api/session.js';
 import { watchInstall } from './lib/install.js';
+import { syncOnStart } from './lib/push.js';
 import { NowProvider } from './lib/now.js';
 import { router } from './router.js';
 
@@ -32,6 +33,15 @@ const queryClient = new QueryClient({
 });
 
 watchInstall();
+void syncOnStart();
+
+// A tapped notification asks an open app to show the alert's page (docs/09 §6).
+navigator.serviceWorker?.addEventListener('message', (event: MessageEvent) => {
+  const data = event.data as { type?: string; url?: string } | null;
+  if (data?.type !== 'navigate' || !data.url) return;
+  const url = new URL(data.url, window.location.origin);
+  if (url.origin === window.location.origin) void router.navigate(url.pathname + url.hash);
+});
 
 const root = document.getElementById('root');
 if (!root) throw new Error('#root missing from index.html');
