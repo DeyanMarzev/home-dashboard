@@ -129,6 +129,15 @@ Times in Europe/London, `en-GB` formatting, as in `docs/09`.
     enabled: true
 ```
 
+**Built** (M11 step 3, 21 Nov 2026): `apps/collector/src/sources/met_office_warnings/`, `docs/03` § met_office_warnings. Where the build differs from the plan below:
+
+- The feed is `https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/se` (the `weather.metoffice.gov.uk` address on the RSS guide page redirects there; checked 21 Nov 2026). It sends `ETag` and `Last-Modified`; the collector uses both.
+- Region and areas are in `config/sources.yaml` (`met_office_warnings.options: { region: se, areas: [Waltham Forest] }`), not env: non-secret settings live in the registry like every other source's. Only `MET_OFFICE_FEED_URL` (dev/test: a URL or a local file) is env.
+- `User-Agent`: the collector's shared one, whose contact is the project's GitHub URL, so no email address is sent to the Met Office.
+- Each RSS item already names the local authorities ("…: Barnet, Enfield, Waltham Forest valid from 0600 Tue 24 Nov to 2100 Tue 24 Nov"), so warning pages are never fetched. Validity has no year: it's the year around now in which that date falls on that weekday, within 60 days.
+- Event: entity `w_<warning uuid>`, title `Amber warning · Rain`, message `Amber warning of rain · Mon 23 Nov 18:00 – Wed 25 Nov 06:00` (no impact sentence: the RSS has none), `data` adds `areas`.
+- The Overview alerts strip already shows "Details on Met Office" on weather warnings (the website terms), ahead of the rest of step 5.
+
 ### Feed
 
 - The Met Office publishes free RSS feeds of UK severe weather warnings, one per region. The URL used by Home Assistant setups is `https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/<code>`, with `se` for London & South East England. **Check the current URL and region code on https://weather.metoffice.gov.uk/guides/rss before building**, and record a real payload as a fixture.

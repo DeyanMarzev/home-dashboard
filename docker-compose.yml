@@ -95,6 +95,7 @@ services:
       MQTT_URL: mqtt://mosquitto:1883
       MQTT_USERNAME: ${MQTT_USERNAME}
       MQTT_PASSWORD: ${MQTT_PASSWORD}
+      MET_OFFICE_FEED_URL: ${MET_OFFICE_FEED_URL:-} # testing only (docs/10 §7)
       HOST_SYS: /host/sys
       HOST_PROC: /host/proc
       HOST_ROOTFS: /host/rootfs

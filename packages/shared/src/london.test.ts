@@ -105,3 +105,14 @@ describe('London days', () => {
     expect(addLondonDays('2026-12-31', 1)).toBe('2027-01-01');
   });
 });
+
+describe('londonLocalTime', () => {
+  it('turns London wall-clock time into the right instant in winter and summer', async () => {
+    const { londonLocalTime } = await import('./london.js');
+    expect(londonLocalTime('2026-11-22', 6, 0).toISOString()).toBe('2026-11-22T06:00:00.000Z');
+    expect(londonLocalTime('2026-07-01', 6, 0).toISOString()).toBe('2026-07-01T05:00:00.000Z');
+    // The day the clocks go back: 01:30 happens twice; the first (BST) one is taken.
+    expect(londonLocalTime('2026-10-25', 1, 30).toISOString()).toBe('2026-10-25T00:30:00.000Z');
+    expect(londonLocalTime('2026-03-29', 3, 0).toISOString()).toBe('2026-03-29T02:00:00.000Z');
+  });
+});

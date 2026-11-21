@@ -3,6 +3,7 @@ import { airQuality } from './air_quality/index.js';
 import { boilerProbes } from './boiler_probes/index.js';
 import { carbonIntensity } from './carbon_intensity/index.js';
 import { nest } from './nest/index.js';
+import { metOfficeWarnings } from './met_office_warnings/index.js';
 import { openMeteo } from './open_meteo/index.js';
 import { piStats } from './pi_stats/index.js';
 import { roborock } from './roborock/index.js';
@@ -26,4 +27,5 @@ export const collectors: readonly Collector[] = [
   wifi,
   speedTest,
   roborock,
+  metOfficeWarnings,
 ];

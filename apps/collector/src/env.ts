@@ -53,6 +53,9 @@ const EnvSchema = z.object({
     z.string().url().default('http://localhost:8080'),
   ),
 
+  // Met Office warnings: dev/test only, a feed URL or a local file instead of the real feed.
+  MET_OFFICE_FEED_URL: optionalString,
+
   // DS18B20 boiler pipe probes (1-Wire ids like 28-0123456789ab). Unset until fitted.
   BOILER_FLOW_W1_ID: optionalString,
   BOILER_RETURN_W1_ID: optionalString,

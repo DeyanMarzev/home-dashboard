@@ -1,4 +1,5 @@
-const USER_AGENT = 'home-dashboard (self-hosted; https://github.com/DeyanMarzev/home-dashboard)';
+export const USER_AGENT =
+  'home-dashboard (self-hosted; https://github.com/DeyanMarzev/home-dashboard)';
 
 export class HttpError extends Error {
   override name = 'HttpError';
