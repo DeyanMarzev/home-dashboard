@@ -2,8 +2,11 @@ import {
   addLondonDays,
   londonDateString,
   londonMidnight,
+  vacuumState,
+  type LatestItem,
   type ReadingsResponse,
   type SeriesMeta,
+  type VacuumState,
 } from '@home/shared';
 
 /** Floors in the order they're listed, each with its colour (docs/03 § roborock). */
@@ -136,4 +139,27 @@ export function formatMinutes(minutes: number): string {
   const total = Math.round(minutes);
   if (total < 60) return `${total} min`;
   return `${Math.floor(total / 60)} h ${String(total % 60).padStart(2, '0')} min`;
+}
+
+export interface VacuumNow {
+  battery: number | null;
+  state: VacuumState | null;
+  /** When the robot was last asked (the newer of the two readings). */
+  ts: string;
+}
+
+/** The robot's own latest battery and state, from `/api/latest` (entity `vacuum`). */
+export function vacuumNow(items: readonly LatestItem[] | undefined): VacuumNow | null {
+  const own = (metric: string) =>
+    items?.find((i) => i.series.entity === 'vacuum' && i.series.metric === metric);
+  const battery = own('battery');
+  const state = own('state');
+  const times = [battery?.ts, state?.ts].filter((t): t is string => !!t).sort();
+  const ts = times.at(-1);
+  if (!ts) return null;
+  return {
+    battery: battery?.value ?? null,
+    state: state?.value === null || state?.value === undefined ? null : vacuumState(state.value),
+    ts,
+  };
 }

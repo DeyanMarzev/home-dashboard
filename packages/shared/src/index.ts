@@ -17,3 +17,4 @@ export * from './heating.js';
 export * from './energy.js';
 export * from './water.js';
 export * from './wifi.js';
+export * from './vacuum.js';

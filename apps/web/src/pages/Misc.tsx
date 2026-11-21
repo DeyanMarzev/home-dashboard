@@ -1,14 +1,16 @@
 import {
   addLondonDays,
+  formatAgo,
   formatLondonTime,
   formatLongDate,
   londonDayBounds,
   londonDateString,
   upcomingCollections,
+  VACUUM_LOW_BATTERY,
   type Bin,
 } from '@home/shared';
 import { useState } from 'react';
-import { useMisc, useReadings, useSeriesList, useSource } from '../api/hooks.js';
+import { useLatest, useMisc, useReadings, useSeriesList, useSource } from '../api/hooks.js';
 import { Empty, Panel, Skeleton } from '../components/Cards.js';
 import { NotConnected, SourceBadge } from '../components/PageBits.js';
 import { PageHeader } from '../components/PageHeader.js';
@@ -27,6 +29,7 @@ import {
   monthBounds,
   monthWeeks,
   runsOfDay,
+  vacuumNow,
   type FloorDay,
 } from '../model/vacuum.js';
 
@@ -156,6 +159,50 @@ function FloorMark({ entity, className }: { entity: string; className: string })
   );
 }
 
+/**
+ * The robot's battery and what it's doing, from the hourly check. Off its dock and not busy
+ * (idle, paused, error) it runs flat, so that's shown as a problem (the collector also raises
+ * it on the Overview).
+ */
+function VacuumBattery({ now }: { now: Date }) {
+  const latest = useLatest({ source: 'roborock', entity: 'vacuum' });
+  const robot = vacuumNow(latest.data?.items);
+  if (!robot) return null;
+  const { battery, state } = robot;
+  const stranded = state?.place === 'stranded';
+  const low = battery !== null && battery < VACUUM_LOW_BATTERY;
+  const fill = low ? 'bad' : stranded ? 'warn' : 'good';
+  return (
+    <div className="stack" style={{ gap: 8 }}>
+      <div className="vacuum-now">
+        <span className="big big--sm">
+          {battery === null ? '–' : `${battery}%`}
+          <span className="unit"> battery</span>
+        </span>
+        {state && (
+          <Status tone={stranded ? 'bad' : state.place === 'docked' ? 'good' : 'muted'}>
+            {state.label}
+          </Status>
+        )}
+      </div>
+      {battery !== null && (
+        <div className="progress-track" role="img" aria-label={`Battery ${battery}%`}>
+          <div
+            className={`progress-fill progress-fill--${fill}`}
+            style={{ width: `${Math.max(0, Math.min(100, battery))}%` }}
+          />
+        </div>
+      )}
+      <span className="small muted">
+        Checked {formatAgo(robot.ts, now)}
+        {stranded && (
+          <span className="warn-text"> · not charging: check it&apos;s on its dock</span>
+        )}
+      </span>
+    </div>
+  );
+}
+
 const WEEK_HEAD = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 /** Which floor the Roborock cleaned each day (docs/05 § Misc, docs/03 § roborock). */
@@ -214,6 +261,7 @@ function VacuumPanel() {
         <Skeleton height={300} />
       ) : (
         <div className="stack">
+          <VacuumBattery now={now} />
           <div className="cal-head">
             <button
               type="button"

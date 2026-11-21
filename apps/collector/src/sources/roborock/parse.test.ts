@@ -1,7 +1,7 @@
 import { ReadingInputSchema } from '@home/shared';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { floorFor, parseRoborockSnapshot } from './parse.js';
+import { floorFor, notChargingMessage, parseRoborockSnapshot } from './parse.js';
 
 const snapshot = JSON.parse(
   readFileSync(new URL('./__fixtures__/snapshot.json', import.meta.url), 'utf8'),
@@ -43,6 +43,15 @@ describe('parseRoborockSnapshot', () => {
     });
   });
 
+  it('reports the state code now, next to the battery', () => {
+    expect(readings.find((r) => r.metric === 'state')).toMatchObject({
+      entity: 'vacuum',
+      valueType: 'state',
+      value: 8,
+      ts: now,
+    });
+  });
+
   it('gives only valid readings', () => {
     for (const r of readings) expect(ReadingInputSchema.safeParse(r).success).toBe(true);
   });
@@ -72,7 +81,7 @@ describe('parseRoborockSnapshot', () => {
     const odd = parseRoborockSnapshot({ ...snapshot, records: [[1, 2, 3], { begin: 'x' }] }, now);
     expect(odd.skipped).toBe(2);
     expect(odd.problems).toContain('begin: Invalid input: expected number, received string');
-    expect(odd.readings.map((r) => r.metric)).toEqual(['battery']);
+    expect(odd.readings.map((r) => r.metric)).toEqual(['battery', 'state']);
   });
 
   it('rejects something that is not a snapshot', () => {
@@ -97,5 +106,30 @@ describe('floorFor', () => {
     expect(floorFor(3, names).entity).toBe('map_3');
     expect(floorFor(7, names)).toEqual({ entity: 'map_7', label: 'Map 8' });
     expect(floorFor(4, names).entity).toBe('map_4');
+  });
+});
+
+describe('notChargingMessage', () => {
+  const withStatus = (status: Record<string, number>) =>
+    parseRoborockSnapshot({ ...snapshot, status }, now).readings;
+
+  it('is quiet while the robot charges, is full or is cleaning', () => {
+    expect(notChargingMessage(withStatus({ state: 8, battery: 40 }), now)).toBeNull();
+    expect(notChargingMessage(withStatus({ state: 100, battery: 100 }), now)).toBeNull();
+    expect(notChargingMessage(withStatus({ state: 5, battery: 60 }), now)).toBeNull();
+  });
+
+  it('warns when the robot sits off its dock, with its state, the time and the battery', () => {
+    expect(notChargingMessage(withStatus({ state: 3, battery: 63 }), now)).toBe(
+      "Vacuum isn't charging · Idle at 12:00, battery 63%. Check it's on its dock",
+    );
+    expect(notChargingMessage(withStatus({ state: 9 }), now)).toBe(
+      "Vacuum isn't charging · Charging problem at 12:00. Check it's on its dock",
+    );
+  });
+
+  it("doesn't decide when the robot gave no state or an unknown one", () => {
+    expect(notChargingMessage(withStatus({ battery: 50 }), now)).toBeUndefined();
+    expect(notChargingMessage(withStatus({ state: 77 }), now)).toBeNull();
   });
 });

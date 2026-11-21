@@ -1,4 +1,4 @@
-import type { ReadingsResponse, SeriesMeta } from '@home/shared';
+import type { LatestItem, ReadingsResponse, SeriesMeta } from '@home/shared';
 import { describe, expect, it } from 'vitest';
 import {
   addMonths,
@@ -9,6 +9,7 @@ import {
   monthBounds,
   monthWeeks,
   runsOfDay,
+  vacuumNow,
 } from './vacuum.js';
 
 const meta = (id: number, metric: string, entity: string, label?: string): SeriesMeta => ({
@@ -110,5 +111,42 @@ describe('vacuum calendar helpers', () => {
   it('formats durations', () => {
     expect(formatMinutes(21.7)).toBe('22 min');
     expect(formatMinutes(65)).toBe('1 h 05 min');
+  });
+});
+
+describe('vacuumNow', () => {
+  const item = (
+    id: number,
+    metric: string,
+    value: number | null,
+    ts: string | null,
+  ): LatestItem => ({
+    series: { ...meta(id, metric, 'vacuum'), unit: metric === 'battery' ? '%' : 'code' },
+    ts,
+    value,
+    freshness,
+  });
+
+  it("reads the robot's battery and state, as of the newer reading", () => {
+    expect(
+      vacuumNow([
+        item(1, 'clean_minutes', 20, '2026-11-20T09:00:00Z'),
+        item(2, 'battery', 63, '2026-11-21T10:00:00Z'),
+        item(3, 'state', 3, '2026-11-21T10:00:01Z'),
+      ]),
+    ).toEqual({
+      battery: 63,
+      state: { label: 'Idle', place: 'stranded' },
+      ts: '2026-11-21T10:00:01Z',
+    });
+  });
+
+  it('copes with only one of them, and with none', () => {
+    expect(vacuumNow([item(2, 'battery', 87, '2026-11-21T10:00:00Z')])).toMatchObject({
+      battery: 87,
+      state: null,
+    });
+    expect(vacuumNow([item(2, 'battery', null, null)])).toBeNull();
+    expect(vacuumNow(undefined)).toBeNull();
   });
 });
