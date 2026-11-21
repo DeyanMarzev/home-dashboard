@@ -37,6 +37,8 @@ beforeAll(async () => {
   writeFileSync(join(publicDir, 'index.html'), INDEX_HTML);
   mkdirSync(join(publicDir, 'assets'));
   writeFileSync(join(publicDir, 'assets', 'index-abc123.js'), 'console.log(1)');
+  writeFileSync(join(publicDir, 'sw.js'), 'self.addEventListener("fetch", () => {})');
+  writeFileSync(join(publicDir, 'manifest.webmanifest'), '{"name":"Home Dashboard"}');
   access = await fakeAccess();
 });
 
@@ -128,6 +130,18 @@ describe('with Cloudflare Access enabled', () => {
     const res = await get('/assets/index-abc123.js', await access.sign());
     expect(res.statusCode).toBe(200);
     expect(res.headers['cache-control']).toBe('private, max-age=31536000, immutable');
+  });
+
+  it('serves the service worker and manifest uncached, so app updates show up (docs/09 §1)', async () => {
+    const token = await access.sign();
+    const sw = await get('/sw.js', token);
+    expect(sw.statusCode).toBe(200);
+    expect(sw.headers['content-type']).toMatch(/javascript/);
+    expect(sw.headers['cache-control']).toBe('no-cache');
+    const manifest = await get('/manifest.webmanifest', token);
+    expect(manifest.statusCode).toBe(200);
+    expect(manifest.headers['content-type']).toMatch(/application\/manifest\+json/);
+    expect(manifest.headers['cache-control']).toBe('no-cache');
   });
 
   it('returns a JSON 404 for unknown API paths (not index.html)', async () => {

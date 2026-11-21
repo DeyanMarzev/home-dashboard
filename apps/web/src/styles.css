@@ -270,7 +270,8 @@ figure {
   cursor: pointer;
 }
 
-.pill[aria-pressed='true'] {
+.pill[aria-pressed='true'],
+.pill--primary {
   border-color: var(--accent);
   background: var(--accent);
   color: var(--on-accent);
@@ -1295,4 +1296,191 @@ table.data tr:last-child td {
 .runs-time {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+}
+
+/* ---- App shell: settings link, phone bottom bar, More sheet, update toast (docs/09 §1) -- */
+
+.header-end {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-settings {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text-nav);
+}
+
+.header-settings:hover {
+  color: var(--text);
+}
+
+.bottom-nav {
+  display: none;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 480px;
+  margin: auto auto 0;
+  padding: 8px 16px calc(16px + env(safe-area-inset-bottom));
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.sheet::backdrop {
+  background: rgb(0 0 0 / 40%);
+}
+
+.sheet-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sheet-item {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  border-bottom: 1px solid var(--row-border);
+  color: var(--text);
+  font: 500 16px var(--font-body);
+  text-decoration: none;
+}
+
+.sheet-item[aria-current='page'] {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.sheet-item[aria-current='page']::after {
+  content: '· this page';
+  margin-left: 8px;
+  color: var(--text-muted);
+  font: 400 13px var(--font-body);
+}
+
+.sheet-close {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  color: var(--text);
+  font: 500 15px var(--font-body);
+  cursor: pointer;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100% - 32px);
+  padding: 8px 8px 8px 16px;
+  transform: translateX(-50%);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 4px 16px var(--shadow);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.toast-action,
+.toast-close {
+  min-height: 40px;
+  border: none;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  font: 600 14px var(--font-body);
+}
+
+.toast-action {
+  padding: 0 14px;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.toast-close {
+  min-width: 40px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 20px;
+}
+
+@media (max-width: 640px) {
+  .header .tabs,
+  .header-settings {
+    display: none;
+  }
+
+  /* Room for the bottom bar. */
+  .page {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .bottom-nav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    display: flex;
+    padding: 6px 4px env(safe-area-inset-bottom);
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .bottom-nav-item {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 56px;
+    padding: 4px 0;
+    border: none;
+    background: none;
+    color: var(--text-nav);
+    font: 500 11px var(--font-body);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .bottom-nav-item svg {
+    width: 44px;
+    height: 28px;
+    padding: 3px 11px;
+    border-radius: 999px;
+  }
+
+  /* Active: accent colour, bold label and a filled pill behind the icon (never colour alone). */
+  .bottom-nav-item[aria-current='page'] {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .bottom-nav-item[aria-current='page'] svg {
+    background: var(--nav-bg);
+  }
+
+  .toast {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
 }

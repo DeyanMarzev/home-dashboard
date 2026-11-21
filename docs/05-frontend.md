@@ -61,7 +61,7 @@ Dark mode follows the system setting (`prefers-color-scheme`); there's no switch
 
 ## Pages
 
-Top bar on every page: page title, subtitle (date, "updated HH:mm"), section tabs (Overview, Rooms, Weather, Energy, Heating, Water, Wi-Fi, Misc, System), time range pills. On phones the tabs wrap; later they become a bottom nav in the Android app.
+Top bar on every page: page title, subtitle (date, "updated HH:mm"), section tabs (Overview, Rooms, Weather, Energy, Heating, Water, Wi-Fi, Misc, System), time range pills, and a gear link to Settings (`/settings`). At ≤ 640 px the tabs and gear are hidden and a bottom bar shows Overview, Rooms, Energy, Heating and More; More opens a sheet with Weather, Water, Wi-Fi, Misc, System and Settings (`components/BottomNav.tsx`, `lib/sections.ts`; `docs/09` §1).
 
 Freshness placement: on pages that mix sources, every tile and panel has its own badge. On pages where everything has the same freshness, a single badge in the page subtitle ("Whole page live" / "Whole page: data to 3 Nov · 3 days behind"). Overview and Energy show a one-line key under the header explaining Live vs Delayed.
 

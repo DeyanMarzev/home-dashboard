@@ -8,6 +8,7 @@ import { RouterProvider } from 'react-router';
 import { SessionExpiredError } from './api/client.js';
 import { LiveProvider } from './api/live.js';
 import { markSessionExpired } from './api/session.js';
+import { watchInstall } from './lib/install.js';
 import { NowProvider } from './lib/now.js';
 import { router } from './router.js';
 
@@ -24,6 +25,8 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+watchInstall();
 
 const root = document.getElementById('root');
 if (!root) throw new Error('#root missing from index.html');

@@ -25,7 +25,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['apps/api/**', 'apps/collector/**', 'packages/**', 'scripts/**'],
+    files: ['apps/api/**', 'apps/collector/**', 'packages/**', 'scripts/**', 'apps/web/scripts/**'],
     languageOptions: { globals: globals.node },
   },
   {
@@ -34,7 +34,11 @@ export default defineConfig(
     extends: [reactHooks.configs.flat.recommended, reactRefresh.configs.vite],
   },
   {
-    files: ['**/*.js', '**/*.config.ts'],
+    files: ['apps/web/src/sw/**'],
+    languageOptions: { globals: globals.serviceworker },
+  },
+  {
+    files: ['**/*.js', '**/*.mjs', '**/*.config.ts'],
     extends: [tseslint.configs.disableTypeChecked],
   },
   prettier,
