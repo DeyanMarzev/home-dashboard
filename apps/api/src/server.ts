@@ -12,6 +12,7 @@ import { WebPushChannel, type Channel } from './push/channel.js';
 import { Dispatcher } from './push/dispatcher.js';
 import { RulesStore } from './push/rules.js';
 import { registerDataRoutes } from './routes/data.js';
+import { registerAlertRoutes } from './routes/alerts.js';
 import { registerDeviceRoutes } from './routes/devices.js';
 import { registerEnergyRoutes } from './routes/energy.js';
 import { registerHeatingRoutes } from './routes/heating.js';
@@ -120,7 +121,23 @@ export async function buildServer(config: Config, deps: ServerDeps = {}): Promis
       vapidPublicKey: config.push?.publicKey ?? null,
     });
 
-    // Push notifications: off without keys (development) or without the rules file.
+    // Alert rules (config/alerts.yaml + admin overrides): for Settings and the dispatcher.
+    const notifications = deps.notifications ?? postgresNotifications(deps.db);
+    let rules: RulesStore | null = null;
+    if (deps.alertsFile) {
+      let file = null;
+      try {
+        file = await loadAlertsFile(deps.alertsFile);
+      } catch (err) {
+        app.log.error({ err }, 'alert rules not loaded: no alerts in Settings or on phones');
+      }
+      const store = new RulesStore({ db: deps.db, file, log: app.log });
+      rules = store;
+      app.addHook('onReady', () => store.start(notifications));
+      app.addHook('onClose', () => store.stop());
+    }
+
+    // Push notifications: off without keys (development only).
     const channel =
       deps.channel !== undefined
         ? deps.channel
@@ -128,29 +145,17 @@ export async function buildServer(config: Config, deps: ServerDeps = {}): Promis
           ? new WebPushChannel(config.push)
           : null;
     let dispatcher: Dispatcher | null = null;
-    if (channel && deps.alertsFile) {
-      let file = null;
-      try {
-        file = await loadAlertsFile(deps.alertsFile);
-      } catch (err) {
-        app.log.error({ err }, 'alert rules not loaded: no notifications until fixed');
-      }
-      const rules = new RulesStore({ db: deps.db, file, log: app.log });
-      const d = new Dispatcher({ db: deps.db, channel, rules: () => rules.get(), log: app.log });
+    if (channel && rules) {
+      const store = rules;
+      const d = new Dispatcher({ db: deps.db, channel, rules: () => store.get(), log: app.log });
       dispatcher = d;
-      const notifications = deps.notifications ?? postgresNotifications(deps.db);
-      app.addHook('onReady', async () => {
-        await rules.start(notifications);
-        await d.start(notifications);
-      });
-      app.addHook('onClose', async () => {
-        await d.stop();
-        await rules.stop();
-      });
+      app.addHook('onReady', () => d.start(notifications));
+      app.addHook('onClose', () => d.stop());
     } else if (!channel) {
       app.log.warn('VAPID keys not set: push notifications are off');
     }
     registerDeviceRoutes(app, { db: deps.db, dispatcher });
+    registerAlertRoutes(app, { db: deps.db, rules, registry: deps.registry ?? null });
   }
 
   if (deps.db && deps.registry) {

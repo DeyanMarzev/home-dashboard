@@ -14,7 +14,15 @@ import {
   type PowerState,
   type SourceInfo,
 } from '@home/shared';
-import { useEvents, useHealth, useLatest, useReadings, useSources } from '../api/hooks.js';
+import {
+  useEvents,
+  useHealth,
+  useIsAdmin,
+  useLatest,
+  useReadings,
+  useSources,
+} from '../api/hooks.js';
+import { NotificationLogPanel } from '../components/settings/NotificationLog.js';
 import { useLive } from '../api/live-context.js';
 import { Empty, Panel, ProgressBar, Skeleton, StatTile } from '../components/Cards.js';
 import { TimeChart } from '../components/charts/TimeChart.js';
@@ -50,6 +58,7 @@ const formatSize = (mb: number) =>
 export function SystemPage() {
   const { range, setRange } = useRange();
   const now = useNow();
+  const isAdmin = useIsAdmin();
   const combine = useCombinedFreshness();
   const at = useFreshnessNow();
   const pi = useLatest({ source: 'pi_stats' });
@@ -234,6 +243,11 @@ export function SystemPage() {
         <ApiPanel />
         <EventsPanel events={events.data?.items} />
       </div>
+      {isAdmin && (
+        <div className="row">
+          <NotificationLogPanel />
+        </div>
+      )}
     </div>
   );
 }

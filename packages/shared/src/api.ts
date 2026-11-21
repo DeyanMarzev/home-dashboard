@@ -350,6 +350,97 @@ export const DeviceRegisterSchema = z.object({
 });
 export const DevicePatchSchema = z.strictObject({ label: z.string().trim().min(1).max(60) });
 
+// --- Alert preferences and rules (docs/09 §4, §7) -----------------------------------------
+
+const AlertLevelSchema = z.enum(['warning', 'alert']);
+
+export const MyAlertRuleSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: z.enum(['threshold', 'freshness', 'event']),
+  /** "Warning above 1000 ppm for 15 min · Urgent above 1500 ppm for 10 min" */
+  description: z.string(),
+  levels: z.array(AlertLevelSchema),
+  /** What the "Rooms" chips offer: rooms/devices (threshold) or sources (freshness). */
+  entities: z.array(z.object({ id: z.string(), label: z.string() })),
+  resolvedNotice: z.boolean(),
+  /** false: an admin switched it off for everyone. */
+  ruleEnabled: z.boolean(),
+  enabled: z.boolean(),
+  minLevel: AlertLevelSchema,
+  /** null = all of them. */
+  entitiesSelected: z.array(z.string()).nullable(),
+  notifyResolved: z.boolean(),
+  /** No saved choice: the rule's defaults apply. */
+  isDefault: z.boolean(),
+  open: z.array(
+    z.object({
+      entity: z.string(),
+      label: z.string(),
+      level: AlertLevelSchema,
+      since: IsoTimestamp,
+    }),
+  ),
+});
+export type MyAlertRule = z.infer<typeof MyAlertRuleSchema>;
+export const MyAlertsResponseSchema = z.object({
+  groups: z.array(
+    z.object({ id: z.string(), name: z.string(), rules: z.array(MyAlertRuleSchema) }),
+  ),
+});
+export type MyAlertsResponse = z.infer<typeof MyAlertsResponseSchema>;
+
+export const MyAlertPutSchema = z.strictObject({
+  enabled: z.boolean(),
+  minLevel: AlertLevelSchema,
+  entities: z
+    .array(z.string().regex(/^[a-z][a-z0-9_]*$/))
+    .max(100)
+    .nullable(),
+  notifyResolved: z.boolean(),
+});
+export type MyAlertPut = z.infer<typeof MyAlertPutSchema>;
+
+const LevelView = z.object({ level: z.number(), for: z.string() });
+const RuleSettings = z.object({
+  enabled: z.boolean(),
+  warning: LevelView.optional(),
+  alert: LevelView.optional(),
+  clear: LevelView.optional(),
+  options: z.record(z.string(), z.union([z.boolean(), z.number(), z.string()])).optional(),
+});
+export type RuleSettings = z.infer<typeof RuleSettings>;
+
+export const AdminRuleSchema = z.object({
+  id: z.string(),
+  group: z.string(),
+  name: z.string(),
+  type: z.enum(['threshold', 'freshness', 'event']),
+  direction: z.enum(['above', 'below']).nullable(),
+  /** Of the matching series (threshold rules), for the inputs' labels. */
+  unit: z.string().nullable(),
+  /** What applies now (YAML + override) and what the YAML says. Durations like `15m`. */
+  effective: RuleSettings,
+  defaults: RuleSettings,
+  override: z.object({ updatedBy: z.string().nullable(), updatedAt: IsoTimestamp }).nullable(),
+});
+export type AdminRule = z.infer<typeof AdminRuleSchema>;
+export const AdminRulesResponseSchema = z.object({ items: z.array(AdminRuleSchema) });
+
+export const NotificationLogItemSchema = z.object({
+  ts: IsoTimestamp,
+  user: z.string(),
+  ruleId: z.string().nullable(),
+  entity: z.string().nullable(),
+  phase: z.string(),
+  status: z.string(),
+  device: z.string().nullable(),
+});
+export type NotificationLogItem = z.infer<typeof NotificationLogItemSchema>;
+export const NotificationLogResponseSchema = z.object({
+  items: z.array(NotificationLogItemSchema),
+});
+
 export const UserPatchSchema = z
   .strictObject({ role: z.enum(ROLES), enabled: z.boolean() })
   .partial()

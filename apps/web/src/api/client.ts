@@ -35,9 +35,9 @@ export async function putJson<T>(path: string, body: unknown, schema?: z.ZodType
   );
 }
 
-/** POST / PATCH / DELETE with an optional JSON body; a 204 resolves to undefined. */
+/** POST / PUT / PATCH / DELETE with an optional JSON body; a 204 resolves to undefined. */
 export async function sendJson<T>(
-  method: 'POST' | 'PATCH' | 'DELETE',
+  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   path: string,
   body?: unknown,
 ): Promise<T> {

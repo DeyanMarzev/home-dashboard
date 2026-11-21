@@ -26,6 +26,8 @@ const common = {
   id: snake,
   group: snake,
   name: z.string().min(1),
+  /** One line for Settings → My alerts; threshold rules get one from their levels. */
+  description: z.string().min(1).optional(),
   advice: z.string().min(1).optional(),
   /** Where tapping the notification goes; threshold rules add `#<entity>`. */
   link: z.string().regex(/^\//, 'must start with /'),

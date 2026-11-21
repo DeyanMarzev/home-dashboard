@@ -20,6 +20,11 @@ export class RulesStore {
     return this.current;
   }
 
+  /** config/alerts.yaml as read (null if it couldn't be): overrides are merged onto it. */
+  get file(): AlertsFile | null {
+    return this.o.file;
+  }
+
   async reload(): Promise<void> {
     if (!this.o.file) return;
     try {

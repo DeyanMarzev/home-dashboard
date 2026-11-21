@@ -175,7 +175,7 @@ Read and replace tariff rows. Validate no overlapping periods per fuel. From M11
 
 ## Users and notifications (M11)
 
-From `docs/09` and `docs/10`; tables in `docs/02` § Users and notifications. **Built so far:** `GET`/`PATCH /api/me`, `GET /api/users`, `PATCH /api/users/:id`, admin-only `PUT /api/tariffs` (step 2); all of `/api/me/devices` (step 4). The rest comes with step 5.
+From `docs/09` and `docs/10`; tables in `docs/02` § Users and notifications. **Built:** all of it (M11 steps 2, 4 and 5; `apps/api/src/routes/users.ts`, `devices.ts`, `alerts.ts`), except `/api/network/devices` (with the new-device alert). Without readable alert rules on the Pi, `/api/me/alerts` and `/api/alert-rules` answer 503 `RULES_UNAVAILABLE`.
 
 - Every `/api` request except `/api/health` gets its user (`apps/api/src/users.ts`): the Access JWT's email, lowercased, upserted into `users` on first visit (a member, or an admin if it's in `ADMIN_EMAILS`), cached for 60 s. With `AUTH_DISABLED=true` it's `DEV_USER_EMAIL`, an admin.
 - A token without an email (service token) is a `service` identity: read access, 403 `FORBIDDEN` on `/api/me*` and admin routes.
@@ -189,15 +189,15 @@ From `docs/09` and `docs/10`; tables in `docs/02` § Users and notifications. **
 - `GET /api/me/devices` → `{ items: [{ id, label, createdAt, lastSeenAt, lastSuccessAt, failureCount }] }` (never the endpoint or keys).
 - `POST /api/me/devices` with `{ subscription: PushSubscriptionJSON, label? }` → the device (the endpoint must be https; a new device's label defaults to e.g. "Chrome on Android" from its User-Agent). Upsert on the endpoint: refreshes `lastSeenAt`, and moves the device to the signed-in user if it belonged to someone else.
 - `PATCH /api/me/devices/:id` `{ label }` · `DELETE /api/me/devices/:id` · `POST /api/me/devices/:id/test` (sends "Test notification"; 202, result in the log). Another user's device id gives 404.
-- `GET /api/me/alerts` → `{ groups: [{ id, name, rules: [{ id, name, type, description, levels, entities, resolvedNotice, enabled, minLevel, entitiesSelected, notifyResolved, isDefault, open: [{ entity, level, since }] }] }] }`. `description` is generated from the effective thresholds; `levels` is `['warning']` or `['warning','alert']`; `entities` are the ones the rule covers now.
-- `PUT /api/me/alerts/:ruleId` `{ enabled, minLevel, entities, notifyResolved }` → the rule as above. `DELETE /api/me/alerts/:ruleId` resets it to the defaults.
+- `GET /api/me/alerts` → `{ groups: [{ id, name, rules: [{ id, name, type, description, levels, entities: [{ id, label }], resolvedNotice, ruleEnabled, enabled, minLevel, entitiesSelected, notifyResolved, isDefault, open: [{ entity, label, level, since }] }] }] }`. `description` is the rule's own, or generated from the effective thresholds; `levels` is `['warning']` or `['warning','alert']`; `entities` are the rooms/devices the rule covers now (sources, for the freshness rule; none for event rules); `ruleEnabled` false = switched off for everyone.
+- `PUT /api/me/alerts/:ruleId` `{ enabled, minLevel, entities, notifyResolved }` → 204 (400 for a level the rule doesn't have, 404 for an unknown rule). `DELETE /api/me/alerts/:ruleId` → 204, back to the defaults.
 
 #### Admin
 
-- `GET /api/alert-rules` → `{ items: [{ id, group, name, type, effective, defaults, override: { params, updatedBy, updatedAt } | null }] }`.
-- `PATCH /api/alert-rules/:id` `{ enabled?, warning?, alert?, clear?, options? }` → the rule. The merged rule is validated (`docs/09` §3, `docs/10` §1); 400 `BAD_REQUEST` lists the problems. `DELETE /api/alert-rules/:id/override` → back to the YAML.
+- `GET /api/alert-rules` → `{ items: [{ id, group, name, type, direction, unit, effective, defaults, override: { updatedBy, updatedAt } | null }] }`; `effective`/`defaults` = `{ enabled, warning?, alert?, clear?: { level, for: '15m' }, options? }`.
+- `PATCH /api/alert-rules/:id` `{ enabled?, warning?: { level?, for? }, alert?, clear?, options? }` → the rule. Merged onto the rule's existing override, then onto the YAML, and validated (`docs/09` §3, `docs/10` §1); 400 `BAD_REQUEST` names the problems. Then NOTIFY `alert_rules_changed` (collector and api reload). `DELETE /api/alert-rules/:id/override` → 204, back to the YAML.
 - `GET /api/users` → `{ items: [{ id, email, name, role, roleLocked, enabled, lastSeenAt, devices }] }`. `PATCH /api/users/:id` `{ role?, enabled? }` → the user; 409 `CONFLICT` for a `roleLocked` user or yourself, 404 for an unknown id. Applies to the next request (the user cache is cleared).
-- `GET /api/notifications/log?limit=50` → `{ items: [{ ts, user, ruleId, entity, phase, status, device }] }`, newest first; `limit` 1–500.
+- `GET /api/notifications/log?limit=50` → `{ items: [{ ts, user, ruleId, entity, phase, status, device }] }`, newest first; `limit` 1–500. `user` is the name, else the email.
 - `GET /api/network/devices?known=` · `PATCH /api/network/devices/:mac` · `DELETE /api/network/devices/:mac`: `docs/10` §5 (built after M11 step 2).
 
 ## Errors

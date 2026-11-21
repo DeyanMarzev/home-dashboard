@@ -21,10 +21,19 @@ export function pushSupported(): boolean {
   );
 }
 
+/** The service worker, or null if it isn't running within a few seconds (it failed to install). */
+async function readyWorker(): Promise<ServiceWorkerRegistration | null> {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+  ]);
+}
+
 export async function pushState(): Promise<PushState> {
   if (!pushSupported()) return { kind: 'unsupported' };
   if (Notification.permission === 'denied') return { kind: 'blocked' };
-  const registration = await navigator.serviceWorker.ready;
+  const registration = await readyWorker();
+  if (!registration) return { kind: 'unsupported' };
   const subscription = await registration.pushManager.getSubscription();
   return subscription && Notification.permission === 'granted'
     ? { kind: 'on', subscription }
@@ -50,7 +59,9 @@ function register(subscription: PushSubscription): Promise<DeviceItem> {
 export async function turnOn(vapidPublicKey: string): Promise<DeviceItem> {
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') throw new Error('Notifications were not allowed');
-  const registration = await navigator.serviceWorker.ready;
+  const registration = await readyWorker();
+  if (!registration)
+    throw new Error("The app's service worker isn't running: reload and try again");
   const subscription =
     (await registration.pushManager.getSubscription()) ??
     (await registration.pushManager.subscribe({

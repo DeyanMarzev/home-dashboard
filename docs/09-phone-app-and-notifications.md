@@ -397,6 +397,15 @@ self.addEventListener('notificationclick', (e) => {
 
 ## 7. Settings screen (`/settings`)
 
+**Built** (M11 step 5, 21 Nov 2026): `apps/web/src/pages/Settings.tsx` with `components/settings/` (`MyAlerts`, `QuietHours`, `Devices`, `AdminRules`, `Users`, `NotificationLog`), data hooks in `api/settings.ts`. As built:
+
+- My alerts: the row's text is the rule's `description` from `config/alerts.yaml` (event rules), or generated from the effective levels (threshold rules), with the unit of the matching series. A rule an admin switched off shows "Off for everyone" instead of a switch. Selecting every room saves "all", so rooms added later are included.
+- Quiet hours: switching on starts at 23:00–07:00; the pause buttons are 1 hour, 8 hours and "Until 07:00 (tomorrow)" (the next 07:00 London time).
+- My devices: Remove asks once more ("Really remove?") before deleting.
+- Alert thresholds: levels as numbers, durations in whole minutes (1–1440, saved as `<n>m`); only changed fields are sent, and admin changes accumulate in one override per rule. Boolean `options` are switches. The YAML defaults are listed under each rule.
+- Users: role and access per person, except yourself and `ADMIN_EMAILS` admins.
+- Recent notifications (System page, admins): the last 30 entries of `notification_log` in words ("Not sent: quiet hours").
+
 Reached from the bottom nav "More" sheet (phone) or the gear icon (desktop). Same design tokens and components as the rest (`docs/05`): cards, 44 px targets, real `<button>`/`<input>`, status shown with text plus icon, not colour alone.
 
 ### This device

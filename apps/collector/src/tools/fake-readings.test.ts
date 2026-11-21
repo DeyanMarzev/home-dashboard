@@ -46,3 +46,31 @@ describe('fakeRoomReadings', () => {
     expect(co2('2026-11-07T03:00:00Z')).toBeLessThan(600);
   });
 });
+
+describe('co2 spike', () => {
+  it('holds one room at the given ppm until the spike ends, any room', async () => {
+    const { fakeRoomReadings } = await import('./fake-readings.js');
+    const now = new Date('2026-11-21T12:00:00Z');
+    const until = new Date(now.getTime() + 60_000);
+    const co2 = (msgs: { topic: string; payload: { value: number } }[], room: string) =>
+      msgs.find((m) => m.topic === `home/sensors/${room}/co2`)?.payload.value;
+    expect(
+      co2(
+        fakeRoomReadings(now, () => 0, { room: 'bedroom', ppm: 1600, until }),
+        'bedroom',
+      ),
+    ).toBe(1600);
+    expect(
+      co2(
+        fakeRoomReadings(until, () => 0, { room: 'bedroom', ppm: 1600, until }),
+        'bedroom',
+      ),
+    ).not.toBe(1600);
+    expect(
+      co2(
+        fakeRoomReadings(now, () => 0, { room: 'study', ppm: 1300, until }),
+        'study',
+      ),
+    ).toBe(1300);
+  });
+});

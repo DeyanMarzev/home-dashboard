@@ -2,7 +2,12 @@ import { formatLongDate } from '@home/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { sendJson } from '../api/client.js';
-import { useMe } from '../api/hooks.js';
+import { useIsAdmin, useMe } from '../api/hooks.js';
+import { AdminRulesPanel } from '../components/settings/AdminRules.js';
+import { DevicesPanel } from '../components/settings/Devices.js';
+import { MyAlertsPanel } from '../components/settings/MyAlerts.js';
+import { QuietHoursPanel } from '../components/settings/QuietHours.js';
+import { UsersPanel } from '../components/settings/Users.js';
 import { Empty, Panel, Skeleton } from '../components/Cards.js';
 import { PageHeader } from '../components/PageHeader.js';
 import { Status } from '../components/Status.js';
@@ -10,9 +15,10 @@ import { promptInstall, useInstall } from '../lib/install.js';
 import { useNow } from '../lib/now-context.js';
 import { pushState, syncOnStart, turnOff, turnOn } from '../lib/push.js';
 
-/** Settings (docs/09 §7). For now: who you are and this device's install state. */
+/** Settings (docs/09 §7): you, this device, your alerts, quiet hours, devices; admins also thresholds and users. */
 export function SettingsPage() {
   const now = useNow();
+  const isAdmin = useIsAdmin();
   return (
     <div className="page">
       <PageHeader title="Settings" subtitle={formatLongDate(now)} />
@@ -20,6 +26,23 @@ export function SettingsPage() {
         <You />
         <ThisDevice />
       </div>
+      <div className="row">
+        <MyAlertsPanel />
+      </div>
+      <div className="row">
+        <QuietHoursPanel />
+        <DevicesPanel />
+      </div>
+      {isAdmin && (
+        <>
+          <div className="row">
+            <AdminRulesPanel />
+          </div>
+          <div className="row">
+            <UsersPanel />
+          </div>
+        </>
+      )}
     </div>
   );
 }

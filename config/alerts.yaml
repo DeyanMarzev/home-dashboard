@@ -64,6 +64,7 @@ rules:
   - id: nest_auth # raised by the nest collector when its token refresh fails
     group: heating
     name: Nest connection lost
+    description: When the dashboard can no longer read the Nest (its Google sign-in needs renewing)
     type: event
     level: alert
     link: /heating
@@ -73,6 +74,7 @@ rules:
   - id: weather_warning # raised by met_office_warnings (yellow = warning, amber/red = alert)
     group: weather
     name: Weather warning
+    description: Met Office severe weather warnings for Waltham Forest or London (yellow, amber, red)
     resolvedName: Warning ended
     type: event
     level: warning
@@ -83,6 +85,7 @@ rules:
   - id: water_leak # raised by the thames_water leak check
     group: home
     name: Possible water leak
+    description: When water flows all night, night after night (from Thames Water, 3 days behind)
     type: event
     level: alert
     link: /water
@@ -92,6 +95,7 @@ rules:
   - id: vacuum_not_charging # raised by the roborock collector
     group: devices
     name: Vacuum isn't charging
+    description: When the vacuum is found off its dock and not charging (checked hourly)
     resolvedName: Vacuum charging again
     type: event
     level: warning
@@ -114,6 +118,7 @@ rules:
   - id: roborock_auth # raised by the roborock collector when its sign-in is refused
     group: devices
     name: Roborock sign-in lost
+    description: When the dashboard can no longer read the vacuum (Roborock sign-in refused)
     type: event
     level: alert
     advice: Run the one-time Roborock login on the Pi (docs/06 § 5h).
@@ -123,6 +128,7 @@ rules:
   - id: network_new_device # raised by the new-device check (after M11 step 2, docs/10 §5)
     group: devices
     name: New device on the network
+    description: When a device never seen before joins the home network (wired or Wi-Fi)
     type: event
     level: warning
     resolvedNotice: false
@@ -157,6 +163,7 @@ rules:
   - id: pi_undervoltage # raised by pi_stats
     group: system
     name: Pi power problem
+    description: When the Pi reports its power supply is too weak
     type: event
     level: warning
     advice: Check the Pi's power supply and cable.
@@ -166,6 +173,7 @@ rules:
   - id: backup # scripts/backup.sh: info on success (never notifies), warning on failure
     group: system
     name: Backup failed
+    description: When the nightly backup fails
     type: event
     level: warning
     resolvedNotice: false
