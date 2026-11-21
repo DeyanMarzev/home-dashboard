@@ -1,8 +1,9 @@
 import { openEvent, resolveEvent } from '@home/db';
 import type { CollectorContext, PullCollector } from '../../collector.js';
-import { parseRoborockSnapshot } from './parse.js';
+import { notChargingMessage, parseRoborockSnapshot, VACUUM_ENTITY } from './parse.js';
 
 const AUTH_EVENT = 'roborock_auth';
+const NOT_CHARGING_EVENT = 'vacuum_not_charging';
 
 /** The helper said the Roborock sign-in is missing or no longer accepted (HTTP 401). */
 export class RoborockAuthError extends Error {
@@ -58,7 +59,8 @@ export const roborock: PullCollector = {
     }
     await resolveEvent(ctx.db, 'roborock', AUTH_EVENT);
 
-    const { readings, skipped, problems } = parseRoborockSnapshot(body, new Date());
+    const now = new Date();
+    const { readings, skipped, problems } = parseRoborockSnapshot(body, now);
     if (skipped > 0) {
       ctx.log.warn({ skipped, problems }, 'cleaning records in an unexpected shape left out');
     }
@@ -71,8 +73,21 @@ export const roborock: PullCollector = {
     }
     await ctx.writeReadings(
       readings.filter(
-        (r) => r.metric === 'battery' || new Date(r.ts).getTime() > stored.get(r.entity ?? '')!,
+        (r) => r.entity === VACUUM_ENTITY || new Date(r.ts).getTime() > stored.get(r.entity ?? '')!,
       ),
     );
+
+    // Left off its dock it runs flat: say so on the Overview until it's charging again.
+    const notCharging = notChargingMessage(readings, now);
+    if (notCharging) {
+      await openEvent(ctx.db, {
+        level: 'warning',
+        sourceId: 'roborock',
+        kind: NOT_CHARGING_EVENT,
+        message: notCharging,
+      });
+    } else if (notCharging === null) {
+      await resolveEvent(ctx.db, 'roborock', NOT_CHARGING_EVENT);
+    }
   },
 };

@@ -1,9 +1,9 @@
-import { isSnakeCase, type ReadingInput } from '@home/shared';
+import { formatLondonTime, isSnakeCase, vacuumState, type ReadingInput } from '@home/shared';
 import { z } from 'zod';
 
 /** Runs without a map: the robot on a landing between floors, or a single-room clean. */
 export const NO_MAP_ENTITY = 'no_map';
-/** The robot itself (battery), so the source stays Live between runs. */
+/** The robot itself (battery, state), so the source stays Live between runs. */
 export const VACUUM_ENTITY = 'vacuum';
 /** Shorter runs are false starts (cancelled at once), not cleans. */
 export const MIN_RUN_SECONDS = 60;
@@ -17,7 +17,12 @@ const RecordSchema = z.object({
 });
 
 const SnapshotSchema = z.object({
-  status: z.object({ battery: z.number().min(0).max(100).optional() }).nullish(),
+  status: z
+    .object({
+      battery: z.number().min(0).max(100).optional(),
+      state: z.number().int().nonnegative().optional(), // vacuumState() in @home/shared
+    })
+    .nullish(),
   maps: z
     .object({
       map_info: z
@@ -62,7 +67,8 @@ export interface ParsedSnapshot {
 /**
  * The helper's snapshot (docker/roborock/helper.py) → readings (docs/03 § roborock).
  * Each finished run becomes `clean_minutes` and `clean_area` on its floor's entity, stamped
- * with the run's start; the battery is stamped `now` (the robot gives no time for it).
+ * with the run's start; the battery and the state code are stamped `now` (the robot gives
+ * no time for them).
  */
 export function parseRoborockSnapshot(body: unknown, now: Date): ParsedSnapshot {
   const snapshot = SnapshotSchema.parse(body);
@@ -119,5 +125,39 @@ export function parseRoborockSnapshot(body: unknown, now: Date): ParsedSnapshot 
       value: battery,
     });
   }
+  const state = snapshot.status?.state;
+  if (state !== undefined) {
+    readings.push({
+      metric: 'state',
+      entity: VACUUM_ENTITY,
+      unit: 'code',
+      valueType: 'state',
+      ts: now,
+      value: state,
+      label: 'Roborock state code',
+    });
+  }
   return { readings, skipped, problems: [...problems] };
+}
+
+/**
+ * The "not charging" warning for a snapshot's readings: a message while the robot is off its
+ * dock and not busy (idle, paused, error, charging problem), `null` when it's fine, and
+ * `undefined` when the robot didn't say (leave any open warning as it is).
+ */
+export function notChargingMessage(
+  readings: readonly ReadingInput[],
+  now: Date,
+): string | null | undefined {
+  const own = (metric: string) =>
+    readings.find((r) => r.entity === VACUUM_ENTITY && r.metric === metric)?.value;
+  const code = own('state');
+  if (code === undefined) return undefined;
+  const state = vacuumState(code);
+  if (state.place !== 'stranded') return null;
+  const battery = own('battery');
+  return (
+    `Vacuum isn't charging · ${state.label} at ${formatLondonTime(now)}` +
+    `${battery === undefined ? '' : `, battery ${battery}%`}. Check it's on its dock`
+  );
 }
