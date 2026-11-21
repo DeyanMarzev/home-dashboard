@@ -186,7 +186,7 @@ Part of the `wifi` source (`netprobe` container, M9), but built **after M11 step
 - Event message: "New device on the network · Samsung device · 192.168.1.47 · wired. Open Wi-Fi to name it or mark it as yours" (the router's name first when it has one; "Unknown device (private address)" for a randomised one). `ignoreRandomised` comes from the rule as the collector's alert engine loaded it (default off).
 - The 24-hour auto-resolve runs on every scan. "This is ours" and "Forget" also resolve the open alert (no push: `resolvedNotice: false`).
 - Push deep link `/wifi#<mac>` (every alert with an entity now links `#<entity>`); the Wi-Fi page's Devices card gives each row that id.
-- The existing per-device table on the Wi-Fi page (router names, signal; M9) is unchanged and still visible to everyone; only this new card is admin-only.
+- The existing per-device table on the Wi-Fi page (router names, signal; M9) stays visible to everyone (owner's decision, `docs/08` #23); only this new card is admin-only.
 
 ### Detection
 

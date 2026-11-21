@@ -36,3 +36,4 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 | 20 | Phone app | An installed web app (PWA) with Web Push, not a Capacitor/Firebase Android app (21 Nov 2026). `docs/09`. |
 | 21 | Vacuum on the Overview | No Overview tile: battery and state stay on the Misc page's Vacuum panel (21 Nov 2026). |
 | 22 | Vacuum notifications | Notify for "not charging" (raised within an hour of the robot being found off its dock); keep "battery below 50 % for 6 h" as a backup (21 Nov 2026). `docs/10` §3. |
+| 23 | Wi-Fi page's per-device table (router names, signal; M9) | Stays visible to everyone; only the new-device card (`docs/10` §5) is admin-only (21 Nov 2026). |
