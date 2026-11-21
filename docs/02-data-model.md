@@ -139,7 +139,7 @@ CREATE TRIGGER events_notify_update AFTER UPDATE OF level, resolved_at, escalate
   FOR EACH ROW EXECUTE FUNCTION events_notify();
 ```
 
-- `rule_id`: `openEvent` sets it to `kind` when a rule of that id exists and the level is `warning` or `alert`. `info` events (backup finished, tariff updated) never notify. Threshold rules write their own events with `rule_id` = the rule id, `source_id` = the series' source, `entity` = the series' entity.
+- `rule_id`: set by the alert engine (`docs/09` §3, as built): it adopts open `warning`/`alert` events whose kind is a rule id, within an hour of them opening. `info` events (backup finished, tariff updated) never notify. Threshold rules write their own events with `rule_id` = the rule id, `source_id` = the series' source, `entity` = the series' entity.
 - Existing rows keep `entity = ''` and `rule_id = NULL`, so nothing old is pushed when M11 is deployed.
 - `level` only ever goes up while an event is open (no de-escalation), so for a resolved event it is the highest level reached (`docs/09` §4 rule 4).
 
@@ -235,6 +235,7 @@ CREATE INDEX ON notification_log (user_id, ts DESC);   -- rate limit: pushes per
 - **`alert_state` per series**, not per `(rule, entity)` as `docs/09` §3 says: a room with both a room sensor and the Nest (same entity, two sources) then gets two independent state machines instead of mixing two sensors' readings. Today no entity has two sources for the same metric, so the difference only matters later.
 - **"Back to normal" is off by default** for every rule (`docs/09` doesn't say). People switch it on per rule.
 - **Backups:** `scripts/backup.sh` keeps inserting plain rows (`source_id` NULL). After a good backup it will resolve any open `backup` warning, so the Overview strip stops showing an old failure (today it stays forever).
+- `alert_state` is created but **not used**: the engine re-evaluates threshold rules from the stored readings every minute instead (`docs/09` §3), so there's no state to keep. Leave it until a later migration drops it.
 - `network_devices` (`docs/10` §5) comes next as migration `005_network_devices.sql`, because it references `users`.
 
 ## Migrations

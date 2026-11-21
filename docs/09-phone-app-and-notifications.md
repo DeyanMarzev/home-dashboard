@@ -244,22 +244,22 @@ The default thresholds are suggestions. They're listed as an open question in `d
 
 ### Rule types
 
-**`threshold`.** Pure logic in `packages/shared/alerts/threshold.ts` (unit-tested). The collector supplies readings and persists state in `alert_state`.
+**`threshold`.** Pure logic in `packages/shared/src/alerts/threshold.ts` (`evaluateThreshold`, unit-tested); the engine is `apps/collector/src/alerts/engine.ts` (built: M11 step 3, 21 Nov 2026).
 
-- One state machine per `(rule, entity)`. `match` selects series by `metric`, optional `sources`, optional `entities`. A series that appears later (a new room) is covered automatically.
-- Evaluate on every new reading for a matching series, plus a 1-minute tick (so `for` durations elapse even between readings).
+- One evaluation per `(rule, series)`. `match` selects series by `metric`, optional `sources`, optional `entities`. A series that appears later (a new room) is covered automatically.
+- **As built:** every minute the engine re-reads each matching series' readings over a window (the longest `for` plus two of the source's intervals, at least 10 min) and decides from those alone. So it sees readings from every writer (the netprobe container too), and a restart changes nothing. `alert_state` (migration 004) is therefore not used.
 - **Open:** the value has been beyond `warning.level` continuously for `warning.for` → insert event (`level: warning`). Same for `alert`. If it's already open at warning and the alert condition holds → **escalate**: set `level = 'alert'`, `escalated_at = now()`, `dispatched_at = NULL`.
-- **Continuously** means: `pending_since` is set at the first reading beyond the level and cleared at any reading back inside it. Open when `now − pending_since ≥ for`.
+- **Continuously** means: the trailing run of readings beyond the level started at least `for` ago; any reading back inside it starts the run again. Beyond = strictly above (or below) the level; back inside `clear` = at or under it (at or over for `below`).
 - **Resolve:** the value has been inside `clear.level` continuously for `clear.for` → set `resolved_at`. The gap between `warning.level` and `clear.level` (hysteresis) stops flapping. No de-escalation from alert to warning; it stays open at alert until it clears.
 - **Stale data:** if the series' freshness is Late, don't open, escalate or resolve. Freeze the state. `source_late` covers that situation.
-- On collector restart, load `alert_state` and open events, then continue.
-- Only one open event per `(rule_id, entity)` (enforced by a partial unique index).
+- Open events are read back from `events` each tick. Only one open event per source + kind (= rule id) + entity (partial unique index).
+- Event message: `<rule name> · <entity label> <value>` ("CO₂ high · Kitchen 1,240 ppm"), `data`: `{ value, unit, label, since }`.
 
 **`freshness`.** Opens when a source's freshness becomes `late`, resolves when it isn't. This is the existing late check (`apps/collector/src/late-check.ts`, every 5 min): it keeps raising `source_late` with `source_id` = the late source, and the rule only declares it, so it gets a `rule_id` like any event rule. The "Rooms" chips list sources for this rule.
 
-**`event`.** Other code raises it with `openEvent(sql, { level, sourceId, kind, entity?, title?, message, data })` and resolves it with `resolveEvent(sql, sourceId, kind, entity?)`. If `kind` matches an `event` rule id and the level is `warning` or `alert`, `openEvent` sets `rule_id = kind` (`info` events never notify). As part of this milestone, `pi_stats` raises `pi_undervoltage` when the Pi reports under-voltage now and resolves it when it clears: throttle bit 0 where `get_throttled` exists, else the `under_voltage` reading from the `rpi_volt` alarm (the owner's kernel 6.12 has no `get_throttled`). The others are already raised by their collectors.
+**`event`.** Other code raises it with `openEvent(sql, { level, sourceId, kind, entity?, title?, message, data })` and resolves it with `resolveEvent(sql, sourceId, kind, entity?)`. **As built:** the engine *adopts* events: each minute it sets `rule_id = kind` on open `warning`/`alert` events whose kind is an `event` rule id and that are less than an hour old (and `rule_id = 'source_late'` for the freshness rule), then NOTIFYs them. So every writer is covered, even `scripts/backup.sh`'s plain SQL, and `openEvent` needs no rule list. `info` events never notify; older events (e.g. open before M11 was deployed) never push. Threshold events pass `ruleId` to `openEvent` directly. As part of this milestone, `pi_stats` raises `pi_undervoltage` when the Pi reports under-voltage now and resolves it when it clears: throttle bit 0 where `get_throttled` exists, else the `under_voltage` reading from the `rpi_volt` alarm (the owner's kernel 6.12 has no `get_throttled`). The others are already raised by their collectors.
 
-**Admin overrides.** `PATCH /api/alert-rules/:id` validates the merged result (for `above`: `clear < warning ≤ alert`; for `below`: `clear > warning ≥ alert`; `for` between 1 min and 24 h), stores it, then `NOTIFY alert_rules_changed`. The collector `LISTEN`s and reloads. `enabled: false` on a rule = the engine skips it, and any open event for it is resolved with `data.reason = 'rule_disabled'`.
+**Admin overrides.** `PATCH /api/alert-rules/:id` validates the merged result (for `above`: `clear < warning ≤ alert`; for `below`: `clear > warning ≥ alert`; `for` between 1 min and 24 h), stores it, then `NOTIFY alert_rules_changed`. The collector `LISTEN`s and reloads. `enabled: false` on a rule = the engine skips it: its open threshold events are resolved with `data.reason = 'rule_disabled'`; open events of a switched-off event or freshness rule lose their `rule_id` (no pushes) but stay visible. Rules and overrides: `packages/shared/src/alerts/schema.ts` (`mergeRule`, `buildAlertRules`); a bad override is ignored for that rule and logged, a bad rule in the YAML is left out and logged, and a YAML the collector can't read at all means no alerts (logged) while every collector keeps running.
 
 ### Messages
 

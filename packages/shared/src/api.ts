@@ -193,8 +193,13 @@ export const EventItemSchema = z.object({
   level: z.enum(EVENT_LEVELS),
   sourceId: z.string().nullable(),
   kind: z.string(),
+  /** Room, device or warning id; '' = the whole source. */
+  entity: z.string(),
+  /** The alert rule it notifies through, if any (docs/09 §3). */
+  ruleId: z.string().nullable(),
   message: z.string(),
   data: z.unknown(),
+  escalatedAt: IsoTimestamp.nullable(),
   resolvedAt: IsoTimestamp.nullable(),
 });
 export type EventItem = z.infer<typeof EventItemSchema>;

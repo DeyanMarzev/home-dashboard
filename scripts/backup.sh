@@ -51,5 +51,6 @@ fi
 
 trap - ERR
 WHERE=$([ "$OFFSITE" = true ] && echo " · copied to $REMOTE" || echo " · on the Pi only")
+resolve_backup_failures
 record_event info "Backup finished · $SIZE$WHERE" "{\"file\": \"$(basename "$FILE")\", \"bytes\": $BYTES, \"offsite\": $OFFSITE, \"keptLocal\": $KEEP_LOCAL, \"keptRemoteDays\": $KEEP_REMOTE_DAYS}"
 log "done"

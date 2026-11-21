@@ -54,8 +54,11 @@ interface EventRow {
   level: EventItem['level'];
   source_id: string | null;
   kind: string;
+  entity: string;
+  rule_id: string | null;
   message: string;
   data: unknown;
+  escalated_at: Date | null;
   resolved_at: Date | null;
 }
 
@@ -65,14 +68,17 @@ export const toEventItem = (r: EventRow): EventItem => ({
   level: r.level,
   sourceId: r.source_id,
   kind: r.kind,
+  entity: r.entity,
+  ruleId: r.rule_id,
   message: r.message,
   data: r.data,
+  escalatedAt: r.escalated_at?.toISOString() ?? null,
   resolvedAt: r.resolved_at?.toISOString() ?? null,
 });
 
 export async function findEvent(sql: Sql, id: number): Promise<EventItem | null> {
   const [row] = await sql<EventRow[]>`
-    select id, ts, level, source_id, kind, message, data, resolved_at from events where id = ${id}`;
+    select id, ts, level, source_id, kind, entity, rule_id, message, data, escalated_at, resolved_at from events where id = ${id}`;
   return row ? toEventItem(row) : null;
 }
 
@@ -240,7 +246,7 @@ export function registerDataRoutes(
   app.get('/api/events', async (request) => {
     const q = parseInput(EventsQuerySchema, request.query);
     const rows = await db<EventRow[]>`
-      select id, ts, level, source_id, kind, message, data, resolved_at from events
+      select id, ts, level, source_id, kind, entity, rule_id, message, data, escalated_at, resolved_at from events
       where true
       ${q.level ? db`and level = ${q.level}` : db``}
       ${q.kind ? db`and kind = ${q.kind}` : db``}

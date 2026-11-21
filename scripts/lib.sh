@@ -29,3 +29,9 @@ record_event() {
   sql="insert into events (level, kind, message, data) values ('$level', 'backup', \$m\$$message\$m\$, \$d\$$data\$d\$::jsonb)"
   psql_exec "$sql" >/dev/null 2>&1 || log "warning: could not record the backup event"
 }
+
+# After a good backup, earlier failures are over: resolve them so they leave the Overview.
+resolve_backup_failures() {
+  psql_exec "update events set resolved_at = now() where kind = 'backup' and level <> 'info' and resolved_at is null" \
+    >/dev/null 2>&1 || log "warning: could not resolve earlier backup failures"
+}

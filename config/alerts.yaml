@@ -1,0 +1,168 @@
+# Alert rules (docs/09 §3, docs/10 §2). Thresholds are defaults: admins can override them in
+# Settings → Alert thresholds without a deploy (stored in the database, merged on top).
+#
+# type: threshold  → the collector watches readings (match: metric, optional sources/entities)
+#       freshness  → a source turning Late (the existing source_late events)
+#       event      → raised by other code; the rule id IS the event kind they raise
+# defaults.audience: who has the rule switched on until they change it: all | admins | none
+# Levels: warning, alert (shown in the app as "Urgent"). `for`: how long it must hold.
+# Rule ids are stable forever: people's preferences are stored against them.
+
+groups:
+  - { id: air, name: Rooms & air }
+  - { id: heating, name: Heating }
+  - { id: weather, name: Weather }
+  - { id: home, name: Energy & water }
+  - { id: devices, name: Devices & network }
+  - { id: system, name: System }
+
+rules:
+  # --- Rooms & air ---------------------------------------------------------------------
+  - id: co2_high
+    group: air
+    name: CO₂ high
+    type: threshold
+    match: { metric: co2 }
+    direction: above
+    warning: { level: 1000, for: 15m }
+    alert: { level: 1500, for: 10m }
+    clear: { level: 900, for: 5m }
+    advice: Open a window or turn on ventilation.
+    link: /rooms
+    defaults: { audience: all, minLevel: alert }
+
+  - id: humidity_high
+    group: air
+    name: Humidity high
+    type: threshold
+    match: { metric: humidity, sources: [room_sensors] }
+    direction: above
+    warning: { level: 70, for: 2h }
+    alert: { level: 80, for: 1h }
+    clear: { level: 65, for: 30m }
+    advice: Ventilate or run a dehumidifier to avoid condensation and mould.
+    link: /rooms
+    defaults: { audience: none, minLevel: warning }
+
+  # --- Heating -------------------------------------------------------------------------
+  - id: room_cold
+    group: heating
+    name: Room too cold
+    type: threshold
+    match: { metric: temperature, sources: [room_sensors, nest] }
+    direction: below
+    warning: { level: 14, for: 30m }
+    alert: { level: 10, for: 30m }
+    clear: { level: 15, for: 15m }
+    advice: Check the heating and the boiler.
+    link: /heating
+    defaults: { audience: all, minLevel: alert }
+
+  - id: nest_auth # raised by the nest collector when its token refresh fails
+    group: heating
+    name: Nest connection lost
+    type: event
+    level: alert
+    link: /heating
+    defaults: { audience: admins, minLevel: warning }
+
+  # --- Weather -------------------------------------------------------------------------
+  - id: weather_warning # raised by met_office_warnings (yellow = warning, amber/red = alert)
+    group: weather
+    name: Weather warning
+    type: event
+    level: warning
+    link: /
+    defaults: { audience: all, minLevel: warning }
+
+  # --- Energy & water ------------------------------------------------------------------
+  - id: water_leak # raised by the thames_water leak check
+    group: home
+    name: Possible water leak
+    type: event
+    level: alert
+    link: /water
+    defaults: { audience: all, minLevel: warning }
+
+  # --- Devices & network ---------------------------------------------------------------
+  - id: vacuum_not_charging # raised by the roborock collector
+    group: devices
+    name: Vacuum isn't charging
+    resolvedName: Vacuum charging again
+    type: event
+    level: warning
+    link: /misc
+    defaults: { audience: all, minLevel: warning }
+
+  - id: vacuum_battery_low # backup for vacuum_not_charging
+    group: devices
+    name: Vacuum battery low
+    resolvedName: Vacuum battery OK
+    type: threshold
+    match: { metric: battery, sources: [roborock], entities: [vacuum] }
+    direction: below
+    warning: { level: 50, for: 6h } # one level only: never escalates
+    clear: { level: 55, for: 10m }
+    advice: Check it's on its dock and the dock has power.
+    link: /misc
+    defaults: { audience: all, minLevel: warning }
+
+  - id: roborock_auth # raised by the roborock collector when its sign-in is refused
+    group: devices
+    name: Roborock sign-in lost
+    type: event
+    level: alert
+    advice: Run the one-time Roborock login on the Pi (docs/06 § 5h).
+    link: /system
+    defaults: { audience: admins, minLevel: warning }
+
+  - id: network_new_device # raised by the new-device check (after M11 step 2, docs/10 §5)
+    group: devices
+    name: New device on the network
+    type: event
+    level: warning
+    resolvedNotice: false
+    options: { ignoreRandomised: false } # the owner wants guests' phones too
+    link: /wifi
+    defaults: { audience: admins, minLevel: warning }
+
+  # --- System --------------------------------------------------------------------------
+  - id: pi_cpu_hot
+    group: system
+    name: Pi running hot
+    type: threshold
+    match: { metric: cpu_temperature, sources: [pi_stats] }
+    direction: above
+    warning: { level: 75, for: 10m }
+    alert: { level: 80, for: 5m }
+    clear: { level: 70, for: 10m }
+    advice: Check the Pi's ventilation.
+    link: /system
+    defaults: { audience: admins, minLevel: warning }
+
+  - id: source_late # the collector's late check (every 5 min)
+    group: system
+    name: Data source stopped
+    type: freshness
+    match: { sources: '*' }
+    level: warning
+    link: /system
+    defaults: { audience: admins, minLevel: warning }
+
+  - id: pi_undervoltage # raised by pi_stats
+    group: system
+    name: Pi power problem
+    type: event
+    level: warning
+    advice: Check the Pi's power supply and cable.
+    link: /system
+    defaults: { audience: admins, minLevel: warning }
+
+  - id: backup # scripts/backup.sh: info on success (never notifies), warning on failure
+    group: system
+    name: Backup failed
+    type: event
+    level: warning
+    resolvedNotice: false
+    link: /system
+    defaults: { audience: admins, minLevel: warning }

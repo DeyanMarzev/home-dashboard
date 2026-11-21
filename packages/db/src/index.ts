@@ -12,3 +12,4 @@ export * from './runs.js';
 export * from './tariffs.js';
 export * from './misc-file.js';
 export * from './users.js';
+export * from './alerts.js';

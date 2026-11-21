@@ -18,7 +18,7 @@ Rule ids are stable forever (user preferences are stored against them).
 ## 1. Changes to the alert engine (on top of `docs/09` §3)
 
 1. **Single-level threshold rules.** `alert` is optional on `threshold` rules. A rule with only `warning` has `levels: ['warning']`, never escalates, and the "Notify me for" control is hidden. Validation becomes: `above`: `clear < warning` (and `warning ≤ alert` when `alert` exists); `below`: `clear > warning` (and `warning ≥ alert` when `alert` exists). An admin override can't add a level the YAML doesn't define.
-2. **Event rules can escalate and update.** When `openEvent` is called for a `(source, kind, entity)` that already has an open event (today it does nothing then):
+2. **Event rules can escalate and update** (built in `openEvent`, M11 step 3). When `openEvent` is called for a `(source, kind, entity)` that already has an open event:
    - higher level → escalate: set `level`, `escalated_at = now()`, `dispatched_at = NULL` (the dispatcher sends an `escalated` push with the same tag);
    - same or lower level → update `message` and `data` only, no push. Never de-escalate the stored level.
 3. **Custom titles for event rules.** `openEvent`'s input gains optional `title`, stored in `data.title`. The message builder uses it instead of the rule name for `opened` and `escalated` (no "Urgent:" prefix when a custom title is given; the title already says it).
