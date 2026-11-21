@@ -12,6 +12,8 @@ export interface StartupPaths {
   sourcesFile: string;
   /** The Misc page's settings (bins), read on each request. */
   miscFile: string;
+  /** Alert rules (docs/09 §3), read by the collector at startup. */
+  alertsFile: string;
 }
 
 /**
@@ -23,6 +25,7 @@ export function startupPaths(env: Record<string, string | undefined>): StartupPa
     migrationsDir: resolve(env.MIGRATIONS_DIR || 'db/migrations'),
     sourcesFile: resolve(env.SOURCES_FILE || 'config/sources.yaml'),
     miscFile: resolve(env.MISC_FILE || 'config/misc.yaml'),
+    alertsFile: resolve(env.ALERTS_FILE || 'config/alerts.yaml'),
   };
 }
 

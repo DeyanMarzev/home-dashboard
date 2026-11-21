@@ -120,3 +120,14 @@ export function parsePiStats(raw: RawPiStats, ts: Date): ReadingInput[] {
     readings.push(pi('database_size', 'MB', round(raw.databaseBytes / MB, 1)));
   return readings;
 }
+
+/**
+ * Is the Pi under-voltage right now (docs/09 §3 `pi_undervoltage`)? Bit 0 of the throttle
+ * flags where `get_throttled` exists, else the `rpi_volt` alarm (kernel 6.12+). null = unknown.
+ */
+export function underVoltageNow(readings: readonly ReadingInput[]): boolean | null {
+  const flags = readings.find((r) => r.metric === 'throttle_flags');
+  if (flags) return (flags.value & 0x1) !== 0;
+  const alarm = readings.find((r) => r.metric === 'under_voltage');
+  return alarm ? alarm.value === 1 : null;
+}

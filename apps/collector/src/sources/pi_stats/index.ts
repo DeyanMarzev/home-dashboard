@@ -1,5 +1,8 @@
+import { openEvent, resolveEvent } from '@home/db';
 import type { PullCollector } from '../../collector.js';
-import { parsePiStats } from './parse.js';
+import { parsePiStats, underVoltageNow } from './parse.js';
+
+const UNDER_VOLTAGE_EVENT = 'pi_undervoltage';
 import { HWMON_DIR, readPiStats, THERMAL_PATH, THROTTLED_PATH } from './read.js';
 
 let warnedMissing = false;
@@ -23,6 +26,20 @@ export const piStats: PullCollector = {
       );
       warnedMissing = true;
     }
-    await ctx.writeReadings(parsePiStats(raw, new Date()));
+    const readings = parsePiStats(raw, new Date());
+    await ctx.writeReadings(readings);
+
+    // A weak power supply corrupts SD cards: say so on the Overview (and, from M11, on phones).
+    const under = underVoltageNow(readings);
+    if (under === true) {
+      await openEvent(ctx.db, {
+        level: 'warning',
+        sourceId: 'pi_stats',
+        kind: UNDER_VOLTAGE_EVENT,
+        message: "Pi power problem · under-voltage now. Check the Pi's power supply and cable",
+      });
+    } else if (under === false) {
+      await resolveEvent(ctx.db, 'pi_stats', UNDER_VOLTAGE_EVENT);
+    }
   },
 };

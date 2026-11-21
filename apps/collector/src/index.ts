@@ -1,9 +1,11 @@
 import {
+  ALERT_RULES_CHANNEL,
   createDb,
   createReadingWriter,
   finishRun,
   lastDataTo,
   latestBySource,
+  loadAlertsFile,
   openEvent,
   prepareDatabase,
   pruneRuns,
@@ -13,6 +15,7 @@ import {
   startupPaths,
 } from '@home/db';
 import { pino } from 'pino';
+import { AlertEngine } from './alerts/engine.js';
 import type { CollectorContext } from './collector.js';
 import { EnvError, loadCollectorEnv, type CollectorEnv } from './env.js';
 import { describeError } from './errors.js';
@@ -22,6 +25,7 @@ import { startPushSource } from './push-runner.js';
 import { collectors } from './sources/index.js';
 
 const LATE_CHECK_INTERVAL_MS = 5 * 60_000;
+const ALERT_TICK_MS = 60_000;
 const PRUNE_INTERVAL_MS = 6 * 3600_000;
 /** Pull sources start this far apart so they don't all hit the network/DB at once. */
 const STARTUP_STAGGER_MS = 2000;
@@ -42,7 +46,8 @@ process.on('unhandledRejection', (err) =>
 );
 
 const db = createDb({ applicationName: 'collector', max: 4, log });
-const registry = await prepareDatabase(db, startupPaths(process.env), log);
+const paths = startupPaths(process.env);
+const registry = await prepareDatabase(db, paths, log);
 const writer = createReadingWriter(db, {
   onRollupError: (err) =>
     log.warn({ error: describeError(err) }, 'hourly rollup refresh after a backfill failed'),
@@ -158,8 +163,24 @@ function every(ms: number, name: string, job: () => Promise<unknown>): NodeJS.Ti
   }, ms);
 }
 
+// --- Alert engine (docs/09 §3) -------------------------------------------------------------
+// A broken alerts.yaml must not stop the collectors (CLAUDE.md rule 7): log it and run without.
+let engine: AlertEngine | null = null;
+try {
+  engine = new AlertEngine({
+    db,
+    registry,
+    file: await loadAlertsFile(paths.alertsFile),
+    log: log.child({ part: 'alerts' }),
+  });
+  await db.listen(ALERT_RULES_CHANNEL, () => engine?.markDirty());
+} catch (err) {
+  log.error({ error: describeError(err) }, 'alert rules not loaded: no alerts until fixed');
+}
+
 // The first late check runs one interval after startup, giving every source time to report.
 const timers = [
+  every(ALERT_TICK_MS, 'alerts', async () => engine?.tick()),
   every(LATE_CHECK_INTERVAL_MS, 'late-check', () =>
     checkLateSources(registry.sources, lateStore, log),
   ),

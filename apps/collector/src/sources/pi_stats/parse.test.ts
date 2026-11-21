@@ -1,7 +1,7 @@
 import { ReadingInputSchema } from '@home/shared';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { parsePiStats, type RawPiStats } from './parse.js';
+import { parsePiStats, underVoltageNow, type RawPiStats } from './parse.js';
 
 const fixture = JSON.parse(
   readFileSync(new URL('./__fixtures__/pi4-under-load.json', import.meta.url), 'utf8'),
@@ -104,5 +104,27 @@ describe('parsePiStats', () => {
       /MemAvailable/,
     );
     expect(() => parsePiStats({ ...fixture, loadavg: '' }, ts)).toThrow(/loadavg/);
+  });
+});
+
+describe('underVoltageNow', () => {
+  const r = (metric: string, value: number) => ({
+    metric,
+    entity: 'pi',
+    unit: 'flags',
+    valueType: 'state' as const,
+    ts: new Date(),
+    value,
+  });
+
+  it('reads bit 0 of the throttle flags, ignoring past events (bits 16+)', () => {
+    expect(underVoltageNow([r('throttle_flags', 0x50005)])).toBe(true);
+    expect(underVoltageNow([r('throttle_flags', 0x50000)])).toBe(false);
+  });
+
+  it("uses the rpi_volt alarm where get_throttled doesn't exist, and knows when it can't tell", () => {
+    expect(underVoltageNow([r('under_voltage', 1)])).toBe(true);
+    expect(underVoltageNow([r('under_voltage', 0)])).toBe(false);
+    expect(underVoltageNow([r('cpu_temperature', 50)])).toBeNull();
   });
 });

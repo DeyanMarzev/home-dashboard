@@ -511,6 +511,65 @@ describe.each(testBackends)('database ($name)', ({ start }) => {
       await resolveEvent(sql, 'roborock', 'test_kind', 'bedroom');
     });
 
+    it('escalates an open event to a higher level, and only refreshes it otherwise', async () => {
+      const base = {
+        sourceId: 'room_sensors',
+        kind: 'co2_high',
+        entity: 'kitchen',
+        ruleId: 'co2_high',
+      };
+      const id = await openEvent(sql, {
+        ...base,
+        level: 'warning',
+        message: 'CO₂ high · Kitchen 1,100 ppm',
+      });
+      await sql`update events set dispatched_at = now() where id = ${id}`;
+      const row = async () =>
+        (
+          await sql<
+            {
+              level: string;
+              message: string;
+              escalated_at: Date | null;
+              dispatched_at: Date | null;
+              rule_id: string;
+              data: unknown;
+            }[]
+          >`select level, message, escalated_at, dispatched_at, rule_id, data from events where id = ${id}`
+        )[0]!;
+
+      expect(
+        await openEvent(sql, {
+          ...base,
+          level: 'alert',
+          message: 'CO₂ high · Kitchen 1,600 ppm',
+          title: 'Urgent',
+        }),
+      ).toBeNull();
+      const escalated = await row();
+      expect(escalated).toMatchObject({
+        level: 'alert',
+        message: 'CO₂ high · Kitchen 1,600 ppm',
+        dispatched_at: null,
+        rule_id: 'co2_high',
+        data: { title: 'Urgent' },
+      });
+      expect(escalated.escalated_at).toBeInstanceOf(Date);
+
+      await sql`update events set dispatched_at = now() where id = ${id}`;
+      expect(
+        await openEvent(sql, {
+          ...base,
+          level: 'warning',
+          message: 'CO₂ high · Kitchen 1,200 ppm',
+        }),
+      ).toBeNull();
+      const refreshed = await row();
+      expect(refreshed).toMatchObject({ level: 'alert', message: 'CO₂ high · Kitchen 1,200 ppm' });
+      expect(refreshed.dispatched_at).toBeInstanceOf(Date); // still dispatched: no new push
+      await resolveEvent(sql, 'room_sensors', 'co2_high', 'kitchen');
+    });
+
     it('lets sourceless events (backups) repeat while open, as before', async () => {
       await sql`insert into events (level, kind, message) values ('info', 'backup', 'one'), ('info', 'backup', 'two')`;
       const [row] = await sql<{ n: number }[]>`

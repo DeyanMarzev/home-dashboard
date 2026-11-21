@@ -8,8 +8,11 @@ const event = (level: EventItem['level'], data: unknown): EventItem => ({
   level,
   sourceId: null,
   kind: 'backup',
+  entity: '',
+  ruleId: null,
   message: 'x',
   data,
+  escalatedAt: null,
   resolvedAt: null,
 });
 

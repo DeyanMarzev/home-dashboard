@@ -18,3 +18,5 @@ export * from './energy.js';
 export * from './water.js';
 export * from './wifi.js';
 export * from './vacuum.js';
+export * from './alerts/schema.js';
+export * from './alerts/threshold.js';
