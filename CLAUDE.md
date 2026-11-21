@@ -4,7 +4,7 @@ A self-hosted dashboard for one house: room sensors (temperature, humidity, COâ‚
 
 - **Runs on:** Raspberry Pi 4, 4 GB RAM, 64-bit Raspberry Pi OS (Lite). Boots from SD card; database lives on a USB SSD mounted at `/mnt/ssd`.
 - **Public URL:** `https://home.deyan.uk` via Cloudflare Tunnel, behind Cloudflare Access (login required). DNS for `deyan.uk` is on Cloudflare.
-- **Clients:** web app (browser) now, Android app later (Capacitor wrapper around the same web app).
+- **Clients:** web app in the browser, installed on phones as a PWA with Web Push notifications (M11, `docs/09`).
 - **Owner:** Deyan (UK, Europe/London timezone).
 
 ## Read these first
@@ -19,6 +19,8 @@ A self-hosted dashboard for one house: room sensors (temperature, humidity, COâ‚
 | `docs/06-pi-setup-and-deploy.md` | Preparing the Pi, Cloudflare, deploying, backups |
 | `docs/07-build-plan.md` | Milestones in order, with acceptance criteria |
 | `docs/08-open-questions.md` | Things not decided yet: ask the owner, don't guess |
+| `docs/09-phone-app-and-notifications.md` | M11: installed phone app (PWA), users and roles, alert rules, Web Push |
+| `docs/10-extra-alerts.md` | Vacuum, Met Office weather warnings and new-device alerts on top of `docs/09` |
 
 Work through `docs/07-build-plan.md` in order. Finish and verify one milestone before starting the next.
 
@@ -30,7 +32,6 @@ Work through `docs/07-build-plan.md` in order. Finish and verify one milestone b
   - `apps/collector`: one process running all collectors on schedules, plus the MQTT subscriber.
   - `apps/api`: Fastify 5 HTTP API + Server-Sent Events, also serves the built web app.
   - `apps/web`: React + Vite + TanStack Query + React Router. Charts with Apache ECharts (tree-shaken imports).
-  - `apps/mobile`: added in the last milestone (Capacitor, Android).
 - **Database:** PostgreSQL 17 + TimescaleDB, accessed with `postgres` (postgres.js). Plain numbered SQL migrations in `db/migrations/`, applied by a small runner in `packages/db` or `apps/api` at startup.
 - **Messaging:** Mosquitto (MQTT 5) for sensors.
 - **Deployment:** Docker Compose on the Pi. All images must have `linux/arm64` variants.

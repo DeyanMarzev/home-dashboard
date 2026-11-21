@@ -265,6 +265,7 @@ interface CollectorContext {
   - `battery` % on entity `vacuum`, stamped with the poll time, so the source is Live while the robot answers.
   - `state` on entity `vacuum` (value type `state`, unit `code`): `get_status.state` as sent, stamped with the poll time. `vacuumState()` in `packages/shared/src/vacuum.ts` names the code and says where the robot is: `docked` (charging 8, fully charged 100, emptying the bin 22, washing the mop 23), `busy` (cleaning, returning, docking…), `stranded` (off the charger 2, idle 3, charging problem 9, paused 10, error 12, shutting down 13) or `unknown`.
   - **Not charging warning:** when a poll finds the robot `stranded`, the collector opens a `warning` event `vacuum_not_charging` ("Vacuum isn't charging · Idle at 14:02, battery 63%. Check it's on its dock"), shown on the Overview's alert strip; the next poll that finds it docked or busy resolves it. No state in the snapshot leaves the event as it is; an unknown code resolves it. A robot that has run completely flat stops answering: the source then goes stale and the run fails, rather than raising this warning.
+  - From M11, `vacuum_not_charging` and `roborock_auth` notify phones through rules of the same id, and `vacuum_battery_low` (below 50 % for 6 h) is a backup on `battery` (`docs/10` §3).
 - The Misc calendar colours floors by entity: `ground_floor` teal, `first_floor` amber, `top_floor` violet, `no_map` grey; other maps get the next free colour.
 
 ### Later sources (separate milestones)

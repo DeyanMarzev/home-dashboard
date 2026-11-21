@@ -1,0 +1,493 @@
+# 09 · Phone app and notifications
+
+This replaces the earlier plan for a Capacitor Android app with Firebase push. The phone app is the existing web app, **installed as a Progressive Web App (PWA)**. Notifications use **Web Push** sent from the Pi. Several people can use it, and **each person turns specific notifications on or off for themselves** from their phone.
+
+Build this as milestone M11 (`docs/07`). It only needs M3–M5, so the owner may ask for it earlier. Rules for sources added later (water, backups, Nest) start working when those milestones land, because they work off events.
+
+## Goals
+
+1. Every allowed person can install the dashboard on an Android phone as an app with its own icon, full screen, and no APK.
+2. Every person gets push notifications on their own phone(s) for the alerts *they* chose, at the levels *they* chose, outside *their* quiet hours.
+3. The owner (admin) sets the shared thresholds (e.g. CO₂ 1000 / 1500 ppm) and manages users. Members manage only their own notifications and devices.
+4. Nothing new to run on the Pi except code in the existing `collector` and `api` containers. No Firebase project, no Google account, no extra app store.
+
+## Not in scope (v1)
+
+- Native app / Capacitor (can come back later for home-screen widgets, using the same API).
+- ntfy, SMS, email or Telegram delivery. (The dispatcher has a `Channel` interface so one can be added later.)
+- Daily digest, repeat reminders for alerts that stay open, and snooze buttons on the notification itself. Ideas for later, listed at the end.
+- iPhone. Web Push works on iOS only for installed web apps. Nothing here should break it, but it isn't tested.
+
+## How it fits together
+
+```
+ collector                                   api                                      phone
+ ─────────                                   ───                                      ─────
+ readings batch ─► alert engine ─► events row ─(pg NOTIFY 'events')─► dispatcher
+ freshness tick ─►      │                                              │  for each user:
+ other code ─► openEvent()                                             │   prefs? level? room? quiet? paused?
+                                                                        │  for each of their devices:
+                                                                        └─► web-push ─► Chrome push service ─► service worker
+                                                                                                              └─► notification
+                                                                                                                  tap → /rooms
+```
+
+- **Alerts are events.** Anything that should notify people becomes a row in `events` with a `rule_id`, written through `openEvent()` / `resolveEvent()` (`packages/db/src/events.ts`, extended as in `docs/10` §1). The dispatcher only reads events. No code sends a notification directly.
+- The **alert engine** runs in `collector` (it already sees every reading). The **dispatcher** runs in `api` (it owns the VAPID key and the subscriptions).
+- Push delivery goes Pi → Google's push service → phone. It does **not** go through Cloudflare, so Cloudflare Access doesn't affect delivery. Access only matters when the person taps through to the app.
+
+## 1. PWA (installable app)
+
+### Manifest
+
+`apps/web/public/manifest.webmanifest`:
+
+```json
+{
+  "name": "Home Dashboard",
+  "short_name": "Home",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F3F4F1",
+  "theme_color": "#F3F4F1",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
+```
+
+- Also ship `/icons/badge-96.png`: white glyph on transparent, used as the small status-bar icon on Android.
+- Icon: a simple house glyph in `--accent` (#0F766E) on `--bg`. Keep it original and simple.
+- Link it with **`<link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">`**. Without `use-credentials` the manifest request carries no Access cookie, gets redirected to the Cloudflare login, and Chrome won't offer to install. If install still fails, the fallback is an Access **Bypass** app for `/manifest.webmanifest` and `/icons/*` (`docs/06` §5). These files contain no data.
+
+### Service worker
+
+- Use `vite-plugin-pwa` with the **`injectManifest`** strategy, so the service worker is our own file (`apps/web/src/sw.ts`) with push handlers, plus Workbox precaching.
+- **Precache:** the built app shell (JS, CSS, `index.html`), self-hosted fonts, icons.
+- **Never cache or intercept:** `/api/*`, `/cdn-cgi/*` (Cloudflare Access login/logout lives there). API calls are network-only. The app already shows Late badges and skeletons, so no offline data cache in v1.
+- `navigateFallback: '/index.html'` with a denylist for `/api` and `/cdn-cgi`.
+- Updates: `registerType: 'prompt'`. When a new version is waiting, show a small toast: "New version available · Reload".
+- Serve `/sw.js` with `Cache-Control: no-cache` from Fastify.
+
+### Install flow
+
+- Capture `beforeinstallprompt`. Show an **Install app** button in Settings → This device while it's available.
+- If the event never fires (already installed, or Chrome decided not to offer it), show the manual route instead: "Chrome menu ⋮ → Add to Home screen / Install app".
+- Detect installed mode with `matchMedia('(display-mode: standalone)')`. It's used for small layout tweaks only, never to gate features.
+
+### Cloudflare Access session on the phone
+
+- Access's session cookie eventually expires. When it does, API calls get a redirect to the Access login instead of JSON.
+- **Already built** (`apps/web/src/api/client.ts`, `api/session.ts`); check it still works from the installed app. The API client (one wrapper used by every TanStack Query hook) calls `fetch` with `redirect: 'manual'`. If `res.type === 'opaqueredirect'` or `res.status === 401`, it sets a global `sessionExpired` flag.
+- The UI then shows a full-width banner, "You've been signed out · Sign in again", with a button that does `location.reload()`. The full navigation goes through Access login and back.
+- The SSE client treats repeated `error` events the same way (fall back to polling, which hits the check above).
+- Push notifications keep arriving while signed out. Tapping one simply leads through the login first.
+
+### Mobile navigation
+
+- At ≤ 640 px width: hide the top tabs and show a **bottom navigation bar** with Overview, Rooms, Energy, Heating, More. More opens a sheet with Weather, Water, Wi-Fi, Misc, System, Settings (every page in the top tabs, `docs/05`).
+- Respect `env(safe-area-inset-bottom)`. Touch targets 44 px. Active item uses `--accent` plus a label, never colour alone.
+- Above 640 px, nothing changes. Add a gear icon (Settings) at the right end of the top bar.
+
+## 2. Users and roles
+
+- **Identity comes from Cloudflare Access.** The API middleware already verifies `Cf-Access-Jwt-Assertion`. Take the `email` claim, lowercase it, and upsert into `users` (`docs/02` § Users and notifications, migration `004`). Update `last_seen_at` at most once per 5 minutes.
+- **Who is a user:** anyone Access lets in. Adding a person = adding their email to the Access policy. They appear in `users` on first visit.
+- **Roles:**
+
+| | member | admin |
+|---|---|---|
+| View all dashboards | ✓ | ✓ |
+| Own notification settings, quiet hours, pause, devices | ✓ | ✓ |
+| Edit alert thresholds / disable a rule for everyone | | ✓ |
+| Edit tariffs (`PUT /api/tariffs`) | | ✓ |
+| Users page (role, enable/disable) | | ✓ |
+| Notification log on System page | | ✓ |
+
+- `ADMIN_EMAILS` (comma-separated env) are always admin. They're created as admin and can't be demoted or disabled in the UI (`roleLocked: true`). Other users start as `member`. An admin can promote them.
+- `enabled = false` → API returns 403 `USER_DISABLED` for everything except `/api/health`, and the user gets no pushes. The Users page says that removing someone's access entirely is done in Cloudflare Access.
+- **Service token requests** (JWT without `email`, e.g. scripts) are a `service` identity with member read rights. `/api/me*` returns 403 for them.
+- **Permissions are enforced in the API.** Hiding admin screens in the UI is for convenience only.
+- Dev: with `AUTH_DISABLED=true`, use `DEV_USER_EMAIL` (default `dev@localhost`) as an admin.
+
+## 3. Alert rules
+
+### Catalogue: `config/alerts.yaml`
+
+The YAML (in git) defines which rules exist, their wording and **default** thresholds. Admin edits are stored as **overrides** in `alert_rule_overrides`, so the YAML stays the source of truth for structure and the database holds the household's tuning. Effective rule = YAML deep-merged with override. Validate both with zod (`packages/shared/alerts/schema.ts`).
+
+```yaml
+# config/alerts.yaml
+# Thresholds are defaults. Admins can override them in Settings → Alert thresholds.
+# defaults.audience: who has the rule switched on until they change it: all | admins | none
+# Levels: warning, alert (shown in the UI as "Urgent").
+
+groups:
+  - { id: air,     name: Rooms & air }
+  - { id: heating, name: Heating }
+  - { id: home,    name: Energy & water }
+  - { id: system,  name: System }
+
+rules:
+  - id: co2_high
+    group: air
+    name: CO₂ high
+    type: threshold
+    match: { metric: co2 }                 # every entity with this metric
+    direction: above
+    warning: { level: 1000, for: 15m }
+    alert:   { level: 1500, for: 10m }
+    clear:   { level: 900,  for: 5m }
+    advice: Open a window or turn on ventilation.
+    link: /rooms
+    defaults: { audience: all, minLevel: alert }
+
+  - id: humidity_high
+    group: air
+    name: Humidity high
+    type: threshold
+    match: { metric: humidity, sources: [room_sensors] }
+    direction: above
+    warning: { level: 70, for: 2h }
+    alert:   { level: 80, for: 1h }
+    clear:   { level: 65, for: 30m }
+    advice: Ventilate or run a dehumidifier to avoid condensation and mould.
+    link: /rooms
+    defaults: { audience: none, minLevel: warning }
+
+  - id: room_cold
+    group: heating
+    name: Room too cold
+    type: threshold
+    match: { metric: temperature, sources: [room_sensors, nest] }
+    direction: below
+    warning: { level: 14, for: 30m }
+    alert:   { level: 10, for: 30m }
+    clear:   { level: 15, for: 15m }
+    advice: Check the heating and the boiler.
+    link: /heating
+    defaults: { audience: all, minLevel: alert }
+
+  - id: pi_cpu_hot
+    group: system
+    name: Pi running hot
+    type: threshold
+    match: { metric: cpu_temperature, sources: [pi_stats] }
+    direction: above
+    warning: { level: 75, for: 10m }
+    alert:   { level: 80, for: 5m }
+    clear:   { level: 70, for: 10m }
+    advice: Check the Pi's ventilation.
+    link: /system
+    defaults: { audience: admins, minLevel: warning }
+
+  - id: source_late
+    group: system
+    name: Data source stopped
+    type: freshness                         # opens when a source turns Late, resolves when it isn't
+    match: { sources: '*' }
+    level: warning
+    link: /system
+    defaults: { audience: admins, minLevel: warning }
+
+  - id: pi_undervoltage
+    group: system
+    name: Pi power problem
+    type: event                             # raised by other code; rule id == event kind
+    level: warning
+    link: /system
+    defaults: { audience: admins, minLevel: warning }
+
+  - id: water_leak                          # raised by the thames_water leak check (M8)
+    group: home
+    name: Possible water leak
+    type: event
+    level: alert
+    link: /water
+    defaults: { audience: all, minLevel: warning }
+
+  - id: backup                              # scripts/backup.sh: info on success (never notifies), warning on failure
+    group: system
+    name: Backup failed
+    resolvedNotice: false                   # the next good backup resolves it; no push for that
+    type: event
+    level: warning
+    link: /system
+    defaults: { audience: admins, minLevel: warning }
+
+  - id: nest_auth                           # raised by the nest collector (M6) on token refresh failure
+    group: heating
+    name: Nest connection lost
+    type: event
+    level: alert                            # as the collector raises it today
+    link: /heating
+    defaults: { audience: admins, minLevel: warning }
+
+  - id: roborock_auth                       # raised by the roborock collector when its sign-in is refused
+    group: devices                          # (docs/10 adds the group)
+    name: Roborock sign-in lost
+    type: event
+    level: alert                            # as the collector raises it today
+    advice: Run the one-time Roborock login on the Pi (docs/06 § 5h).
+    link: /system
+    defaults: { audience: admins, minLevel: warning }
+```
+
+Event rule ids are the event kinds the code already raises (`docs/03`); don't rename them.
+
+The default thresholds are suggestions. They're listed as an open question in `docs/08`, for the owner to confirm.
+
+### Rule types
+
+**`threshold`.** Pure logic in `packages/shared/alerts/threshold.ts` (unit-tested). The collector supplies readings and persists state in `alert_state`.
+
+- One state machine per `(rule, entity)`. `match` selects series by `metric`, optional `sources`, optional `entities`. A series that appears later (a new room) is covered automatically.
+- Evaluate on every new reading for a matching series, plus a 1-minute tick (so `for` durations elapse even between readings).
+- **Open:** the value has been beyond `warning.level` continuously for `warning.for` → insert event (`level: warning`). Same for `alert`. If it's already open at warning and the alert condition holds → **escalate**: set `level = 'alert'`, `escalated_at = now()`, `dispatched_at = NULL`.
+- **Continuously** means: `pending_since` is set at the first reading beyond the level and cleared at any reading back inside it. Open when `now − pending_since ≥ for`.
+- **Resolve:** the value has been inside `clear.level` continuously for `clear.for` → set `resolved_at`. The gap between `warning.level` and `clear.level` (hysteresis) stops flapping. No de-escalation from alert to warning; it stays open at alert until it clears.
+- **Stale data:** if the series' freshness is Late, don't open, escalate or resolve. Freeze the state. `source_late` covers that situation.
+- On collector restart, load `alert_state` and open events, then continue.
+- Only one open event per `(rule_id, entity)` (enforced by a partial unique index).
+
+**`freshness`.** Opens when a source's freshness becomes `late`, resolves when it isn't. This is the existing late check (`apps/collector/src/late-check.ts`, every 5 min): it keeps raising `source_late` with `source_id` = the late source, and the rule only declares it, so it gets a `rule_id` like any event rule. The "Rooms" chips list sources for this rule.
+
+**`event`.** Other code raises it with `openEvent(sql, { level, sourceId, kind, entity?, title?, message, data })` and resolves it with `resolveEvent(sql, sourceId, kind, entity?)`. If `kind` matches an `event` rule id and the level is `warning` or `alert`, `openEvent` sets `rule_id = kind` (`info` events never notify). As part of this milestone, `pi_stats` raises `pi_undervoltage` when the Pi reports under-voltage now and resolves it when it clears: throttle bit 0 where `get_throttled` exists, else the `under_voltage` reading from the `rpi_volt` alarm (the owner's kernel 6.12 has no `get_throttled`). The others are already raised by their collectors.
+
+**Admin overrides.** `PATCH /api/alert-rules/:id` validates the merged result (for `above`: `clear < warning ≤ alert`; for `below`: `clear > warning ≥ alert`; `for` between 1 min and 24 h), stores it, then `NOTIFY alert_rules_changed`. The collector `LISTEN`s and reloads. `enabled: false` on a rule = the engine skips it, and any open event for it is resolved with `data.reason = 'rule_disabled'`.
+
+### Messages
+
+Built by the dispatcher from the event and rule (`packages/shared/alerts/message.ts`, unit-tested):
+
+| Phase | Title | Body |
+|---|---|---|
+| opened | `CO₂ high · Bedroom` | `1,240 ppm for 15 min. Open a window or turn on ventilation.` |
+| escalated | `Urgent: CO₂ high · Bedroom` | `1,560 ppm. Open a window or turn on ventilation.` |
+| resolved | `CO₂ back to normal · Bedroom` | `880 ppm.` |
+| event rules | `data.title`, else the head of the message, else the rule name | the rest of the message |
+
+Event messages already have the alerts-strip form `Head · rest` ("Vacuum isn't charging · Idle at 14:02, battery 63%. Check it's on its dock"): the push title is the part before the first ` · ` and the body the rest. A message without ` · ` gets the rule name as title and the whole message as body.
+| test | `Test notification` | `Notifications work on <device label>.` |
+
+The entity label comes from the series `label`, else the entity in Title Case (`living_room` → "Living room"). Numbers are formatted `en-GB` with the series unit. Durations are humanised ("15 min", "2 h").
+
+## 4. Per-user preferences
+
+Stored in `user_alert_prefs`, one row per user per rule **only after the user changes something**. No row = the rule's defaults:
+
+- `audience: all` → enabled for everyone at `minLevel`.
+- `audience: admins` → enabled for admins, off for members. Members can still switch it on.
+- `audience: none` → off for everyone until switched on.
+
+Per rule, a user can set:
+
+| Setting | Values | Meaning |
+|---|---|---|
+| `enabled` | on/off | Get this alert at all |
+| `minLevel` | `warning` (warnings and urgent) / `alert` (urgent only) | Lowest level that notifies |
+| `entities` | `null` = all, or e.g. `['bedroom','kitchen']` | Only these rooms/devices (threshold and freshness rules) |
+| `notifyResolved` | on/off | Also notify when it's back to normal |
+
+Per user (on `users`):
+
+| Setting | Meaning |
+|---|---|
+| Quiet hours `quiet_start`–`quiet_end` | Local time in `users.tz` (Europe/London). May cross midnight (23:00–07:00). `NULL` = none. |
+| `urgent_ignores_quiet` (default on) | Urgent alerts still come through during quiet hours |
+| `paused_until` | "Pause all notifications" until a time (1 h / 8 h / until 07:00 tomorrow) |
+
+### Decision function
+
+`shouldNotify(user, rule, pref, event, phase, now) → { send: true } | { send: false, reason }`. Pure, in `packages/shared/alerts/prefs.ts`, unit-tested. Order:
+
+1. `user.enabled` false → `skipped_disabled`
+2. Rule disabled for everyone, or pref (or default) `enabled` false → `skipped_disabled`
+3. Phase `resolved` and `notifyResolved` false → `skipped_disabled`
+4. Event level below `minLevel` → `skipped_level`. (For `resolved`: compare the highest level the event reached.)
+5. `entities` set and `event.entity` not in it → `skipped_entity`
+6. `paused_until > now` → `skipped_paused`
+7. Inside quiet hours (DST-correct, crossing midnight) and not (`level = 'alert'` and `urgent_ignores_quiet`) → `skipped_quiet`
+8. Otherwise send.
+
+Skipped notifications are **not** delivered later. The alert is still visible in the app (alerts strip, events). This is stated on the Settings screen under Quiet hours.
+
+## 5. Dispatcher (in `api`)
+
+- `LISTEN events` (a trigger sends the id on insert and on changes to `level`, `resolved_at`, `escalated_at`; see `docs/02` § Users and notifications). The SSE stream already listens on the same channel.
+- On a notification, and on a 1-minute safety tick, and at startup, pick up work with `SELECT … FOR UPDATE SKIP LOCKED`:
+  - **opened/escalated:** `rule_id IS NOT NULL AND dispatched_at IS NULL AND resolved_at IS NULL AND coalesce(escalated_at, ts) > now() - interval '60 minutes'`. The phase is `escalated` when `escalated_at` is set, otherwise `opened`.
+  - **resolved:** `rule_id IS NOT NULL AND resolved_at IS NOT NULL AND resolved_dispatched_at IS NULL AND resolved_at > now() - interval '60 minutes'`
+  - Older undispatched rows are marked dispatched without sending (no stale pushes after a long outage).
+- For each user: `shouldNotify`. If yes, send to each of their `push_subscriptions`. Write one `notification_log` row per user (skips) or per device (sends).
+- Then set `dispatched_at` / `resolved_dispatched_at`.
+- **Sending** (`web-push` npm package, VAPID from env):
+  - Payload (JSON, keep < 2 KB): `{ v: 1, phase, eventId, ruleId, level, title, body, tag, url, ts }`
+  - `tag` = `${ruleId}:${entity}`, so escalation and resolved notifications replace the earlier one on the phone.
+  - Options: `TTL` 6 h for alert, 1 h for warning, 30 min for resolved. `urgency` `high` / `normal` / `low` for the same three. `topic` = a short URL-safe hash of `tag` (≤ 32 chars), so a newer message replaces an undelivered older one.
+  - Run devices in parallel with `Promise.allSettled`, 10 s timeout each.
+  - `404`/`410` → delete the subscription, log `gone`. `429`/`5xx` → retry up to 3 times with backoff (5 s, 30 s, 2 min), then log `failed`. Other errors → `failed`. Increment `failure_count`. Reset it on success and set `last_success_at`.
+- **Channel interface:** `interface Channel { send(target, message): Promise<Result> }`, with `WebPushChannel` as the only implementation. Tests use a `FakeChannel`.
+- **Rate limit:** at most 20 pushes per user per hour. Beyond that, log `skipped_rate_limited` and send one "Too many alerts, open the app" push per hour.
+- Daily job: delete `notification_log` rows older than 90 days.
+- Never log VAPID keys, subscription `auth`/`p256dh`, or full endpoints (log the host plus the last 8 characters).
+
+### Environment
+
+```
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=mailto:            # contact address sent to push services
+ADMIN_EMAILS=                    # comma-separated, always admins
+DEV_USER_EMAIL=dev@localhost     # only used when AUTH_DISABLED=true
+HEALTHCHECK_PING_URL=            # optional, see §8
+```
+
+The API refuses to start in production if the VAPID values are missing. It logs a warning and disables push in development.
+
+## 6. Service worker: push handling
+
+In `apps/web/src/sw.ts`:
+
+```ts
+self.addEventListener('push', (e) => {
+  const m = e.data?.json() ?? { title: 'Home', body: 'Open the app for details', url: '/' };
+  e.waitUntil(self.registration.showNotification(m.title, {
+    body: m.body,
+    tag: m.tag,
+    renotify: m.phase !== 'resolved',
+    requireInteraction: m.level === 'alert' && m.phase !== 'resolved',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/badge-96.png',
+    timestamp: Date.parse(m.ts),
+    data: { url: m.url ?? '/' },
+  }));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const url = new URL(e.notification.data?.url ?? '/', self.location.origin).href;
+  e.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const win = wins.find((w) => new URL(w.url).origin === self.location.origin);
+    if (win) { await win.focus(); win.postMessage({ type: 'navigate', url }); }
+    else await self.clients.openWindow(url);
+  })());
+});
+```
+
+- Every `push` must show a notification (Chrome requires `userVisibleOnly`).
+- The app listens for `{ type: 'navigate' }` messages and routes with React Router.
+- Deep links: the rule's `link`, plus `#<entity>` for threshold rules (Rooms scrolls to that room's card).
+- `pushsubscriptionchange`: re-subscribe and `POST /api/me/devices`, best effort. The app also re-syncs on every start (below), which covers failures here.
+
+## 7. Settings screen (`/settings`)
+
+Reached from the bottom nav "More" sheet (phone) or the gear icon (desktop). Same design tokens and components as the rest (`docs/05`): cards, 44 px targets, real `<button>`/`<input>`, status shown with text plus icon, not colour alone.
+
+### This device
+
+- Status line, one of:
+  - "Notifications are on for this phone" (with a device label)
+  - "Off on this phone" + **Turn on notifications**
+  - "Blocked in Chrome" + how to unblock (Chrome ⋮ → Settings → Site settings → Notifications → home.deyan.uk → Allow; on Android 13+ Chrome itself must also be allowed to notify)
+  - "This browser doesn't support notifications"
+- **Turn on:** only on a button tap. `Notification.requestPermission()` → `registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidPublicKey })` → `POST /api/me/devices` with `subscription.toJSON()` and a default label (e.g. "Chrome on Android"). Then prompt to rename it ("Deyan's Pixel").
+- **Send test notification** → `POST /api/me/devices/:id/test`.
+- **Turn off on this phone** → `subscription.unsubscribe()` + `DELETE /api/me/devices/:id`.
+- **Install app** button (§1) when available.
+- **On every app start** with permission granted: `getSubscription()`. If one exists, `POST /api/me/devices` (an upsert that refreshes `last_seen_at`, and re-links the device if a different person is now signed in on that phone).
+
+### My alerts
+
+- Grouped by `groups` from the YAML. Each rule is a row: name, one-line description generated from the effective thresholds ("Warning above 1000 ppm for 15 min · Urgent above 1500 ppm for 10 min"), and an on/off switch.
+- Expanding a row shows:
+  - **Notify me for:** segmented control "Warnings and urgent" / "Urgent only" (hidden for rules with one level)
+  - **Rooms:** chips for each entity the rule covers, all selected by default (hidden for event rules)
+  - **Also tell me when it's back to normal:** switch
+  - **Reset to default** (shown when the user has a pref row)
+- Any rule currently open shows a status line, e.g. "Open now · Kitchen · warning since 14:20".
+- Changes save immediately (`PUT /api/me/alerts/:ruleId`) with an optimistic update and a small "Saved" confirmation. Roll back and show the error on failure.
+
+### Quiet hours and pause
+
+- Quiet hours: switch, from/to time inputs (`<input type="time">`), "Urgent alerts still come through" switch, and a note: "Alerts during quiet hours aren't sent later. You'll still see them in the app."
+- Pause all notifications: 1 hour / 8 hours / until 07:00 tomorrow / Resume. Shows "Paused until 22:40" while active.
+
+### My devices
+
+- List: label, "this device" marker, last seen, last successful notification, a warning after 3+ failures. Rename, Remove.
+
+### Admin only
+
+- **Alert thresholds:** per rule, an "On for everyone" switch, number inputs for the levels and durations, inline validation (§3), "Reset to defaults", and "Changed by Deyan on 16 Nov" from the override.
+- **Users:** email, name, role, last seen, number of devices. Change role and enable/disable, except `roleLocked` users and yourself. A note says access itself is managed in Cloudflare Access.
+- **System page addition:** "Recent notifications" table from `GET /api/notifications/log` (time, user, alert, status).
+
+## 8. "The Pi itself is down"
+
+The Pi can't report its own death. Optional, controlled by `HEALTHCHECK_PING_URL`:
+
+- The collector does `GET $HEALTHCHECK_PING_URL` every 5 minutes, only while its scheduler loop is running and the database answers.
+- On a service like healthchecks.io the owner sets period 5 min / grace 10 min and chooses how to be told (email, or one of its integrations).
+- Unset → feature off. The doc in `docs/06` §10 explains setup.
+
+## 9. Tests
+
+Unit (Vitest, `packages/shared`):
+
+- Threshold state machine:
+  - doesn't open before `for`
+  - opens at exactly `for`
+  - a spike back below resets the pending timer
+  - warning → alert escalation
+  - stays at alert until clear
+  - hysteresis: a value between `clear` and `warning` doesn't resolve
+  - stale/Late data freezes the state
+  - a new entity appearing
+  - `below` direction
+- `shouldNotify`:
+  - each skip reason
+  - defaults by audience and role
+  - quiet hours crossing midnight
+  - quiet hours on the last Sunday of March and October (Europe/London)
+  - urgent ignoring quiet
+  - `paused_until`
+  - entity filter
+  - resolved phase uses the highest level reached
+- Override merge and validation (rejects `clear ≥ warning` for `above`).
+- Message formatting (numbers, units, durations, entity labels).
+
+Integration (seeded test DB, `FakeChannel`):
+
+- Fake sensor pushes kitchen CO₂ to 1300 for 15 min → one `warning` event → only users whose prefs allow warnings for kitchen get a push. Then 1600 for 10 min → escalated push with the same tag. Then 850 for 5 min → resolved push only to users with `notifyResolved`.
+- Two users with different prefs get different results. Quiet hours skip is logged.
+- `410` from the channel deletes the subscription.
+- An API restart between event insert and dispatch still sends exactly once.
+- An event older than 60 min is marked dispatched without sending.
+- API permissions: a member gets 403 on `PATCH /api/alert-rules/:id`, `PUT /api/tariffs`, `/api/users`. A service identity gets 403 on `/api/me`.
+
+Add to `scripts/fake-sensor.ts`: `--co2-spike <room> --ppm 1600 --minutes 20` to drive manual tests.
+
+## 10. Done when
+
+1. On the owner's Android phone, Chrome offers to install the dashboard through Cloudflare Access. It opens full screen with its own icon and the bottom nav.
+2. "Turn on notifications" then "Send test notification" shows a notification within 10 seconds, including with the app closed and the phone locked.
+3. With the fake sensor spiking bedroom CO₂, the owner gets "CO₂ high · Bedroom". Tapping it opens Rooms scrolled to Bedroom. Escalation replaces the first notification, and "back to normal" arrives if switched on.
+4. A second person (added to Access) installs it, turns off `co2_high` for the kitchen only, and sets quiet hours. A kitchen spike notifies the owner but not them. A bedroom spike during their quiet hours notifies them only if it's urgent.
+5. As a member they can't see or call the admin screens or endpoints. As admin, the owner changes the CO₂ warning to 1100 ppm and the engine uses it without a restart.
+6. After the Access session expires, the app shows "Signed out · Sign in again" instead of broken charts, and signing in returns to the same page.
+7. All tests in §9 pass, `pnpm lint typecheck test build` pass, `docker stats` shows `api` and `collector` still within their memory limits.
+
+## Later ideas (not v1)
+
+- Repeat reminder if an urgent alert stays open (e.g. every 2 h) until someone acknowledges it.
+- Notification action buttons: "Snooze 1 h" / "Acknowledge" (the service worker POSTs to the API).
+- Morning digest of alerts skipped during quiet hours.
+- A second channel (ntfy or email) for admins, as a backup.
+- Capacitor app for home-screen widgets, reusing the same API and push data.

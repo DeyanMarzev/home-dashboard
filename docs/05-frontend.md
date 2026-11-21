@@ -1,6 +1,6 @@
 # 05 · Frontend
 
-React + Vite + TypeScript, TanStack Query for data, React Router for pages, Apache ECharts for charts. Served by the API at `https://home.deyan.uk`. Later wrapped by Capacitor for Android, so: no browser-only APIs without a fallback, all URLs relative or from config, layouts must work at phone width (360–412 px).
+React + Vite + TypeScript, TanStack Query for data, React Router for pages, Apache ECharts for charts. Served by the API at `https://home.deyan.uk`. Installed on phones as a PWA with Web Push (M11, `docs/09`), so: all URLs relative or from config, layouts must work at phone width (360–412 px).
 
 The approved design is the HTML mockup in `docs/mockup/mockup/` (seven pages: `01-overview.html` … `07-system.html`, all sample data). Open them in a browser; spacing and colours are exact in their inline styles. The rules below capture it.
 
@@ -84,7 +84,7 @@ Derived numbers shown in the UI (dew point, mould risk, costs, projections, base
 ## Implementation notes (M5)
 
 - **Where things are:** `apps/web/src/styles.css` (tokens and component classes, values from the mockup), `components/` (`FreshnessBadge`, `StatTile`/`Panel`/`ProgressBar` in `Cards.tsx`, `PageHeader`, `AlertStrip`, `Status`, charts in `components/charts/`), `pages/` (Overview, Rooms, System; Energy, Heating, Water and Wi-Fi show which sources they wait for), `api/` (fetch client, one hook per endpoint, SSE provider), `model/` (pure view models, unit-tested).
-- **Fonts:** Inter and Space Grotesk variable fonts are bundled from `@fontsource-variable/*` (no requests to Google; works offline in the Android app).
+- **Fonts:** Inter and Space Grotesk variable fonts are bundled from `@fontsource-variable/*` (no requests to Google; precached by the PWA's service worker from M11).
 - **Freshness on screen:** every badge is `retick(freshness, policy, now)` from `packages/shared`, using the source's `policy` from `/api/sources` and one shared clock that ticks every 30 s (`lib/now.tsx`). A badge therefore turns Late on its own, with no refetch. Panels built from several series combine them (worst wins). Sources disabled in the registry show "Not connected" instead.
 - **Live data:** `api/live.tsx` opens `/api/stream`; `reading` events patch cached `/api/latest` responses, `freshness` events patch `/api/sources`, `event` events refetch events. While the stream is down, latest values poll every 60 s (every 5 min as a safety net otherwise). Charts refetch every 5 minutes.
 - **Expired Cloudflare session:** requests use `redirect: 'manual'`; Access's login redirect shows a banner asking to reload, instead of failing silently.
