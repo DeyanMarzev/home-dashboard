@@ -122,7 +122,7 @@ describe('buildPushMessage', () => {
       title: 'Amber warning · Rain',
       body: 'Mon 23 Nov 18:00 – Wed 25 Nov 06:00.',
       tag: 'weather_warning:w_2222',
-      url: '/',
+      url: '/#w_2222',
     });
     expect(buildPushMessage(weather, amber, 'resolved', NOW).title).toBe(
       'Warning ended · Amber warning · Rain',

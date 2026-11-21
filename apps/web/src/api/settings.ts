@@ -3,6 +3,7 @@ import {
   DevicesResponseSchema,
   MeSchema,
   MyAlertsResponseSchema,
+  NetworkDevicesResponseSchema,
   NotificationLogResponseSchema,
   UsersResponseSchema,
   type AdminRule,
@@ -12,6 +13,7 @@ import {
   type MePatch,
   type MyAlertPut,
   type MyAlertsResponse,
+  type NetworkDevice,
   type UserItem,
   type UserPatch,
 } from '@home/shared';
@@ -141,4 +143,39 @@ export function useNotificationLog(enabled: boolean) {
     enabled,
     refetchInterval: 60_000,
   });
+}
+
+export function useNetworkDevices(enabled: boolean) {
+  return useQuery({
+    queryKey: ['network-devices'],
+    queryFn: () =>
+      getJson<{ items: NetworkDevice[] }>('/api/network/devices', NetworkDevicesResponseSchema),
+    enabled,
+    refetchInterval: 5 * 60_000,
+  });
+}
+
+export function useNetworkDeviceActions() {
+  const client = useQueryClient();
+  const done = async () => {
+    await client.invalidateQueries({ queryKey: ['network-devices'] });
+    await client.invalidateQueries({ queryKey: ['events'] });
+  };
+  return {
+    patch: useMutation({
+      mutationFn: ({
+        mac,
+        patch,
+      }: {
+        mac: string;
+        patch: { label?: string | null; known?: boolean };
+      }) => sendJson('PATCH', `/api/network/devices/${encodeURIComponent(mac)}`, patch),
+      onSuccess: done,
+    }),
+    forget: useMutation({
+      mutationFn: (mac: string) =>
+        sendJson('DELETE', `/api/network/devices/${encodeURIComponent(mac)}`),
+      onSuccess: done,
+    }),
+  };
 }

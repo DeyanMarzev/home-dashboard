@@ -71,7 +71,11 @@ const DevicesSchema = z.object({
         connections: z
           .array(
             z
-              .object({ macAddress: z.string().optional(), parentDeviceID: z.string().optional() })
+              .object({
+                macAddress: z.string().optional(),
+                ipAddress: z.string().optional(),
+                parentDeviceID: z.string().optional(),
+              })
               .loose(),
           )
           .default([]),
@@ -134,6 +138,10 @@ export interface RouterLink {
 export interface RouterClient extends RouterLink {
   /** Connected through a satellite node (its signal isn't in the main router's list). */
   viaSatellite: boolean;
+  /** For the new-device alert (docs/10 §5): MAC (lowercase), IP and maker, when known. */
+  mac: string | null;
+  ip: string | null;
+  manufacturer: string | null;
 }
 
 export interface RouterSnapshot {
@@ -203,6 +211,9 @@ export function parseRouterSnapshot(
         name: nameOf(d),
         ...link(d, connection.macAddress?.toLowerCase()),
         viaSatellite: satelliteIds.has(connection.parentDeviceID),
+        mac: connection.macAddress?.toLowerCase() ?? null,
+        ip: connection.ipAddress ?? null,
+        manufacturer: d.model?.manufacturer?.trim() || null,
       };
     });
 

@@ -236,7 +236,7 @@ CREATE INDEX ON notification_log (user_id, ts DESC);   -- rate limit: pushes per
 - **"Back to normal" is off by default** for every rule (`docs/09` doesn't say). People switch it on per rule.
 - **Backups:** `scripts/backup.sh` keeps inserting plain rows (`source_id` NULL). After a good backup it will resolve any open `backup` warning, so the Overview strip stops showing an old failure (today it stays forever).
 - `alert_state` is created but **not used**: the engine re-evaluates threshold rules from the stored readings every minute instead (`docs/09` §3), so there's no state to keep. Leave it until a later migration drops it.
-- `network_devices` (`docs/10` §5) comes next as migration `005_network_devices.sql`, because it references `users`.
+- `network_devices` (`docs/10` §5) is migration `005_network_devices.sql` (it references `users`): one row per MAC ever seen, with first/last seen, last IP, router name, maker, randomised, wired, an admin's label, and whether it's known (and who said so).
 
 ## Migrations
 

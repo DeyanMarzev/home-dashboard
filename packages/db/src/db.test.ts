@@ -13,6 +13,12 @@ import { attemptsSince, finishRun, pruneRuns, recordRun, startRun } from './runs
 import { syncSources } from './sources.js';
 import { addPublishedTariff } from './tariffs.js';
 import { SOURCES_FILE, testBackends, type TestDatabase } from './test/database.js';
+import {
+  forgetNetworkDevice,
+  listNetworkDevices,
+  recordNetworkScan,
+  updateNetworkDevice,
+} from './network-devices.js';
 import { listUsers, signInUser, updateProfile, updateUserAccess } from './users.js';
 
 const kitchenTemps: ReadingInput[] = [
@@ -92,6 +98,7 @@ describe.each(testBackends)('database ($name)', ({ start }) => {
           'alert_rule_overrides',
           'alert_state',
           'notification_log',
+          'network_devices',
         ]),
       );
     });
@@ -590,6 +597,70 @@ describe.each(testBackends)('database ($name)', ({ start }) => {
       } finally {
         await unlisten();
       }
+    });
+  });
+
+  describe('network devices (docs/10 §5)', () => {
+    const dev = (
+      mac: string,
+      over: Partial<Parameters<typeof recordNetworkScan>[1][number]> = {},
+    ) => ({
+      mac,
+      ip: '192.168.1.10',
+      vendor: null,
+      hostname: null,
+      wired: null,
+      randomised: false,
+      ...over,
+    });
+
+    it('takes the first scan as the baseline: all known, nothing new', async () => {
+      const fresh = await recordNetworkScan(sql, [
+        dev('aa:00:00:00:00:01', { vendor: 'Raspberry Pi Foundation' }),
+        dev('aa:00:00:00:00:02'),
+      ]);
+      expect(fresh).toEqual([]);
+      expect((await listNetworkDevices(sql)).every((d) => d.known)).toBe(true);
+    });
+
+    it('reports a new device once, then only refreshes it', async () => {
+      const phone = dev('3a:00:00:00:00:03', { ip: '192.168.1.47', randomised: true });
+      expect(await recordNetworkScan(sql, [dev('aa:00:00:00:00:01'), phone])).toEqual([phone]);
+      expect(
+        await recordNetworkScan(sql, [
+          { ...phone, ip: '192.168.1.48', hostname: 'Galaxy-S24', wired: false },
+        ]),
+      ).toEqual([]);
+      const [row] = await listNetworkDevices(sql, false);
+      expect(row).toMatchObject({
+        mac: '3a:00:00:00:00:03',
+        lastIp: '192.168.1.48',
+        hostname: 'Galaxy-S24',
+        wired: false,
+        randomised: true,
+        known: false,
+      });
+    });
+
+    it('lets an admin name it and mark it as ours, and forgetting makes it new again', async () => {
+      const admin = await signInUser(sql, 'netadmin@example.com', { admin: true });
+      const marked = await updateNetworkDevice(
+        sql,
+        '3a:00:00:00:00:03',
+        { known: true, label: "Anna's phone" },
+        admin.id,
+      );
+      expect(marked).toMatchObject({
+        known: true,
+        label: "Anna's phone",
+        markedKnownBy: 'netadmin@example.com',
+      });
+      expect(marked?.markedKnownAt).toBeInstanceOf(Date);
+      expect(
+        await updateNetworkDevice(sql, 'ff:ff:ff:ff:ff:ff', { known: true }, admin.id),
+      ).toBeNull();
+      expect(await forgetNetworkDevice(sql, '3a:00:00:00:00:03')).toBe(true);
+      expect(await recordNetworkScan(sql, [dev('3a:00:00:00:00:03')])).toHaveLength(1);
     });
   });
 

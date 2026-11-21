@@ -441,6 +441,28 @@ export const NotificationLogResponseSchema = z.object({
   items: z.array(NotificationLogItemSchema),
 });
 
+// --- New devices on the network (admins; docs/10 §5) ------------------------------------------
+
+export const NetworkDeviceSchema = z.object({
+  mac: z.string(),
+  label: z.string().nullable(),
+  vendor: z.string().nullable(),
+  hostname: z.string().nullable(),
+  lastIp: z.string().nullable(),
+  randomised: z.boolean(),
+  wired: z.boolean().nullable(),
+  known: z.boolean(),
+  firstSeen: IsoTimestamp,
+  lastSeen: IsoTimestamp,
+  markedKnownBy: z.string().nullable(),
+});
+export type NetworkDevice = z.infer<typeof NetworkDeviceSchema>;
+export const NetworkDevicesResponseSchema = z.object({ items: z.array(NetworkDeviceSchema) });
+export const NetworkDevicePatchSchema = z
+  .strictObject({ label: z.string().trim().min(1).max(60).nullable(), known: z.boolean() })
+  .partial()
+  .refine((p) => p.label !== undefined || p.known !== undefined, 'give label or known');
+
 export const UserPatchSchema = z
   .strictObject({ role: z.enum(ROLES), enabled: z.boolean() })
   .partial()

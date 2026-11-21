@@ -2,14 +2,20 @@ import type { ReadingInput } from '@home/shared';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import {
-  parseArpScan,
   parseDefaultGateway,
   parseIwLink,
   parseIwScan,
   parsePing,
   summariseScan,
 } from './parse.js';
-import { jnap, parseRouterSnapshot, type Band, type RouterSnapshot } from './router.js';
+import { mergeDevices, parseArpDevices, type SeenDevice } from './devices.js';
+import {
+  jnap,
+  parseRouterSnapshot,
+  type Band,
+  type RouterClient,
+  type RouterSnapshot,
+} from './router.js';
 import { speedTest, type CurlRunner } from './speedtest.js';
 
 const exec = promisify(execFile);
@@ -25,6 +31,8 @@ export interface ProbeResult {
   readings: ReadingInput[];
   /** Problems that didn't stop the other measurements. */
   errors: string[];
+  /** Every device seen on the network this round (new-device alert, docs/10 §5). */
+  devices?: SeenDevice[];
 }
 
 async function run(cmd: string, args: string[], timeoutMs = 20_000): Promise<string> {
@@ -115,6 +123,15 @@ export async function probeNetwork(env: ProbeEnv, signal: AbortSignal): Promise<
       if (p.avgMs !== null) add('latency', entity, 'ms', Math.round(p.avgMs * 10) / 10);
     });
   }
+  // Every round, router or not: ARP sees wired and Wi-Fi devices, guests included (docs/10 §5).
+  // Assigned inside a callback: declared so TypeScript doesn't narrow it to null.
+  let arpDevices = null as SeenDevice[] | null;
+  await attempt('arp-scan', async () => {
+    arpDevices = parseArpDevices(
+      await run('arp-scan', ['--localnet', '--plain', '--retry=2'], 60_000),
+    );
+  });
+  let routerClients: RouterClient[] = [];
   await attempt('devices', async () => {
     if (env.ROUTER_PASSWORD) {
       const base = env.ROUTER_URL ?? (gateway ? `http://${gateway}` : null);
@@ -135,19 +152,15 @@ export async function probeNetwork(env: ProbeEnv, signal: AbortSignal): Promise<
       add('devices_wifi', 'network', 'devices', snapshot.counts.wifi);
       add('devices_wired', 'network', 'devices', snapshot.counts.wired);
       readings.push(...routerReadings(snapshot, ts));
-    } else {
+      routerClients = snapshot.clients;
+    } else if (arpDevices) {
       // Without the router's API: whoever answers ARP on the local network.
-      add(
-        'devices_connected',
-        'network',
-        'devices',
-        parseArpScan(
-          await run('arp-scan', ['--localnet', '--plain', '--quiet', '--retry=2'], 60_000),
-        ),
-      );
+      add('devices_connected', 'network', 'devices', arpDevices.length);
     }
   });
-  return { readings, errors };
+  // No device list when ARP failed: an empty one would look like everyone left.
+  const devices = arpDevices ? mergeDevices(arpDevices, routerClients) : undefined;
+  return { readings, errors, ...(devices && { devices }) };
 }
 
 /** Every 30 minutes: who else is on our Wi-Fi channels. */

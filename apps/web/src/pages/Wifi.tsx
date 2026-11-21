@@ -8,7 +8,8 @@ import {
   type SourceInfo,
 } from '@home/shared';
 import { useState } from 'react';
-import { useLatest, useReadings, useSources } from '../api/hooks.js';
+import { useIsAdmin, useLatest, useReadings, useSources } from '../api/hooks.js';
+import { NetworkDevicesPanel } from '../components/NetworkDevicesPanel.js';
 import { AlertStrip } from '../components/AlertStrip.js';
 import { Empty, Panel, Skeleton, StatTile } from '../components/Cards.js';
 import { BarChart } from '../components/charts/BarChart.js';
@@ -41,6 +42,7 @@ const BANDS = [
 ];
 
 export function WifiPage() {
+  const isAdmin = useIsAdmin();
   const { range, setRange } = useRange();
   const now = useNow();
   const sources = useSources();
@@ -89,6 +91,11 @@ export function WifiPage() {
         <Channels net={net.data} source={source('wifi')} />
         <SpeedHistory speed={speed.data} source={source('speed_test')} />
       </div>
+      {isAdmin && (
+        <div className="row">
+          <NetworkDevicesPanel />
+        </div>
+      )}
     </div>
   );
 }

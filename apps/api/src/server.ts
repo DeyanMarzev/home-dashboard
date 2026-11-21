@@ -14,6 +14,7 @@ import { RulesStore } from './push/rules.js';
 import { registerDataRoutes } from './routes/data.js';
 import { registerAlertRoutes } from './routes/alerts.js';
 import { registerDeviceRoutes } from './routes/devices.js';
+import { registerNetworkRoutes } from './routes/network.js';
 import { registerEnergyRoutes } from './routes/energy.js';
 import { registerHeatingRoutes } from './routes/heating.js';
 import { registerUserRoutes } from './routes/users.js';
@@ -156,6 +157,7 @@ export async function buildServer(config: Config, deps: ServerDeps = {}): Promis
     }
     registerDeviceRoutes(app, { db: deps.db, dispatcher });
     registerAlertRoutes(app, { db: deps.db, rules, registry: deps.registry ?? null });
+    registerNetworkRoutes(app, { db: deps.db });
   }
 
   if (deps.db && deps.registry) {

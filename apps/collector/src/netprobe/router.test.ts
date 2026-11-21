@@ -138,6 +138,9 @@ describe('routerReadings', () => {
             signalDbm: -51,
             linkMbps: 866,
             viaSatellite: false,
+            mac: null,
+            ip: null,
+            manufacturer: null,
           },
           {
             key: 'device_b2',
@@ -146,6 +149,9 @@ describe('routerReadings', () => {
             signalDbm: null,
             linkMbps: null,
             viaSatellite: true,
+            mac: null,
+            ip: null,
+            manufacturer: null,
           },
         ],
         satellites: [

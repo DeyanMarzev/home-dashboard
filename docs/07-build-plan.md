@@ -71,7 +71,7 @@ M11 (phone app and notifications) only depends on M3–M5. If the owner asks, do
 ## M9 · Wi-Fi and speed test
 
 - `netprobe` container (host network), `wifi` and `speed_test` sources, Wi-Fi page. Router integration only if the owner's router supports it (see `docs/08`).
-- **New-device alert** (`docs/10` §5), added after M9 was built. It needs users and roles, so build it **after M11 step 2**: `network_devices` migration (`005`), arp-scan every 5 min with baseline on the first scan, `network_new_device` events for any new device (wired or Wi-Fi, guests included), admin `/api/network/devices` endpoints, "Devices" card on the Wi-Fi page (admins only). If M11 isn't built yet, the events still appear in the events list and start notifying once M11 lands.
+- **New-device alert** (`docs/10` §5), added after M9 was built (built 21 Nov 2026, after M11 step 5). It needs users and roles, so build it **after M11 step 2**: `network_devices` migration (`005`), arp-scan every 5 min with baseline on the first scan, `network_new_device` events for any new device (wired or Wi-Fi, guests included), admin `/api/network/devices` endpoints, "Devices" card on the Wi-Fi page (admins only). If M11 isn't built yet, the events still appear in the events list and start notifying once M11 lands.
 
 **Done when:** (existing Wi-Fi checks) and `docs/10` §7 item 3 passes once M11 exists.
 

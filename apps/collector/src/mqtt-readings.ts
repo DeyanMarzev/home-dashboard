@@ -1,19 +1,24 @@
 import mqtt from 'mqtt';
 import { z } from 'zod';
-import type { PushCollector } from './collector.js';
+import type { PushCollector, PushContext } from './collector.js';
 import { describeError } from './errors.js';
 
 /** What another container (e.g. netprobe) publishes: ready-made readings, plus any problems. */
-const MessageSchema = z.object({
-  readings: z.array(z.unknown()),
-  errors: z.array(z.string()).default([]),
-});
+const MessageSchema = z
+  .object({
+    readings: z.array(z.unknown()),
+    errors: z.array(z.string()).default([]),
+  })
+  .loose();
+
+/** Extra handling for the rest of a message (e.g. the wifi source's device list). */
+export type MessageHook = (message: Record<string, unknown>, ctx: PushContext) => Promise<void>;
 
 /**
  * A push collector for a source whose readings arrive pre-built over MQTT on the registry's
  * `mqtt_topic`. Readings are validated by writeReadings; reported problems show in collector_runs.
  */
-export function mqttReadingsCollector(id: string): PushCollector {
+export function mqttReadingsCollector(id: string, onMessage?: MessageHook): PushCollector {
   return {
     id,
     kind: 'push',
@@ -42,6 +47,7 @@ export function mqttReadingsCollector(id: string): PushCollector {
             for (const e of message.errors) ctx.reportError(e);
             if (message.readings.length)
               await ctx.writeReadings(message.readings as Parameters<typeof ctx.writeReadings>[0]);
+            if (onMessage) await onMessage(message, ctx);
           } catch (err) {
             ctx.reportError(`message on ${topic} rejected: ${describeError(err)}`);
           }

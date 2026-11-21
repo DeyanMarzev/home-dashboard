@@ -1,7 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
-  parseArpScan,
   parseDefaultGateway,
   parseIwLink,
   parseIwScan,
@@ -81,11 +80,7 @@ describe('parsePing', () => {
   });
 });
 
-describe('parseArpScan and parseDefaultGateway', () => {
-  it('counts distinct devices', () => {
-    expect(parseArpScan(fixture('arp-scan.txt'))).toBe(4);
-  });
-
+describe('parseDefaultGateway', () => {
   it('finds the router', () => {
     expect(parseDefaultGateway(fixture('ip-route.txt'))).toBe('192.168.1.1');
     expect(parseDefaultGateway('')).toBeNull();

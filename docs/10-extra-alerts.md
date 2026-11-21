@@ -178,13 +178,23 @@ Part of the `wifi` source (`netprobe` container, M9), but built **after M11 step
 
 **Owner decision:** alert for **any** new device that connects, wired or Wi-Fi, **guests included**. The owner wants to know whenever a new device connects. No wired devices are connected at the moment.
 
+**Built** (21 Nov 2026): `apps/collector/src/netprobe/devices.ts` (scan), `sources/wifi/new-devices.ts` (events), migration `005_network_devices.sql`, `apps/api/src/routes/network.ts`, `apps/web/src/components/NetworkDevicesPanel.tsx`. As built:
+
+- netprobe has no database access, so it sends the device list with its usual MQTT message; the collector's `wifi` source keeps `network_devices` and raises the events.
+- `arp-scan` now runs every round even with the router's API set up (before, it only ran without it), and without `--quiet`: the maker comes from arp-scan's own bundled IEEE OUI list, so no OUI table of ours is loaded. The router's list adds names, wired/Wi-Fi and any device ARP missed; it never removes one.
+- `network_devices` has one more column than below: `wired` (from the router; null from ARP alone).
+- Event message: "New device on the network · Samsung device · 192.168.1.47 · wired. Open Wi-Fi to name it or mark it as yours" (the router's name first when it has one; "Unknown device (private address)" for a randomised one). `ignoreRandomised` comes from the rule as the collector's alert engine loaded it (default off).
+- The 24-hour auto-resolve runs on every scan. "This is ours" and "Forget" also resolve the open alert (no push: `resolvedNotice: false`).
+- Push deep link `/wifi#<mac>` (every alert with an entity now links `#<entity>`); the Wi-Fi page's Devices card gives each row that id.
+- The existing per-device table on the Wi-Fi page (router names, signal; M9) is unchanged and still visible to everyone; only this new card is admin-only.
+
 ### Detection
 
 - From the existing `arp-scan --localnet` in the `wifi` collector, run every 5 min. This sees wired and Wi-Fi devices on the Pi's subnet, which is what the owner wants, so no router API is needed for this alert. If a router API turns up later (`docs/08` #6), it may add hostnames or a wired/Wi-Fi flag, but it must not narrow the alert.
 - Keep `ignoreRandomised: false` so guests' phones (which use private, randomised addresses) do alert.
 - A device that connects briefly between scans can be missed. That's accepted in v1.
 
-### Table (migration `005_network_devices.sql`, after `004_users_notifications.sql`)
+### Table (migration `005_network_devices.sql`, after `004_users_notifications.sql`; built with a `wired boolean` column too)
 
 ```sql
 CREATE TABLE network_devices (

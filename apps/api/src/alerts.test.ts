@@ -3,6 +3,7 @@ import { SOURCES_FILE, startPglite, type TestDatabase } from '@home/db/testing';
 import {
   AdminRulesResponseSchema,
   MyAlertsResponseSchema,
+  NetworkDevicesResponseSchema,
   NotificationLogResponseSchema,
   type MyAlertRule,
 } from '@home/shared';
@@ -249,5 +250,68 @@ describe('Recent notifications (admin)', () => {
       status: 'skipped_level',
       device: null,
     });
+  });
+});
+
+describe('Network devices (admin; docs/10 §5)', () => {
+  const mac = '3a:1f:9c:00:00:04';
+  const url = `/api/network/devices/${encodeURIComponent(mac)}`;
+
+  beforeAll(async () => {
+    await db.sql`insert into network_devices (mac, last_ip, vendor, randomised, known) values
+      ('b8:27:eb:00:00:01', '192.168.1.20', 'Raspberry Pi Foundation', false, true),
+      (${mac}, '192.168.1.51', null, true, false)`;
+    await openEvent(db.sql, {
+      level: 'warning',
+      sourceId: 'wifi',
+      kind: 'network_new_device',
+      entity: mac,
+      message: 'New device on the network · Unknown device (private address) · 192.168.1.51',
+    });
+  });
+  const openAlert = async () =>
+    (
+      await db.sql`select 1 from events
+        where kind = 'network_new_device' and entity = ${mac} and resolved_at is null`
+    ).length;
+
+  it('keeps the device list from members', async () => {
+    expect((await call('GET', '/api/network/devices', 'anna')).status).toBe(403);
+    expect((await call('PATCH', url, 'anna', { known: true })).status).toBe(403);
+    expect((await call('DELETE', url, 'anna')).status).toBe(403);
+  });
+
+  it('lists new devices first for admins, and filters', async () => {
+    const all = NetworkDevicesResponseSchema.parse(
+      (await call('GET', '/api/network/devices', 'owner')).body,
+    );
+    expect(all.items.map((d) => [d.mac, d.known])).toEqual([
+      [mac, false],
+      ['b8:27:eb:00:00:01', true],
+    ]);
+    expect(all.items[0]).toMatchObject({ lastIp: '192.168.1.51', randomised: true, vendor: null });
+    const fresh = NetworkDevicesResponseSchema.parse(
+      (await call('GET', '/api/network/devices?known=false', 'owner')).body,
+    );
+    expect(fresh.items.map((d) => d.mac)).toEqual([mac]);
+  });
+
+  it('"This is ours" names it, records who, and closes its alert', async () => {
+    expect(await openAlert()).toBe(1);
+    const res = await call('PATCH', url, 'owner', { known: true, label: "Anna's phone" });
+    expect(res.body).toMatchObject({
+      known: true,
+      label: "Anna's phone",
+      markedKnownBy: 'owner@example.com',
+    });
+    expect(await openAlert()).toBe(0);
+  });
+
+  it('forgets a device, and checks the address', async () => {
+    expect((await call('DELETE', url, 'owner')).status).toBe(204);
+    expect((await call('DELETE', url, 'owner')).status).toBe(404);
+    expect(
+      (await call('PATCH', '/api/network/devices/not-a-mac', 'owner', { known: true })).status,
+    ).toBe(400);
   });
 });

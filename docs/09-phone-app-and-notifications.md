@@ -392,7 +392,7 @@ self.addEventListener('notificationclick', (e) => {
 
 - Every `push` must show a notification (Chrome requires `userVisibleOnly`).
 - The app listens for `{ type: 'navigate' }` messages and routes with React Router.
-- Deep links: the rule's `link`, plus `#<entity>` for threshold rules (Rooms scrolls to that room's card).
+- Deep links: the rule's `link`, plus `#<entity>` whenever the event has one (Rooms scrolls to that room's card, Wi-Fi to the new device's row).
 - `pushsubscriptionchange`: re-subscribe and `POST /api/me/devices`, best effort. The app also re-syncs on every start (below), which covers failures here.
 
 ## 7. Settings screen (`/settings`)

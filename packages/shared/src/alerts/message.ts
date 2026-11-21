@@ -64,8 +64,8 @@ export function buildPushMessage(
 ): PushMessage {
   const d = dataOf(event);
   const tag = `${rule.id}:${event.entity}`;
-  const url =
-    rule.type === 'threshold' && event.entity ? `${rule.link}#${event.entity}` : rule.link;
+  // Deep link to the room, device or warning on the rule's page (e.g. /wifi#aa:bb:…).
+  const url = event.entity ? `${rule.link}#${event.entity}` : rule.link;
 
   if (rule.type === 'threshold') {
     const label = d.label ?? event.entity;

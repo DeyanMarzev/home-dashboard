@@ -175,7 +175,7 @@ Read and replace tariff rows. Validate no overlapping periods per fuel. From M11
 
 ## Users and notifications (M11)
 
-From `docs/09` and `docs/10`; tables in `docs/02` § Users and notifications. **Built:** all of it (M11 steps 2, 4 and 5; `apps/api/src/routes/users.ts`, `devices.ts`, `alerts.ts`), except `/api/network/devices` (with the new-device alert). Without readable alert rules on the Pi, `/api/me/alerts` and `/api/alert-rules` answer 503 `RULES_UNAVAILABLE`.
+From `docs/09` and `docs/10`; tables in `docs/02` § Users and notifications. **Built:** all of it (M11 steps 2, 4 and 5 and the new-device alert; `apps/api/src/routes/users.ts`, `devices.ts`, `alerts.ts`, `network.ts`). Without readable alert rules on the Pi, `/api/me/alerts` and `/api/alert-rules` answer 503 `RULES_UNAVAILABLE`.
 
 - Every `/api` request except `/api/health` gets its user (`apps/api/src/users.ts`): the Access JWT's email, lowercased, upserted into `users` on first visit (a member, or an admin if it's in `ADMIN_EMAILS`), cached for 60 s. With `AUTH_DISABLED=true` it's `DEV_USER_EMAIL`, an admin.
 - A token without an email (service token) is a `service` identity: read access, 403 `FORBIDDEN` on `/api/me*` and admin routes.
@@ -198,7 +198,7 @@ From `docs/09` and `docs/10`; tables in `docs/02` § Users and notifications. **
 - `PATCH /api/alert-rules/:id` `{ enabled?, warning?: { level?, for? }, alert?, clear?, options? }` → the rule. Merged onto the rule's existing override, then onto the YAML, and validated (`docs/09` §3, `docs/10` §1); 400 `BAD_REQUEST` names the problems. Then NOTIFY `alert_rules_changed` (collector and api reload). `DELETE /api/alert-rules/:id/override` → 204, back to the YAML.
 - `GET /api/users` → `{ items: [{ id, email, name, role, roleLocked, enabled, lastSeenAt, devices }] }`. `PATCH /api/users/:id` `{ role?, enabled? }` → the user; 409 `CONFLICT` for a `roleLocked` user or yourself, 404 for an unknown id. Applies to the next request (the user cache is cleared).
 - `GET /api/notifications/log?limit=50` → `{ items: [{ ts, user, ruleId, entity, phase, status, device }] }`, newest first; `limit` 1–500. `user` is the name, else the email.
-- `GET /api/network/devices?known=` · `PATCH /api/network/devices/:mac` · `DELETE /api/network/devices/:mac`: `docs/10` §5 (built after M11 step 2).
+- `GET /api/network/devices?known=true|false` → `{ items: [{ mac, label, vendor, hostname, lastIp, randomised, wired, known, firstSeen, lastSeen, markedKnownBy }] }`, unknown devices first. `PATCH /api/network/devices/:mac` `{ label?, known? }` → the device (`known: true` records who and when, and resolves its open alert). `DELETE /api/network/devices/:mac` → 204 (it alerts again next time it's seen). `:mac` like `aa:bb:cc:dd:ee:ff` (URL-encoded colons are fine). Built 21 Nov 2026 (`docs/10` §5).
 
 ## Errors
 

@@ -121,17 +121,6 @@ export function parsePing(text: string): PingResult {
   };
 }
 
-/** `arp-scan --localnet --plain --quiet`: number of distinct devices answering. */
-export function parseArpScan(text: string): number {
-  const macs = new Set(
-    text
-      .split('\n')
-      .map((line) => /^\d+\.\d+\.\d+\.\d+\s+([0-9a-f:]{17})/i.exec(line.trim())?.[1]?.toLowerCase())
-      .filter((m): m is string => !!m),
-  );
-  return macs.size;
-}
-
 /** `ip route show default` → the gateway (router) address. */
 export function parseDefaultGateway(text: string): string | null {
   return /^default via (\S+)/m.exec(text)?.[1] ?? null;

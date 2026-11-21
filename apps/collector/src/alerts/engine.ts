@@ -16,6 +16,12 @@ import {
 import type { Logger } from 'pino';
 import { SOURCE_LATE } from '../late-check.js';
 
+/** The rules as last loaded by the engine, for collectors that read a rule's options. */
+let latestRules: AlertRules | null = null;
+export function currentAlertRules(): AlertRules | null {
+  return latestRules;
+}
+
 /** Events older than this when the engine first sees them never notify (no stale pushes). */
 const ADOPT_WITHIN_MS = 60 * 60_000;
 
@@ -50,17 +56,23 @@ export class AlertEngine {
     this.dirty = true;
   }
 
+  /** Loads the rules now (at startup, so options are known before the first tick). */
+  async load(): Promise<void> {
+    this.rules = await loadAlertRules(this.o.db, this.o.file);
+    latestRules = this.rules;
+    this.dirty = false;
+  }
+
   async tick(now: Date = new Date()): Promise<void> {
     if (this.dirty || !this.rules) {
-      this.rules = await loadAlertRules(this.o.db, this.o.file);
-      this.dirty = false;
-      const problems = this.rules.problems.join('\n');
+      await this.load();
+      const problems = this.rules!.problems.join('\n');
       if (problems !== this.reportedProblems) {
-        if (problems) this.o.log.warn({ problems: this.rules.problems }, 'alert rule problems');
+        if (problems) this.o.log.warn({ problems: this.rules!.problems }, 'alert rule problems');
         this.reportedProblems = problems;
       }
     }
-    const rules = this.rules.rules;
+    const rules = this.rules!.rules;
     await this.switchOff(rules.filter((r) => !r.enabled));
     const live = rules.filter((r) => r.enabled);
     await this.thresholds(

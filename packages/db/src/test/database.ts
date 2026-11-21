@@ -47,6 +47,7 @@ const PGLITE_MIGRATIONS: Record<string, (sql: string) => string | null> = {
     FROM readings GROUP BY series_id, bucket;`,
   '003_hourly_realtime.sql': () => null,
   '004_users_notifications.sql': (sql) => sql,
+  '005_network_devices.sql': (sql) => sql,
 };
 
 export async function startPglite(): Promise<TestDatabase> {

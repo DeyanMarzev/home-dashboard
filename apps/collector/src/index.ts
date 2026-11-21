@@ -173,6 +173,7 @@ try {
     file: await loadAlertsFile(paths.alertsFile),
     log: log.child({ part: 'alerts' }),
   });
+  await engine.load();
   await db.listen(ALERT_RULES_CHANNEL, () => engine?.markDirty());
 } catch (err) {
   log.error({ error: describeError(err) }, 'alert rules not loaded: no alerts until fixed');

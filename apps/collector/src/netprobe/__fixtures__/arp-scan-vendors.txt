@@ -1,0 +1,6 @@
+192.168.1.1	a4:c3:f0:11:22:33	TP-LINK TECHNOLOGIES CO.,LTD.
+192.168.1.20	b8:27:eb:aa:bb:cc	Raspberry Pi Foundation
+192.168.1.31	24:6f:28:01:02:03	Espressif Inc.
+192.168.1.31	24:6f:28:01:02:03	Espressif Inc. (DUP: 2)
+192.168.1.47	3a:1f:9c:5e:77:01	(Unknown: locally administered)
+192.168.1.52	00:11:22:33:44:55	(Unknown)
