@@ -20,3 +20,5 @@ export * from './wifi.js';
 export * from './vacuum.js';
 export * from './alerts/schema.js';
 export * from './alerts/threshold.js';
+export * from './alerts/prefs.js';
+export * from './alerts/message.js';

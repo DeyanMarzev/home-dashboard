@@ -21,7 +21,7 @@ import { parseInput } from '../validate.js';
 
 const IdParams = z.object({ id: z.coerce.number().int().positive() });
 
-function toMe(user: UserRow, roleLocked: boolean): Me {
+function toMe(user: UserRow, roleLocked: boolean, vapidPublicKey: string | null): Me {
   return {
     id: user.id,
     email: user.email,
@@ -33,20 +33,20 @@ function toMe(user: UserRow, roleLocked: boolean): Me {
     quietEnd: user.quietEnd,
     urgentIgnoresQuiet: user.urgentIgnoresQuiet,
     pausedUntil: user.pausedUntil?.toISOString() ?? null,
-    vapidPublicKey: null, // push comes in M11 step 4
+    vapidPublicKey,
   };
 }
 
 /** /api/me and the admin /api/users routes (docs/04 § Users and notifications). */
 export function registerUserRoutes(
   app: FastifyInstance,
-  deps: { db: Sql; directory: UserDirectory },
+  deps: { db: Sql; directory: UserDirectory; vapidPublicKey: string | null },
 ): void {
-  const { db, directory } = deps;
+  const { db, directory, vapidPublicKey } = deps;
 
   app.get('/api/me', (request) => {
     const { user, roleLocked } = requirePerson(request);
-    return toMe(user, roleLocked);
+    return toMe(user, roleLocked, vapidPublicKey);
   });
 
   app.patch('/api/me', async (request) => {
@@ -63,7 +63,7 @@ export function registerUserRoutes(
       }),
     });
     directory.forget(user.email);
-    return toMe(updated, roleLocked);
+    return toMe(updated, roleLocked, vapidPublicKey);
   });
 
   const toItem = (u: UserRow & { devices: number }): UserItem => ({

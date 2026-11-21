@@ -467,3 +467,22 @@ Asks for confirmation, stops `api` and `collector`, renames the live database to
 
 - Don't publish host port 8000. Don't touch its systemd service or Python environment.
 - Optional: publish it through the same tunnel on another hostname (`api.deyan.uk` → `http://host.docker.internal:8000`, with `extra_hosts: ["host.docker.internal:host-gateway"]` on `cloudflared`).
+
+## 10. Push notifications (M11)
+
+Phones get alerts through Web Push, sent from the Pi with a VAPID key pair (`docs/09` §5). Once, on the Pi (one command per paste):
+
+1. `cd /opt/home-dashboard && git pull`
+2. `docker compose build api`
+3. `docker compose run --rm -T --no-deps api node dist/tools/generate-vapid-keys.js >> .env` (appends `VAPID_PUBLIC_KEY=` and `VAPID_PRIVATE_KEY=` lines)
+4. `echo 'VAPID_SUBJECT=mailto:you@example.com' >> .env` with your email: push services (Google's) use it only to contact the sender if something is wrong; no user sees it.
+5. `grep -c '^VAPID_' .env` should print `3`. Then `docker compose up -d --build`.
+
+Without the three values the api refuses to start and its log says which is missing. Keep the private key secret, and don't generate new keys later: every phone would have to turn notifications on again.
+
+On each phone: open the installed app → Settings → This device → **Turn on notifications** → allow → **Send test notification**. It should arrive within a few seconds, also with the app closed and the phone locked.
+
+If it doesn't arrive:
+- Settings says "Blocked in Chrome": allow notifications for home.deyan.uk in Chrome's site settings, and on Android 13+ allow Chrome itself to notify.
+- `docker compose logs api | grep -i push` shows "push failed" with the status the push service gave, or "VAPID keys not set".
+- Battery saver can delay pushes on some phones; urgent alerts are sent with high priority.

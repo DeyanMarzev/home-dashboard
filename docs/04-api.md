@@ -175,7 +175,7 @@ Read and replace tariff rows. Validate no overlapping periods per fuel. From M11
 
 ## Users and notifications (M11)
 
-From `docs/09` and `docs/10`; tables in `docs/02` § Users and notifications. **Built so far (step 2):** `GET`/`PATCH /api/me` (`vapidPublicKey` stays null until step 4), `GET /api/users`, `PATCH /api/users/:id`, and admin-only `PUT /api/tariffs`. The rest comes with later M11 steps.
+From `docs/09` and `docs/10`; tables in `docs/02` § Users and notifications. **Built so far:** `GET`/`PATCH /api/me`, `GET /api/users`, `PATCH /api/users/:id`, admin-only `PUT /api/tariffs` (step 2); all of `/api/me/devices` (step 4). The rest comes with step 5.
 
 - Every `/api` request except `/api/health` gets its user (`apps/api/src/users.ts`): the Access JWT's email, lowercased, upserted into `users` on first visit (a member, or an admin if it's in `ADMIN_EMAILS`), cached for 60 s. With `AUTH_DISABLED=true` it's `DEV_USER_EMAIL`, an admin.
 - A token without an email (service token) is a `service` identity: read access, 403 `FORBIDDEN` on `/api/me*` and admin routes.
@@ -187,7 +187,7 @@ From `docs/09` and `docs/10`; tables in `docs/02` § Users and notifications. **
 - `GET /api/me` → `{ id, email, name, role, roleLocked, tz, quietStart, quietEnd, urgentIgnoresQuiet, pausedUntil, vapidPublicKey }`. `quietStart`/`quietEnd` are `"23:00"` or null; `vapidPublicKey` is null when push is off (development without keys).
 - `PATCH /api/me` with any of `{ name, quietStart, quietEnd, urgentIgnoresQuiet, pausedUntil }` → the same shape. `quietStart`/`quietEnd` come together (both times, or both null to clear); anything else is a 400.
 - `GET /api/me/devices` → `{ items: [{ id, label, createdAt, lastSeenAt, lastSuccessAt, failureCount }] }` (never the endpoint or keys).
-- `POST /api/me/devices` with `{ subscription: PushSubscriptionJSON, label? }` → the device. Upsert on the endpoint: refreshes `lastSeenAt`, and moves the device to the signed-in user if it belonged to someone else.
+- `POST /api/me/devices` with `{ subscription: PushSubscriptionJSON, label? }` → the device (the endpoint must be https; a new device's label defaults to e.g. "Chrome on Android" from its User-Agent). Upsert on the endpoint: refreshes `lastSeenAt`, and moves the device to the signed-in user if it belonged to someone else.
 - `PATCH /api/me/devices/:id` `{ label }` · `DELETE /api/me/devices/:id` · `POST /api/me/devices/:id/test` (sends "Test notification"; 202, result in the log). Another user's device id gives 404.
 - `GET /api/me/alerts` → `{ groups: [{ id, name, rules: [{ id, name, type, description, levels, entities, resolvedNotice, enabled, minLevel, entitiesSelected, notifyResolved, isDefault, open: [{ entity, level, since }] }] }] }`. `description` is generated from the effective thresholds; `levels` is `['warning']` or `['warning','alert']`; `entities` are the ones the rule covers now.
 - `PUT /api/me/alerts/:ruleId` `{ enabled, minLevel, entities, notifyResolved }` → the rule as above. `DELETE /api/me/alerts/:ruleId` resets it to the defaults.

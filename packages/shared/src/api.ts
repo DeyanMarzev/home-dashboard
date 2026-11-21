@@ -326,6 +326,30 @@ export type UserItem = z.infer<typeof UserItemSchema>;
 export const UsersResponseSchema = z.object({ items: z.array(UserItemSchema) });
 export type UsersResponse = z.infer<typeof UsersResponseSchema>;
 
+export const DeviceItemSchema = z.object({
+  id: z.number().int(),
+  label: z.string(),
+  createdAt: IsoTimestamp,
+  lastSeenAt: IsoTimestamp,
+  lastSuccessAt: IsoTimestamp.nullable(),
+  failureCount: z.number().int(),
+});
+export type DeviceItem = z.infer<typeof DeviceItemSchema>;
+export const DevicesResponseSchema = z.object({ items: z.array(DeviceItemSchema) });
+
+/** POST /api/me/devices: the browser's `PushSubscription.toJSON()`. */
+export const DeviceRegisterSchema = z.object({
+  subscription: z.object({
+    endpoint: z.url({ protocol: /^https$/ }).max(1000),
+    keys: z.object({
+      p256dh: z.string().min(1).max(200),
+      auth: z.string().min(1).max(100),
+    }),
+  }),
+  label: z.string().trim().min(1).max(60).optional(),
+});
+export const DevicePatchSchema = z.strictObject({ label: z.string().trim().min(1).max(60) });
+
 export const UserPatchSchema = z
   .strictObject({ role: z.enum(ROLES), enabled: z.boolean() })
   .partial()

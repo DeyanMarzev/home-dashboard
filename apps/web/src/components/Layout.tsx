@@ -1,5 +1,5 @@
-import { Fragment } from 'react';
-import { Outlet, ScrollRestoration } from 'react-router';
+import { Fragment, useEffect } from 'react';
+import { Outlet, ScrollRestoration, useLocation } from 'react-router';
 import { useAccessDisabled, useSessionExpired } from '../api/session.js';
 import { useColorScheme } from '../lib/color-scheme.js';
 import { BottomNav } from './BottomNav.js';
@@ -11,6 +11,7 @@ export function Layout() {
   // Charts read their colours from the tokens when drawn: redraw the page when the system
   // switches between light and dark (the query cache keeps the data, so it's instant).
   const scheme = useColorScheme();
+  useScrollToHash();
   return (
     <>
       {expired && (
@@ -36,4 +37,23 @@ export function Layout() {
       <ScrollRestoration />
     </>
   );
+}
+
+/**
+ * `/rooms#kitchen` (a notification's deep link) scrolls to that card once it has loaded:
+ * cards appear after their data, so keep looking for a few seconds.
+ */
+function useScrollToHash() {
+  const { hash, pathname } = useLocation();
+  useEffect(() => {
+    const id = decodeURIComponent(hash.slice(1));
+    if (!id) return;
+    let tries = 0;
+    const timer = setInterval(() => {
+      const el = document.getElementById(id);
+      if (el || ++tries > 20) clearInterval(timer);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 250);
+    return () => clearInterval(timer);
+  }, [hash, pathname]);
 }

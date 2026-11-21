@@ -160,6 +160,10 @@ services:
       CF_ACCESS_AUD: ${CF_ACCESS_AUD:?set CF_ACCESS_AUD in .env (docs/06 §5.2)}
       AUTH_DISABLED: ${AUTH_DISABLED:-false}
       ADMIN_EMAILS: ${ADMIN_EMAILS:?set ADMIN_EMAILS in .env (docs/09 §2)}
+      # Push notifications (docs/06 § 10). The api refuses to start in production without them.
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
     volumes:
       - ./config:/app/config:ro
     ports:

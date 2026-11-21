@@ -11,7 +11,7 @@ import { SOURCES_FILE, startPglite, type TestDatabase } from '@home/db/testing';
 import { fileURLToPath } from 'node:url';
 import { pino } from 'pino';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { AlertEngine, formatValue } from './engine.js';
+import { AlertEngine } from './engine.js';
 
 const ALERTS_FILE = fileURLToPath(new URL('../../../../config/alerts.yaml', import.meta.url));
 const MIN = 60_000;
@@ -177,13 +177,5 @@ describe('AlertEngine', () => {
     const off = (await kitchen()).at(-1);
     expect(off?.resolved_at).toBeInstanceOf(Date);
     expect(off?.data.reason).toBe('rule_disabled');
-  });
-});
-
-describe('formatValue', () => {
-  it('formats like the rest of the app', () => {
-    expect(formatValue(1240, 'ppm')).toBe('1,240 ppm');
-    expect(formatValue(13.46, '°C')).toBe('13.5 °C');
-    expect(formatValue(42, '%')).toBe('42%');
   });
 });

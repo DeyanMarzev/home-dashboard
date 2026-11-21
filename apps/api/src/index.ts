@@ -18,7 +18,13 @@ const db = createDb({ applicationName: 'api', max: 10, log });
 // cloudflared, which waits for it) only see a ready API.
 const paths = startupPaths(process.env);
 const registry = await prepareDatabase(db, paths, log);
-const app = await buildServer(config, { db, registry, logger: log, miscFile: paths.miscFile });
+const app = await buildServer(config, {
+  db,
+  registry,
+  logger: log,
+  miscFile: paths.miscFile,
+  alertsFile: paths.alertsFile,
+});
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, () => {

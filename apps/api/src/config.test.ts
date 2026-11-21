@@ -6,6 +6,9 @@ const access = {
   CF_ACCESS_TEAM: 'myteam',
   CF_ACCESS_AUD: 'aud-tag',
   ADMIN_EMAILS: 'owner@example.com',
+  VAPID_PUBLIC_KEY: `B${'A'.repeat(86)}`,
+  VAPID_PRIVATE_KEY: 'a'.repeat(43),
+  VAPID_SUBJECT: 'mailto:owner@example.com',
 };
 
 describe('loadConfig', () => {
@@ -81,6 +84,25 @@ describe('loadConfig', () => {
     expect(
       loadConfig({ NODE_ENV: 'development', AUTH_DISABLED: 'true' }).users?.adminEmails,
     ).toEqual([]);
+  });
+
+  it('needs the VAPID keys in production, and checks them', () => {
+    expect(loadConfig({ NODE_ENV: 'production', ...access }).push).toEqual({
+      publicKey: access.VAPID_PUBLIC_KEY,
+      privateKey: access.VAPID_PRIVATE_KEY,
+      subject: 'mailto:owner@example.com',
+    });
+    expect(() => loadConfig({ NODE_ENV: 'production', ...access, VAPID_PRIVATE_KEY: '' })).toThrow(
+      /VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT are required/,
+    );
+    expect(() => loadConfig({ ...access, VAPID_SUBJECT: 'owner@example.com' })).toThrow(
+      /VAPID_SUBJECT must be mailto:/,
+    );
+    expect(() => loadConfig({ ...access, VAPID_PUBLIC_KEY: 'short' })).toThrow(
+      /not a VAPID public key/,
+    );
+    // Development without keys: push is simply off.
+    expect(loadConfig({ NODE_ENV: 'development', AUTH_DISABLED: 'true' }).push).toBeNull();
   });
 
   it('never binds port 8000 (the FastAPI project)', () => {

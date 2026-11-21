@@ -319,6 +319,15 @@ Skipped notifications are **not** delivered later. The alert is still visible in
 
 ## 5. Dispatcher (in `api`)
 
+**Built** (M11 step 4, 21 Nov 2026): `apps/api/src/push/` (`dispatcher.ts`, `channel.ts`, `rules.ts`), messages and decisions in `packages/shared/src/alerts/` (`message.ts`, `prefs.ts`). As built:
+
+- Each event is **claimed first** (`dispatched_at` / `resolved_dispatched_at` set in the same statement that picks it, `FOR UPDATE SKIP LOCKED`), then sent. A restart never sends twice; a crash in the middle of sending loses that one push rather than repeating it.
+- Retries (5 s, 30 s, 2 min) run in the background, so one slow push service doesn't hold up other alerts.
+- An event that ends before its opening push went out (within the minute) gets no "back to normal" either.
+- "Back to normal" is off by default (`docs/02` § Choices made). Resolved titles use the rule's `resolvedName` ("CO₂ back to normal · Kitchen", "Vacuum charging again", "Warning ended · Amber warning · Rain"); without one, "<name>: back to normal" (threshold) or "Over: …" (event rules).
+- The api reads `config/alerts.yaml` itself (same file, mounted) with the overrides, reloaded on `alert_rules_changed` and every 5 minutes.
+- Without VAPID keys (development only) push is off and the api logs it; `POST /api/me/devices/:id/test` then answers 503 `PUSH_OFF`.
+
 - `LISTEN events` (a trigger sends the id on insert and on changes to `level`, `resolved_at`, `escalated_at`; see `docs/02` § Users and notifications). The SSE stream already listens on the same channel.
 - On a notification, and on a 1-minute safety tick, and at startup, pick up work with `SELECT … FOR UPDATE SKIP LOCKED`:
   - **opened/escalated:** `rule_id IS NOT NULL AND dispatched_at IS NULL AND resolved_at IS NULL AND coalesce(escalated_at, ts) > now() - interval '60 minutes'`. The phase is `escalated` when `escalated_at` is set, otherwise `opened`.
@@ -391,6 +400,8 @@ self.addEventListener('notificationclick', (e) => {
 Reached from the bottom nav "More" sheet (phone) or the gear icon (desktop). Same design tokens and components as the rest (`docs/05`): cards, 44 px targets, real `<button>`/`<input>`, status shown with text plus icon, not colour alone.
 
 ### This device
+
+**Built in step 4** (so it could be checked on a phone): install state, then Notifications: status, **Turn on notifications**, **Send test notification**, **Turn off on this phone** (`apps/web/src/lib/push.ts`, `pages/Settings.tsx`). Renaming a device comes with My devices in step 5.
 
 - Status line, one of:
   - "Notifications are on for this phone" (with a device label)

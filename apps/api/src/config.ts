@@ -29,6 +29,15 @@ export interface Config {
   auth: AuthConfig;
   /** Who is who (docs/09 §2). Optional so tests can leave it out: no admins, dev@localhost. */
   users?: UsersConfig;
+  /** Web Push (docs/09 §5). null = push off (development without keys). */
+  push?: PushConfig | null;
+}
+
+export interface PushConfig {
+  publicKey: string;
+  privateKey: string;
+  /** `mailto:you@example.com` or an https URL: how push services can reach the sender. */
+  subject: string;
 }
 
 export interface UsersConfig {
@@ -65,6 +74,9 @@ const EnvSchema = z.object({
   CF_ACCESS_AUD: optional,
   ADMIN_EMAILS: optional,
   DEV_USER_EMAIL: optional,
+  VAPID_PUBLIC_KEY: optional,
+  VAPID_PRIVATE_KEY: optional,
+  VAPID_SUBJECT: optional,
 });
 
 const EMAIL = /^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/;
@@ -124,6 +136,30 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
     problems.push('ADMIN_EMAILS is required: the email(s) you sign in to Cloudflare Access with');
   }
 
+  let push: PushConfig | null = null;
+  const vapid = [e.VAPID_PUBLIC_KEY, e.VAPID_PRIVATE_KEY, e.VAPID_SUBJECT];
+  if (vapid.every((v) => v !== undefined)) {
+    push = {
+      publicKey: e.VAPID_PUBLIC_KEY!,
+      privateKey: e.VAPID_PRIVATE_KEY!,
+      subject: e.VAPID_SUBJECT!,
+    };
+    if (!/^[A-Za-z0-9_-]{80,100}$/.test(push.publicKey))
+      problems.push(
+        'VAPID_PUBLIC_KEY is not a VAPID public key (generate them as in docs/06 § 10)',
+      );
+    if (!/^[A-Za-z0-9_-]{40,50}$/.test(push.privateKey))
+      problems.push(
+        'VAPID_PRIVATE_KEY is not a VAPID private key (generate them as in docs/06 § 10)',
+      );
+    if (!/^(mailto:[^\s@]+@[^\s@]+|https:\/\/\S+)$/.test(push.subject))
+      problems.push('VAPID_SUBJECT must be mailto:you@example.com or an https:// URL');
+  } else if (e.NODE_ENV === 'production') {
+    problems.push(
+      'VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT are required for notifications (docs/06 § 10)',
+    );
+  }
+
   if (problems.length > 0) {
     throw new ConfigError(`Invalid environment:\n  - ${problems.join('\n  - ')}`);
   }
@@ -135,6 +171,7 @@ export function loadConfig(env: Record<string, string | undefined>): Config {
     version: e.APP_VERSION ?? '0.0.0-dev',
     publicDir: e.PUBLIC_DIR ? resolve(e.PUBLIC_DIR) : DEFAULT_PUBLIC_DIR,
     auth,
+    push,
     users: {
       adminEmails,
       devUserEmail: (e.DEV_USER_EMAIL ?? 'dev@localhost').toLowerCase(),
