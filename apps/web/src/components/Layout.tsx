@@ -2,6 +2,8 @@ import { Fragment } from 'react';
 import { Outlet, ScrollRestoration } from 'react-router';
 import { useSessionExpired } from '../api/session.js';
 import { useColorScheme } from '../lib/color-scheme.js';
+import { BottomNav } from './BottomNav.js';
+import { UpdateToast } from './UpdateToast.js';
 
 export function Layout() {
   const expired = useSessionExpired();
@@ -21,6 +23,8 @@ export function Layout() {
       <Fragment key={scheme}>
         <Outlet />
       </Fragment>
+      <BottomNav />
+      <UpdateToast />
       <ScrollRestoration />
     </>
   );

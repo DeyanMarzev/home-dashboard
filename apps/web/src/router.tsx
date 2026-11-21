@@ -9,6 +9,7 @@ import { WaterPage } from './pages/Water.js';
 import { WeatherPage } from './pages/Weather.js';
 import { WifiPage } from './pages/Wifi.js';
 import { MiscPage } from './pages/Misc.js';
+import { SettingsPage } from './pages/Settings.js';
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       { path: '/wifi', element: <WifiPage /> },
       { path: '/misc', element: <MiscPage /> },
       { path: '/system', element: <SystemPage /> },
+      { path: '/settings', element: <SettingsPage /> },
       { path: '*', element: <OverviewPage /> },
     ],
   },

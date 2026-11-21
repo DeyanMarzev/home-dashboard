@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { NavLink } from 'react-router';
+import { Link, NavLink } from 'react-router';
 import { RANGES, type Range } from '../lib/range.js';
 import { SECTIONS } from '../lib/sections.js';
+import { GearIcon } from './icons.js';
 
 /** Title, subtitle, section tabs and time range pills, on every page (docs/05 § Pages). */
 export function PageHeader<T extends string = Range>({
@@ -32,23 +33,27 @@ export function PageHeader<T extends string = Range>({
           </NavLink>
         ))}
       </nav>
-      {range && onRange ? (
-        <div role="group" aria-label="Time range" className="pills">
-          {options.map((r) => (
-            <button
-              key={r}
-              type="button"
-              className="pill"
-              aria-pressed={r === range}
-              onClick={() => onRange(r)}
-            >
-              {r}
-            </button>
-          ))}
-        </div>
-      ) : (
-        <div aria-hidden="true" />
-      )}
+      <div className="header-end">
+        {range && onRange && (
+          <div role="group" aria-label="Time range" className="pills">
+            {options.map((r) => (
+              <button
+                key={r}
+                type="button"
+                className="pill"
+                aria-pressed={r === range}
+                onClick={() => onRange(r)}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+        )}
+        {/* On phones Settings is in the bottom bar's More sheet instead. */}
+        <Link to="/settings" className="header-settings" aria-label="Settings" title="Settings">
+          <GearIcon size={20} />
+        </Link>
+      </div>
     </header>
   );
 }
