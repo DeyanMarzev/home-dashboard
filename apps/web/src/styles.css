@@ -1664,3 +1664,45 @@ table.data select {
     padding-left: 0;
   }
 }
+
+/* ---- Wi-Fi page: devices on the network ------------------------------------------------ */
+
+.device-line {
+  width: 100%;
+}
+
+.now-text {
+  color: var(--good);
+}
+
+.facts-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.facts-list > div {
+  display: contents;
+}
+
+.facts-list dt {
+  color: var(--text-muted);
+}
+
+.facts-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .facts-list {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .facts-list dd {
+    margin-bottom: 6px;
+  }
+}

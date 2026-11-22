@@ -48,6 +48,7 @@ const PGLITE_MIGRATIONS: Record<string, (sql: string) => string | null> = {
   '003_hourly_realtime.sql': () => null,
   '004_users_notifications.sql': (sql) => sql,
   '005_network_devices.sql': (sql) => sql,
+  '006_network_device_watches.sql': (sql) => sql,
 };
 
 export async function startPglite(): Promise<TestDatabase> {

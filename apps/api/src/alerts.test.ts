@@ -307,6 +307,28 @@ describe('Network devices (admin; docs/10 §5)', () => {
     expect(await openAlert()).toBe(0);
   });
 
+  it('keeps each admin\'s own reminders for a device, and says how long "away" is', async () => {
+    const watch = `/api/network/devices/${encodeURIComponent('b8:27:eb:00:00:01')}/watch`;
+    const res = await call('PUT', watch, 'owner', { onConnect: true, onLeave: false });
+    expect(res.body).toMatchObject({ watchConnect: true, watchLeave: false, present: true });
+    const list = NetworkDevicesResponseSchema.parse(
+      (await call('GET', '/api/network/devices', 'owner')).body,
+    );
+    expect(list.awayMinutes).toBe(60);
+    expect(list.items.find((d) => d.mac === 'b8:27:eb:00:00:01')).toMatchObject({
+      watchConnect: true,
+    });
+    expect((await call('PUT', watch, 'anna', { onConnect: true, onLeave: true })).status).toBe(403);
+    expect(
+      (
+        await call('PUT', '/api/network/devices/ff:ff:ff:ff:ff:ff/watch', 'owner', {
+          onConnect: true,
+          onLeave: false,
+        })
+      ).status,
+    ).toBe(404);
+  });
+
   it('forgets a device, and checks the address', async () => {
     expect((await call('DELETE', url, 'owner')).status).toBe(204);
     expect((await call('DELETE', url, 'owner')).status).toBe(404);

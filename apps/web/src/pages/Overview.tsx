@@ -72,7 +72,8 @@ export function OverviewPage() {
   const updated =
     live.lastMessageAt ?? (sensors.dataUpdatedAt ? new Date(sensors.dataUpdatedAt) : null);
   const openAlerts = (events.data?.items ?? [])
-    .filter((e) => e.resolvedAt === null && e.level !== 'info')
+    // Personal reminders ("tell me when it connects") are pushes, not problems.
+    .filter((e) => e.resolvedAt === null && e.level !== 'info' && !isReminder(e))
     .slice(0, 4);
 
   return (
@@ -929,4 +930,8 @@ function SourcesTable({ sources }: { sources: SourceInfo[] | undefined }) {
       </div>
     </section>
   );
+}
+
+function isReminder(e: { data: unknown }): boolean {
+  return (e.data as { reminder?: unknown } | null)?.reminder === true;
 }

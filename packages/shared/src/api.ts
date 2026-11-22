@@ -455,9 +455,23 @@ export const NetworkDeviceSchema = z.object({
   firstSeen: IsoTimestamp,
   lastSeen: IsoTimestamp,
   markedKnownBy: z.string().nullable(),
+  markedKnownAt: IsoTimestamp.nullable(),
+  /** On the network now (seen within the away time). */
+  present: z.boolean(),
+  /** Your own reminders for this device. */
+  watchConnect: z.boolean(),
+  watchLeave: z.boolean(),
 });
 export type NetworkDevice = z.infer<typeof NetworkDeviceSchema>;
-export const NetworkDevicesResponseSchema = z.object({ items: z.array(NetworkDeviceSchema) });
+export const NetworkDevicesResponseSchema = z.object({
+  items: z.array(NetworkDeviceSchema),
+  /** Not seen for this long = away (connected/left reminders). */
+  awayMinutes: z.number().int(),
+});
+export const NetworkDeviceWatchSchema = z.strictObject({
+  onConnect: z.boolean(),
+  onLeave: z.boolean(),
+});
 export const NetworkDevicePatchSchema = z
   .strictObject({ label: z.string().trim().min(1).max(60).nullable(), known: z.boolean() })
   .partial()

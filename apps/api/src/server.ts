@@ -157,7 +157,7 @@ export async function buildServer(config: Config, deps: ServerDeps = {}): Promis
     }
     registerDeviceRoutes(app, { db: deps.db, dispatcher });
     registerAlertRoutes(app, { db: deps.db, rules, registry: deps.registry ?? null });
-    registerNetworkRoutes(app, { db: deps.db });
+    registerNetworkRoutes(app, { db: deps.db, rules });
   }
 
   if (deps.db && deps.registry) {

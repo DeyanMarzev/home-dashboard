@@ -1,15 +1,22 @@
 import {
   forgetNetworkDevice,
+  getNetworkDevice,
   listNetworkDevices,
   resolveEvent,
+  setDeviceWatch,
   updateNetworkDevice,
   type NetworkDeviceRow,
   type Sql,
 } from '@home/db';
-import { NetworkDevicePatchSchema, type NetworkDevice } from '@home/shared';
+import {
+  NetworkDevicePatchSchema,
+  NetworkDeviceWatchSchema,
+  type NetworkDevice,
+} from '@home/shared';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { HttpError } from '../errors.js';
+import type { RulesStore } from '../push/rules.js';
 import { requireAdmin } from '../users.js';
 import { parseInput } from '../validate.js';
 
@@ -34,20 +41,46 @@ const toItem = (d: NetworkDeviceRow): NetworkDevice => ({
   firstSeen: d.firstSeen.toISOString(),
   lastSeen: d.lastSeen.toISOString(),
   markedKnownBy: d.markedKnownBy,
+  markedKnownAt: d.markedKnownAt?.toISOString() ?? null,
+  present: d.present,
+  watchConnect: d.watchConnect,
+  watchLeave: d.watchLeave,
 });
 
 /**
  * Devices seen on the home network (docs/10 §5). Admins only: device lists, names and MACs
  * are household privacy.
  */
-export function registerNetworkRoutes(app: FastifyInstance, deps: { db: Sql }): void {
+export function registerNetworkRoutes(
+  app: FastifyInstance,
+  deps: { db: Sql; rules: RulesStore | null },
+): void {
   const { db } = deps;
+  /** The collector's away time, from the same rule option (default 60 min). */
+  const awayMinutes = () => {
+    const rule = deps.rules?.get()?.rules.find((r) => r.id === 'network_device_connected');
+    const v = rule?.type === 'event' ? rule.options?.awayMinutes : undefined;
+    return typeof v === 'number' && v >= 10 && v <= 1440 ? v : 60;
+  };
 
   app.get('/api/network/devices', async (request) => {
-    requireAdmin(request);
+    const me = requireAdmin(request);
     const { known } = parseInput(ListQuery, request.query);
-    const rows = await listNetworkDevices(db, known === undefined ? undefined : known === 'true');
-    return { items: rows.map(toItem) };
+    const rows = await listNetworkDevices(db, {
+      ...(known !== undefined && { known: known === 'true' }),
+      userId: me.id,
+    });
+    return { items: rows.map(toItem), awayMinutes: awayMinutes() };
+  });
+
+  // "Tell me when it connects / leaves": your own reminders for this device.
+  app.put('/api/network/devices/:mac/watch', async (request) => {
+    const me = requireAdmin(request);
+    const { mac } = parseInput(MacParams, request.params);
+    const watch = parseInput(NetworkDeviceWatchSchema, request.body);
+    if (!(await setDeviceWatch(db, me.id, mac, watch)))
+      throw new HttpError(404, 'NOT_FOUND', 'No such device');
+    return toItem((await getNetworkDevice(db, mac, me.id))!);
   });
 
   app.patch('/api/network/devices/:mac', async (request) => {

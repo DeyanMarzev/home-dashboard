@@ -227,4 +227,25 @@ describe('Dispatcher (docs/09 §9 integration)', () => {
     ]);
     expect((await logFor(id)).map((l) => l.status)).toEqual(['sent', 'skipped_quiet']);
   });
+
+  it('sends a personal reminder only to the people it names', async () => {
+    await db.sql`delete from notification_log`;
+    const id = (await openEvent(db.sql, {
+      level: 'warning',
+      sourceId: 'wifi',
+      kind: 'network_device_connected',
+      entity: 'b8:27:eb:00:00:01',
+      ruleId: 'network_device_connected',
+      message: "Deyan's laptop connected · 192.168.1.20",
+      data: { recipients: [ids.anna!], reminder: true },
+    }))!;
+    await dispatcher().runOnce();
+    expect(channel.sent.map((s) => [s.endpoint, s.payload.title, s.payload.url])).toEqual([
+      [phone('anna'), "Deyan's laptop connected", '/wifi#b8:27:eb:00:00:01'],
+    ]);
+    // Nobody else is even considered: no "skipped" rows for them.
+    expect(await logFor(id)).toEqual([
+      { email: 'anna@example.com', phase: 'opened', status: 'sent' },
+    ]);
+  });
 });

@@ -14,6 +14,14 @@ import type { FastifyBaseLogger } from 'fastify';
 import type { NotificationSource } from '../stream.js';
 import { endpointHint, type Channel, type PushPayload } from './channel.js';
 
+/** `data.recipients` (user ids) limits an event to those people; absent = everyone. */
+function recipientsOf(data: unknown): Set<number> | null {
+  const list = (data as { recipients?: unknown } | null)?.recipients;
+  return Array.isArray(list)
+    ? new Set(list.filter((v): v is number => typeof v === 'number'))
+    : null;
+}
+
 /** Events (or escalations, resolutions) older than this are marked handled, never pushed. */
 const STALE_MS = 60 * 60_000;
 const SAFETY_TICK_MS = 60_000;
@@ -211,8 +219,11 @@ export class Dispatcher {
       ts: now.toISOString(),
     };
 
+    // Personal reminders name who asked ("tell me when it connects"): nobody else is asked.
+    const only = recipientsOf(e.data);
     const wanted: number[] = [];
     for (const user of users) {
+      if (only && !only.has(user.id)) continue;
       const decision = shouldNotify(
         user,
         rule,

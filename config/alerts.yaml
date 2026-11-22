@@ -136,6 +136,29 @@ rules:
     link: /wifi
     defaults: { audience: admins, minLevel: warning }
 
+  # "Tell me when it connects / leaves": per person and device, switched on in the device's
+  # details on the Wi-Fi page. Only the people who asked get these (the event names them).
+  - id: network_device_connected # raised by the wifi source when a watched device comes back
+    group: devices
+    name: Device connected
+    description: When a device you asked about joins the network after being away (Wi-Fi page)
+    type: event
+    level: warning
+    resolvedNotice: false
+    options: { awayMinutes: 60 } # not seen for this long = away; edit here, then restart the collector
+    link: /wifi
+    defaults: { audience: all, minLevel: warning }
+
+  - id: network_device_left # raised by the wifi source when a watched device has been away for the away time
+    group: devices
+    name: Device left
+    description: When a device you asked about has left the network (Wi-Fi page)
+    type: event
+    level: warning
+    resolvedNotice: false
+    link: /wifi
+    defaults: { audience: all, minLevel: warning }
+
   # --- System --------------------------------------------------------------------------
   - id: pi_cpu_hot
     group: system

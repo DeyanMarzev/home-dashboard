@@ -15,8 +15,12 @@ import { addPublishedTariff } from './tariffs.js';
 import { SOURCES_FILE, testBackends, type TestDatabase } from './test/database.js';
 import {
   forgetNetworkDevice,
+  deviceWatchers,
+  getNetworkDevice,
   listNetworkDevices,
+  markDepartures,
   recordNetworkScan,
+  setDeviceWatch,
   updateNetworkDevice,
 } from './network-devices.js';
 import { listUsers, signInUser, updateProfile, updateUserAccess } from './users.js';
@@ -619,19 +623,22 @@ describe.each(testBackends)('database ($name)', ({ start }) => {
         dev('aa:00:00:00:00:01', { vendor: 'Raspberry Pi Foundation' }),
         dev('aa:00:00:00:00:02'),
       ]);
-      expect(fresh).toEqual([]);
-      expect((await listNetworkDevices(sql)).every((d) => d.known)).toBe(true);
+      expect(fresh).toEqual({ fresh: [], arrived: [] });
+      expect((await listNetworkDevices(sql)).every((d) => d.known && d.present)).toBe(true);
     });
 
     it('reports a new device once, then only refreshes it', async () => {
       const phone = dev('3a:00:00:00:00:03', { ip: '192.168.1.47', randomised: true });
-      expect(await recordNetworkScan(sql, [dev('aa:00:00:00:00:01'), phone])).toEqual([phone]);
+      expect(await recordNetworkScan(sql, [dev('aa:00:00:00:00:01'), phone])).toEqual({
+        fresh: [phone],
+        arrived: [],
+      });
       expect(
         await recordNetworkScan(sql, [
           { ...phone, ip: '192.168.1.48', hostname: 'Galaxy-S24', wired: false },
         ]),
-      ).toEqual([]);
-      const [row] = await listNetworkDevices(sql, false);
+      ).toEqual({ fresh: [], arrived: [] });
+      const [row] = await listNetworkDevices(sql, { known: false });
       expect(row).toMatchObject({
         mac: '3a:00:00:00:00:03',
         lastIp: '192.168.1.48',
@@ -660,7 +667,39 @@ describe.each(testBackends)('database ($name)', ({ start }) => {
         await updateNetworkDevice(sql, 'ff:ff:ff:ff:ff:ff', { known: true }, admin.id),
       ).toBeNull();
       expect(await forgetNetworkDevice(sql, '3a:00:00:00:00:03')).toBe(true);
-      expect(await recordNetworkScan(sql, [dev('3a:00:00:00:00:03')])).toHaveLength(1);
+      expect((await recordNetworkScan(sql, [dev('3a:00:00:00:00:03')])).fresh).toHaveLength(1);
+    });
+
+    it('marks devices away after the away time, and back when seen again', async () => {
+      await sql`update network_devices set last_seen = now() - interval '61 minutes'
+                where mac = 'aa:00:00:00:00:02'`;
+      expect(await markDepartures(sql, 60)).toEqual(['aa:00:00:00:00:02']);
+      expect(await markDepartures(sql, 60)).toEqual([]); // once
+      expect(await recordNetworkScan(sql, [dev('aa:00:00:00:00:02')])).toEqual({
+        fresh: [],
+        arrived: ['aa:00:00:00:00:02'],
+      });
+      expect((await recordNetworkScan(sql, [dev('aa:00:00:00:00:02')])).arrived).toEqual([]);
+    });
+
+    it("keeps each person's reminders for a device", async () => {
+      const a = await signInUser(sql, 'watch-a@example.com', { admin: true });
+      const b = await signInUser(sql, 'watch-b@example.com', { admin: true });
+      const mac = 'aa:00:00:00:00:01';
+      expect(await setDeviceWatch(sql, a.id, mac, { onConnect: true, onLeave: false })).toBe(true);
+      expect(await setDeviceWatch(sql, b.id, mac, { onConnect: true, onLeave: true })).toBe(true);
+      expect(
+        await setDeviceWatch(sql, a.id, 'ff:ff:ff:ff:ff:ff', { onConnect: true, onLeave: true }),
+      ).toBe(false);
+      expect((await deviceWatchers(sql, mac, 'connect')).sort()).toEqual([a.id, b.id].sort());
+      expect(await deviceWatchers(sql, mac, 'leave')).toEqual([b.id]);
+      expect(await getNetworkDevice(sql, mac, a.id)).toMatchObject({
+        watchConnect: true,
+        watchLeave: false,
+      });
+      expect(await getNetworkDevice(sql, mac)).toMatchObject({ watchConnect: false });
+      await setDeviceWatch(sql, b.id, mac, { onConnect: false, onLeave: false });
+      expect(await deviceWatchers(sql, mac, 'leave')).toEqual([]);
     });
   });
 

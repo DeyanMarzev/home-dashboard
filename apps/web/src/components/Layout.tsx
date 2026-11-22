@@ -41,7 +41,8 @@ export function Layout() {
 
 /**
  * `/rooms#kitchen` (a notification's deep link) scrolls to that card once it has loaded:
- * cards appear after their data, so keep looking for a few seconds.
+ * cards appear after their data (on a slow phone connection, a while), so keep looking for
+ * up to 10 seconds.
  */
 function useScrollToHash() {
   const { hash, pathname } = useLocation();
@@ -51,8 +52,8 @@ function useScrollToHash() {
     let tries = 0;
     const timer = setInterval(() => {
       const el = document.getElementById(id);
-      if (el || ++tries > 20) clearInterval(timer);
-      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (el || ++tries > 40) clearInterval(timer);
+      el?.scrollIntoView({ block: 'start' });
     }, 250);
     return () => clearInterval(timer);
   }, [hash, pathname]);

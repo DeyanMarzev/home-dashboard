@@ -149,7 +149,10 @@ export function useNetworkDevices(enabled: boolean) {
   return useQuery({
     queryKey: ['network-devices'],
     queryFn: () =>
-      getJson<{ items: NetworkDevice[] }>('/api/network/devices', NetworkDevicesResponseSchema),
+      getJson<{ items: NetworkDevice[]; awayMinutes: number }>(
+        '/api/network/devices',
+        NetworkDevicesResponseSchema,
+      ),
     enabled,
     refetchInterval: 5 * 60_000,
   });
@@ -175,6 +178,16 @@ export function useNetworkDeviceActions() {
     forget: useMutation({
       mutationFn: (mac: string) =>
         sendJson('DELETE', `/api/network/devices/${encodeURIComponent(mac)}`),
+      onSuccess: done,
+    }),
+    watch: useMutation({
+      mutationFn: ({
+        mac,
+        watch,
+      }: {
+        mac: string;
+        watch: { onConnect: boolean; onLeave: boolean };
+      }) => sendJson('PUT', `/api/network/devices/${encodeURIComponent(mac)}/watch`, watch),
       onSuccess: done,
     }),
   };

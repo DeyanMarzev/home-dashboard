@@ -1,4 +1,11 @@
-import { loadAlertsFile, loadRegistryFile, migrate, syncSources } from '@home/db';
+import {
+  loadAlertsFile,
+  loadRegistryFile,
+  migrate,
+  setDeviceWatch,
+  signInUser,
+  syncSources,
+} from '@home/db';
 import { SOURCES_FILE, startPglite, type TestDatabase } from '@home/db/testing';
 import { fileURLToPath } from 'node:url';
 import { pino } from 'pino';
@@ -43,7 +50,7 @@ describe('new devices on the network (docs/10 §5)', () => {
       seen('b8:27:eb:00:00:01', { vendor: 'Raspberry Pi Foundation' }),
       seen('a4:c3:f0:00:00:02'),
     ];
-    expect(await handleDeviceList(first, db.sql, log)).toEqual({ seen: 2, fresh: 0 });
+    expect(await handleDeviceList(first, db.sql, log)).toMatchObject({ seen: 2, fresh: 0 });
     expect(await openNewDevices()).toEqual([]);
   });
 
@@ -54,8 +61,14 @@ describe('new devices on the network (docs/10 §5)', () => {
       wired: true,
     });
     const guest = seen('3a:1f:9c:00:00:04', { ip: '192.168.1.51' });
-    expect(await handleDeviceList([laptop, guest], db.sql, log)).toEqual({ seen: 2, fresh: 2 });
-    expect(await handleDeviceList([laptop, guest], db.sql, log)).toEqual({ seen: 2, fresh: 0 });
+    expect(await handleDeviceList([laptop, guest], db.sql, log)).toMatchObject({
+      seen: 2,
+      fresh: 2,
+    });
+    expect(await handleDeviceList([laptop, guest], db.sql, log)).toMatchObject({
+      seen: 2,
+      fresh: 0,
+    });
     expect(await openNewDevices()).toEqual([
       {
         entity: 'f4:5c:89:00:00:03',
@@ -91,6 +104,73 @@ describe('new devices on the network (docs/10 §5)', () => {
 
   it('rejects a malformed list', async () => {
     await expect(handleDeviceList([{ mac: 'not-a-mac' }], db.sql, log)).rejects.toThrow();
+  });
+});
+
+describe('"tell me when it connects / leaves" (per person)', () => {
+  const laptop = 'b8:27:eb:00:00:01'; // in the baseline above, so known and present
+  const other = 'a4:c3:f0:00:00:02';
+  const reminders = () =>
+    db.sql<
+      {
+        kind: string;
+        entity: string;
+        message: string;
+        resolved: boolean;
+        data: { recipients: number[]; reminder: boolean };
+      }[]
+    >`
+      select kind, entity, message, resolved_at is not null as resolved, data from events
+      where kind in ('network_device_connected', 'network_device_left') order by id`;
+  let me = 0;
+
+  beforeAll(async () => {
+    me = (await signInUser(db.sql, 'me@example.com', { admin: true })).id;
+    await db.sql`update network_devices set label = 'Deyan''s laptop' where mac = ${laptop}`;
+    await setDeviceWatch(db.sql, me, laptop, { onConnect: true, onLeave: true });
+  });
+
+  it('tells only the watcher when the device has been away for an hour', async () => {
+    await db.sql`update network_devices set last_seen = now() - interval '61 minutes'
+                 where mac in (${laptop}, ${other})`;
+    expect(await handleDeviceList([seen('00:1a:2b:00:00:06')], db.sql, log)).toMatchObject({
+      left: 2,
+    });
+    // The other device left too, but nobody asked about it: no event.
+    expect(await reminders()).toEqual([
+      expect.objectContaining({
+        kind: 'network_device_left',
+        entity: laptop,
+        message: expect.stringMatching(
+          /^Deyan's laptop left the network · last seen \d\d:\d\d$/,
+        ) as string,
+        resolved: false,
+        data: expect.objectContaining({ recipients: [me], reminder: true }) as unknown,
+      }),
+    ]);
+  });
+
+  it('tells them when it comes back, once, and closes the "left" one', async () => {
+    expect(
+      await handleDeviceList([seen(laptop, { ip: '192.168.1.20' })], db.sql, log),
+    ).toMatchObject({
+      arrived: 1,
+    });
+    await handleDeviceList([seen(laptop, { ip: '192.168.1.20' })], db.sql, log);
+    const rows = await reminders();
+    expect(rows.map((r) => [r.kind, r.resolved])).toEqual([
+      ['network_device_left', true],
+      ['network_device_connected', false],
+    ]);
+    expect(rows[1]!.message).toBe("Deyan's laptop connected · 192.168.1.20");
+  });
+
+  it('stays quiet for someone who only wants arrivals', async () => {
+    await setDeviceWatch(db.sql, me, laptop, { onConnect: true, onLeave: false });
+    await db.sql`update network_devices set last_seen = now() - interval '61 minutes' where mac = ${laptop}`;
+    await handleDeviceList([seen('00:1a:2b:00:00:06')], db.sql, log);
+    const rows = await reminders();
+    expect(rows.filter((r) => !r.resolved)).toEqual([]); // "connected" closed, no new "left"
   });
 });
 
