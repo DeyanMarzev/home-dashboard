@@ -20,7 +20,7 @@ Not decided yet. Claude Code: when you reach a milestone that depends on one of 
 | # | Question | Answer (date) |
 |---|---|---|
 | 12a | Git hosting | GitHub. A public repo is fine; secrets stay in `.env` (git-ignored) and never enter the repo (2026-11-07). |
-| 9 | Cloudflare Access allowed emails | `(owner email removed)` (2026-11-07). More people come with M11 (#9b). |
+| 9 | Cloudflare Access allowed emails | The owner's email only (2026-11-07; the address itself is kept out of the repo). More people come with M11 (#9b). |
 | 11 | Water: tariff or volume only? | Volume, and cost where possible: add a `water` rate (p/m³ + standing p/day) on the Water page's tariff editor; costs show wherever one applies (2026-11-07). |
 | 6 | Router make/model | Linksys MX4200 (Velop mesh). Local JNAP API (`POST http://<router>/JNAP/`, admin password): used for device counts (2026-11-07). Not needed for new-device alerts, which use `arp-scan` (#19). |
 | 3b | Bright data format | Confirmed with a capture from the owner's account: classifiers, kWh units and the zero padding for half-hours not yet received are as the provider assumes (2026-11-08). |

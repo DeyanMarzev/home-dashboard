@@ -145,7 +145,7 @@ All of this is in the Cloudflare dashboard → **Zero Trust**. Menu names move a
 1. **Access → Applications → Add an application → Self-hosted.**
 2. Name `Home dashboard`; public hostname: subdomain `home`, domain `deyan.uk`, no path.
 3. Session duration: your choice (e.g. 1 month, so the phone doesn't keep asking).
-4. Policy: name `Owner`, action **Allow**, Include → **Emails** → `(owner email removed)`.
+4. Policy: name `Owner`, action **Allow**, Include → **Emails** → the email address you sign in with (and anyone else who should get in).
 5. Save. Open the application again and copy its **Application Audience (AUD) Tag** into `.env` as `CF_ACCESS_AUD`.
 6. Put the same email in `.env` as `ADMIN_EMAILS` (comma-separate several). Those people are always admins in the app; anyone else you add to the policy later becomes a member on their first visit (`docs/09` §2). Adding someone = adding their email here in the Access policy.
 
